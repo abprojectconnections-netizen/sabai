@@ -1,0 +1,75 @@
+openapi: 3.0.3
+info:
+  title: Travel Super App API
+  version: 1.0.0
+  description: Phase 1 contract. All responses include data or error and a request_id.
+servers:
+  - url: http://localhost:8080/api/v1
+paths:
+  /auth/register:
+    post:
+      summary: Register an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201': { description: Account created }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /auth/login:
+    post:
+      summary: Sign in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200': { description: Session token returned }
+  /trips:
+    get:
+      summary: List trips for the authenticated user
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Trip list }
+    post:
+      summary: Create a trip
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTripRequest'
+      responses:
+        '201': { description: Trip created }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  responses:
+    ValidationError: { description: Invalid request }
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 8 }
+        display_name: { type: string }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, format: password }
+    CreateTripRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        destination_id: { type: string, format: uuid }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }

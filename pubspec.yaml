@@ -1,0 +1,17 @@
+name: travel_app_flutter_app
+description: A Flutter travel app UI converted from HTML/CSS.
+publish_to: 'none'
+version: 1.0.0+1
+environment:
+  sdk: '>=2.19.0 <3.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  postgres: ^3.5.12
+  path_provider: ^2.0.17
+  sqflite: ^2.2.8+1
+  path: ^1.8.4
+  http: ^1.2.2
+
+flutter:
+  uses-material-design: true
