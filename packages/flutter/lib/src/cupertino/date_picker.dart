@@ -536,7 +536,7 @@ class CupertinoDatePicker extends StatefulWidget {
       CupertinoDatePickerMode.dateAndTime => _CupertinoDatePickerDateTimeState(),
       CupertinoDatePickerMode.date => _CupertinoDatePickerDateState(dateOrder: dateOrder),
       CupertinoDatePickerMode.monthYear => _CupertinoDatePickerMonthYearState(dateOrder: dateOrder),
-    };
+    }
   }
 
   // Estimate the minimum width that each column needs to layout its content.

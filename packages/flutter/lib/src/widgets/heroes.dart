@@ -921,11 +921,11 @@ class HeroController extends NavigatorObserver {
     final Animation<double> newRouteAnimation = toRoute.animation!;
     final Animation<double> oldRouteAnimation = fromRoute.animation!;
     final HeroFlightDirection? flightType;
-    switch ((isUserGestureTransition, oldRouteAnimation.status, newRouteAnimation.status)) {
-      case (true, _, _):
-      case (_, AnimationStatus.reverse, _):
+    switch (isUserGestureTransition, oldRouteAnimation.status, newRouteAnimation.status) {
+      case true, _, _:
+      case _, AnimationStatus.reverse, _:
         flightType = HeroFlightDirection.pop;
-      case (_, _, AnimationStatus.forward):
+      case _, _, AnimationStatus.forward:
         flightType = HeroFlightDirection.push;
       default:
         flightType = null;

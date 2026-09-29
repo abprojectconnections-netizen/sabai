@@ -569,16 +569,14 @@ class RawTooltipState extends State<RawTooltip> with SingleTickerProviderStateMi
   AnimationStatus _animationStatus = AnimationStatus.dismissed;
   void _handleStatusChanged(AnimationStatus status) {
     assert(mounted);
-    switch ((_animationStatus.isDismissed, status.isDismissed)) {
-      case (false, true):
+    switch (_animationStatus.isDismissed, status.isDismissed) {
+      case false, true:
         RawTooltip._openedTooltips.remove(this);
         _overlayController.hide();
-      case (true, false):
+      case true, false:
         _overlayController.show();
         RawTooltip._openedTooltips.add(this);
         SemanticsService.tooltip(widget.semanticsTooltip ?? '');
-      case (true, true) || (false, false):
-        break;
     }
     _animationStatus = status;
   }

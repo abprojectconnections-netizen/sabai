@@ -1064,7 +1064,7 @@ void main() {
       return SliverToBoxAdapter(
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTapDown: (TapDownDetails details) => tapDownLog.add((index: index, details: details)),
+          onTapDown: (TapDownDetails details) => tapDownLog.add(index: index, details: details),
           child: const SizedBox.square(dimension: 20),
         ),
       );

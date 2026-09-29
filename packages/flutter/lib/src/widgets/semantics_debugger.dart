@@ -292,7 +292,7 @@ class _SemanticsDebuggerPainter extends CustomPainter {
         effectiveLabel = switch (data.textDirection!) {
           TextDirection.rtl => '${Unicode.RLI}$tooltipAndLabel${Unicode.PDI}',
           TextDirection.ltr => tooltipAndLabel,
-        };
+        }
       }
       if (annotations.isEmpty) {
         message = effectiveLabel;

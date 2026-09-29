@@ -128,15 +128,14 @@ enum _CupertinoMenuWidth {
   // mobile and tablet devices.
   factory _CupertinoMenuWidth.fromScreenWidth({
     required double screenWidth,
-    required bool isLargeTextModeEnabled,
   }) {
     final bool isMobile = screenWidth < _kTabletWidthThreshold;
-    return switch ((isMobile, isLargeTextModeEnabled)) {
+    return switch (isMobile, isLargeTextModeEnabled) {
       (false, false) => _CupertinoMenuWidth.iPadOS,
       (false, true) => _CupertinoMenuWidth.iPadOSAccessible,
       (true, false) => _CupertinoMenuWidth.iOS,
       (true, true) => _CupertinoMenuWidth.iOSAccessible,
-    };
+    }
   }
 
   final double points;
@@ -546,7 +545,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
   bool get isOpenOrOpening => _animationStatus.isForwardOrCompleted;
   bool get enableSwipe =>
       widget.enableSwipe &&
-      switch (_animationStatus) {
+      switch (animationStatus) {
         AnimationStatus.forward || AnimationStatus.completed || AnimationStatus.dismissed => true,
         AnimationStatus.reverse => false,
       };
@@ -602,7 +601,7 @@ class _CupertinoMenuAnchorState extends State<CupertinoMenuAnchor> with TickerPr
       return switch (element) {
         final CupertinoMenuEntry entry => entry.hasLeading(context),
         _ => false,
-      };
+      }
     });
   }
 
@@ -908,11 +907,11 @@ class _MenuOverlayState extends State<_MenuOverlay>
     ).platformDispatcher.accessibilityFeatures;
 
     switch (accessibilityFeatures) {
-      case ui.AccessibilityFeatures(disableAnimations: true):
+      case const ui.AccessibilityFeatures(disableAnimations: true):
         _scaleAnimation.parent = kAlwaysCompleteAnimation;
         _fadeAnimation.parent = kAlwaysCompleteAnimation;
         _sizeAnimation.parent = kAlwaysCompleteAnimation;
-      case ui.AccessibilityFeatures(reduceMotion: true):
+      case const ui.AccessibilityFeatures(reduceMotion: true):
         // Swipe scaling works with reduced motion.
         _scaleAnimation.parent = _swipeAnimationController.view.drive(
           Tween<double>(begin: 0.8, end: 1),
@@ -955,7 +954,7 @@ class _MenuOverlayState extends State<_MenuOverlay>
       < 0.4 => -1.0, // Left
       > 0.6 => 1.0, // Right
       _ => 0.0, // Center
-    };
+    }
 
     _menuAlignment = Alignment(dx, -dy);
     final Offset transformOrigin;

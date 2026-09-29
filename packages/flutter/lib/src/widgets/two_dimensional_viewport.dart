@@ -726,7 +726,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       _scrollCacheExtent = switch (cacheExtentStyle) {
         CacheExtentStyle.pixel => ScrollCacheExtent.pixels(value),
         CacheExtentStyle.viewport => ScrollCacheExtent.viewport(value),
-      };
+      }
     }
     markNeedsLayout();
   }
@@ -751,7 +751,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       _scrollCacheExtent = switch (value) {
         CacheExtentStyle.pixel => ScrollCacheExtent.pixels(cacheExtent),
         CacheExtentStyle.viewport => ScrollCacheExtent.viewport(cacheExtent),
-      };
+      }
     }
     markNeedsLayout();
   }
@@ -1035,7 +1035,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     final (double offset, AxisDirection axisDirection) = switch (axis) {
       Axis.vertical => (verticalOffset.pixels, verticalAxisDirection),
       Axis.horizontal => (horizontalOffset.pixels, horizontalAxisDirection),
-    };
+    }
 
     rect ??= target.paintBounds;
     // `child` will be the last RenderObject before the viewport when walking
@@ -1057,7 +1057,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       AxisDirection.left => child.size.width - rectLocal.right,
       AxisDirection.right => rectLocal.left,
       AxisDirection.down => rectLocal.top,
-    };
+    }
 
     // The scroll offset in the viewport to `rect`.
     final Offset paintOffset = parentDataOf(box).paintOffset!;
@@ -1066,7 +1066,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       AxisDirection.left => viewportDimension.width - paintOffset.dx - box.size.width,
       AxisDirection.right => paintOffset.dx,
       AxisDirection.down => paintOffset.dy,
-    };
+    }
 
     // This step assumes the viewport's layout is up-to-date, i.e., if
     // the position is changed after the last performLayout, the new scroll
@@ -1077,21 +1077,21 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     final double mainAxisExtentDifference = switch (axis) {
       Axis.horizontal => viewportDimension.width - rectLocal.width,
       Axis.vertical => viewportDimension.height - rectLocal.height,
-    };
+    }
 
     final double targetOffset = leadingScrollOffset - mainAxisExtentDifference * alignment;
 
     final double offsetDifference = switch (axis) {
       Axis.horizontal => horizontalOffset.pixels - targetOffset,
       Axis.vertical => verticalOffset.pixels - targetOffset,
-    };
+    }
 
     targetRect = switch (axisDirection) {
       AxisDirection.up => targetRect.translate(0.0, -offsetDifference),
       AxisDirection.down => targetRect.translate(0.0, offsetDifference),
       AxisDirection.left => targetRect.translate(-offsetDifference, 0.0),
       AxisDirection.right => targetRect.translate(offsetDifference, 0.0),
-    };
+    }
 
     final revealedOffset = RevealedOffset(offset: targetOffset, rect: targetRect);
     return revealedOffset;
@@ -1109,24 +1109,13 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     final bool allowHorizontal = horizontalOffset.allowImplicitScrolling;
     final bool allowVertical = verticalOffset.allowImplicitScrolling;
     AxisDirection? axisDirection;
-    switch ((allowHorizontal, allowVertical)) {
-      case (true, true):
+    switch (allowHorizontal, allowVertical) {
+      case true, true:
         // Both allow implicit scrolling.
         break;
-      case (false, true):
+      case false, true:
         // Only the vertical Axis allows implicit scrolling.
         axisDirection = verticalAxisDirection;
-      case (true, false):
-        // Only the horizontal Axis allows implicit scrolling.
-        axisDirection = horizontalAxisDirection;
-      case (false, false):
-        // Neither axis allows for implicit scrolling.
-        return super.showOnScreen(
-          descendant: descendant,
-          rect: rect,
-          duration: duration,
-          curve: curve,
-        );
     }
 
     final Rect? newRect = RenderTwoDimensionalViewport.showInViewport(
@@ -1239,7 +1228,7 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     final ViewportOffset offset = switch (axis) {
       Axis.vertical => viewport.verticalOffset,
       Axis.horizontal => viewport.horizontalOffset,
-    };
+    }
 
     final RevealedOffset leadingEdgeOffset = viewport.getOffsetToReveal(
       descendant,
@@ -1631,12 +1620,12 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
       AxisDirection.right => layoutOffset.dx,
       AxisDirection.left => viewportDimension.width - (layoutOffset.dx + child.size.width),
       AxisDirection.up || AxisDirection.down => throw Exception('This should not happen'),
-    };
+    }
     final double yOffset = switch (verticalAxisDirection) {
       AxisDirection.up => viewportDimension.height - (layoutOffset.dy + child.size.height),
       AxisDirection.down => layoutOffset.dy,
       AxisDirection.right || AxisDirection.left => throw Exception('This should not happen'),
-    };
+    }
     return Offset(xOffset, yOffset);
   }
 

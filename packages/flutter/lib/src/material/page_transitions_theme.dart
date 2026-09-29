@@ -887,7 +887,7 @@ class _PageTransitionsThemeTransitionsState<T> extends State<_PageTransitionsThe
           TargetPlatform.windows ||
           TargetPlatform.macOS ||
           TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
-        };
+        }
     return matchingBuilder.buildTransitions<T>(
       widget.route,
       context,

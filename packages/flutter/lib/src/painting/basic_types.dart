@@ -150,7 +150,7 @@ Axis flipAxis(Axis direction) {
   return switch (direction) {
     Axis.horizontal => Axis.vertical,
     Axis.vertical => Axis.horizontal,
-  };
+  }
 }
 
 /// A direction in which boxes flow vertically.
@@ -284,7 +284,7 @@ Axis axisDirectionToAxis(AxisDirection axisDirection) {
   return switch (axisDirection) {
     AxisDirection.up || AxisDirection.down => Axis.vertical,
     AxisDirection.left || AxisDirection.right => Axis.horizontal,
-  };
+  }
 }
 
 /// Returns the [AxisDirection] in which reading occurs in the given [TextDirection].
@@ -295,7 +295,7 @@ AxisDirection textDirectionToAxisDirection(TextDirection textDirection) {
   return switch (textDirection) {
     TextDirection.rtl => AxisDirection.left,
     TextDirection.ltr => AxisDirection.right,
-  };
+  }
 }
 
 /// Returns the opposite of the given [AxisDirection].
@@ -313,7 +313,7 @@ AxisDirection flipAxisDirection(AxisDirection axisDirection) {
     AxisDirection.right => AxisDirection.left,
     AxisDirection.down => AxisDirection.up,
     AxisDirection.left => AxisDirection.right,
-  };
+  }
 }
 
 /// Returns whether traveling along the given axis direction visits coordinates
@@ -325,5 +325,5 @@ bool axisDirectionIsReversed(AxisDirection axisDirection) {
   return switch (axisDirection) {
     AxisDirection.up || AxisDirection.left => true,
     AxisDirection.down || AxisDirection.right => false,
-  };
+  }
 }

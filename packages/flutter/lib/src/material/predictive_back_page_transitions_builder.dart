@@ -408,7 +408,7 @@ class _PredictiveBackSharedElementPageTransitionState
 
   late Animation<Offset> _positionAnimation;
 
-  Offset _lastDrag = Offset.zero;
+  final Offset _lastDrag = Offset.zero;
 
   // This isn't done as an animation because it's based on the vertical drag
   // amount, not the progression of the back gesture like widget.animation is.
@@ -432,7 +432,7 @@ class _PredictiveBackSharedElementPageTransitionState
     _animation.parent = switch (widget.phase) {
       _PredictiveBackPhase.commit => _curvedAnimationReversed,
       _ => widget.animation,
-    };
+    }
 
     _bounceAnimation.parent = switch (widget.phase) {
       _PredictiveBackPhase.commit => Tween<double>(
@@ -440,12 +440,12 @@ class _PredictiveBackSharedElementPageTransitionState
         end: _lastBounceAnimationValue,
       ).animate(_curvedAnimation!),
       _ => ReverseAnimation(widget.animation),
-    };
+    }
 
     _commitAnimation.parent = switch (widget.phase) {
       _PredictiveBackPhase.commit => _animation,
       _ => kAlwaysDismissedAnimation,
-    };
+    }
 
     final double xShift = (screenSize.width / _kDivisionFactor) - _kMargin;
     _positionAnimation = _animation.drive(switch (widget.phase) {

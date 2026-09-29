@@ -747,7 +747,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       _SliderAdjustmentType.down => false,
       _SliderAdjustmentType.left => directionality == TextDirection.rtl,
       _SliderAdjustmentType.right => directionality == TextDirection.ltr,
-    };
+    }
 
     final slider = _renderObjectKey.currentContext!.findRenderObject()! as _RenderSlider;
     return shouldIncrease ? slider.increaseAction() : slider.decreaseAction();
@@ -835,7 +835,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     final SliderThemeData defaults = switch (theme.useMaterial3) {
       true => year2023 ? _SliderDefaultsM3Year2023(context) : _SliderDefaultsM3(context),
       false => _SliderDefaultsM2(context),
-    };
+    }
 
     // If the widget has active or inactive colors specified, then we plug them
     // in to the slider theme as best we can. If the developer wants more
@@ -964,7 +964,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     )) {
       NavigationMode.directional => _directionalNavShortcutMap,
       NavigationMode.traditional => _traditionalNavShortcutMap,
-    };
+    }
 
     final double fontSize = sliderTheme.valueIndicatorTextStyle?.fontSize ?? kDefaultFontSize;
     final double fontSizeToScale = fontSize == 0.0 ? kDefaultFontSize : fontSize;
@@ -1063,7 +1063,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       ShowValueIndicator.alwaysVisible ||
       ShowValueIndicator.always ||
       ShowValueIndicator.onDrag => valueIndicator,
-    };
+    }
   }
 }
 
@@ -1573,7 +1573,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return switch (textDirection) {
       TextDirection.rtl => 1.0 - visualPosition,
       TextDirection.ltr => visualPosition,
-    };
+    }
   }
 
   double _getValueFromGlobalPosition(Offset globalPosition) {
@@ -1665,7 +1665,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           _currentDragValue += switch (textDirection) {
             TextDirection.rtl => -valueDelta,
             TextDirection.ltr => valueDelta,
-          };
+          }
           onChanged!(_discretize(_currentDragValue));
         }
       case SliderInteraction.tapOnly:
@@ -1749,7 +1749,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       TextDirection.rtl when _secondaryTrackValue == null => (1.0 - controllerValue, null),
       TextDirection.rtl => (1.0 - controllerValue, 1.0 - _secondaryTrackValue!),
       TextDirection.ltr => (controllerValue, _secondaryTrackValue),
-    };
+    }
 
     final Rect trackRect = _sliderTheme.trackShape!.getPreferredRect(
       parentBox: this,
@@ -1926,7 +1926,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     final double visualPosition = switch (textDirection) {
       TextDirection.rtl => 1.0 - _value,
       TextDirection.ltr => _value,
-    };
+    }
     return _calcThumbCenter(trackRect: _trackRect, visualPosition: visualPosition);
   }
 

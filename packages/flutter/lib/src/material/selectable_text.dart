@@ -754,7 +754,7 @@ class _SelectableTextState extends State<SelectableText>
         switch (widget.textScaleFactor) {
           null => null,
           final double textScaleFactor => TextScaler.linear(textScaleFactor),
-        };
+        }
     final Widget child = RepaintBoundary(
       child: EditableText(
         key: editableTextKey,

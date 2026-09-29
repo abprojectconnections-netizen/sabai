@@ -616,7 +616,7 @@ class _RawAutocompleteState<T extends Object> extends State<RawAutocomplete<T>> 
       OptionsViewOpenDirection.up => true,
       OptionsViewOpenDirection.down => false,
       OptionsViewOpenDirection.mostSpace => spaceAbove > spaceBelow,
-    };
+    }
 
     final double optionsViewMaxHeight = opensUp
         ? -overlayRectInField.top

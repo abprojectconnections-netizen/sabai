@@ -214,7 +214,7 @@ Future<(String, Directory)> _createNativeApp({
   final xcodeProjectTemplate = Directory(path.join(templatesDir.path, xcodeProjectName));
   recursiveCopy(xcodeProjectTemplate, xcodeProjectDir);
 
-  return (xcodeProjectName, xcodeProjectDir);
+  return xcodeProjectName, xcodeProjectDir;
 }
 
 Future<void> _installPlugins({

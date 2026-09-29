@@ -590,7 +590,7 @@ AsyncMatcher matchesGoldenFile(Object key, {int? version}) {
     Uri() => MatchesGoldenFile(key, version),
     String() => MatchesGoldenFile.forStringPath(key, version),
     _ => throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}'),
-  };
+  }
 }
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches a
@@ -1495,7 +1495,7 @@ class _IsSystemTextScaler extends Matcher {
         ),
       SystemTextScaler() => true,
       _ => failWithDescription(matchState, '${item.runtimeType} is not a SystemTextScaler'),
-    };
+    }
   }
 
   @override
@@ -2127,10 +2127,10 @@ class _MatchAnythingExceptClip extends _FailWithDescriptionMatcher {
     final RenderObject renderObject = nodes.single.renderObject!;
 
     switch (renderObject.runtimeType) {
-      case const (RenderClipPath):
-      case const (RenderClipOval):
-      case const (RenderClipRect):
-      case const (RenderClipRRect):
+      case const (RenderClipPath,):
+      case const (RenderClipOval,):
+      case const (RenderClipRect,):
+      case const (RenderClipRRect,):
         return failWithDescription(
           matchState,
           'had a root render object of type: ${renderObject.runtimeType}',
@@ -2980,7 +2980,7 @@ class _MatchesSemanticsData extends Matcher {
       SemanticsNode() => node.getSemanticsData(),
       FinderBase<SemanticsNode>() => node.evaluate().single.getSemanticsData(),
       _ => node as SemanticsData,
-    };
+    }
 
     if (label != null && label != data.label) {
       return _checkStringMismatch(matchState, 'label', data.label);

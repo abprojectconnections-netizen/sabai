@@ -776,7 +776,7 @@ void main() {
             isDark: false,
             contrastLevel: 0.0,
           ),
-        };
+        }
         final colorScheme = ColorScheme.fromSeed(
           seedColor: seedColor,
           dynamicSchemeVariant: schemeVariant,
@@ -1063,7 +1063,7 @@ void main() {
           isDark: isDark,
           contrastLevel: contrastLevel,
         ),
-      };
+      }
 
       final colorScheme = ColorScheme.fromSeed(
         seedColor: seedColor,

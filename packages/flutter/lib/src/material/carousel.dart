@@ -720,7 +720,7 @@ class _CarouselViewState extends State<CarouselView> {
         final double mainAxisExtent = switch (widget.scrollDirection) {
           Axis.horizontal => constraints.maxWidth,
           Axis.vertical => constraints.maxHeight,
-        };
+        }
 
         _itemExtent = widget.itemExtent == null
             ? null

@@ -488,6 +488,6 @@ ShapeBorder? lerpBorder(StarBorder border, LerpTarget target, double t, {bool to
       side: lerpToBorder,
       borderRadius: BorderRadius.circular(10),
     ),
-  };
+  }
   return to ? border.lerpTo(targetBorder, t) : border.lerpFrom(targetBorder, t);
 }

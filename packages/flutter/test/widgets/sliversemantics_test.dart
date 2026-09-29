@@ -2749,22 +2749,22 @@ void _tests() {
     // Tuples contain (parent level, child level, expected combined level).
     final scenarios = <(int, int, int)>[
       // Case: neither are headings
-      (0, 0, 0), // expect not a heading
+      0, 0, 0, // expect not a heading
       // Case: parent not a heading, child always wins.
-      (0, 1, 1),
-      (0, 2, 2),
+      0, 1, 1,
+      0, 2, 2,
 
       // Case: child not a heading, parent always wins.
-      (1, 0, 1),
-      (2, 0, 2),
+      1, 0, 1,
+      2, 0, 2,
 
       // Case: child heading level higher, parent still wins.
-      (3, 2, 3),
-      (4, 1, 4),
+      3, 2, 3,
+      4, 1, 4,
 
       // Case: parent heading level higher, parent still wins.
-      (2, 3, 2),
-      (1, 5, 1),
+      2, 3, 2,
+      1, 5, 1,
     ];
 
     for (final scenario in scenarios) {

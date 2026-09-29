@@ -137,7 +137,7 @@ Future<void> dragElement(
     AxisDirection.right => Offset(amount, 0.0),
     AxisDirection.up => Offset(0.0, -amount),
     AxisDirection.down => Offset(0.0, amount),
-  };
+  }
   await tester.drag(finder, delta);
 }
 
@@ -152,7 +152,7 @@ Future<void> flingElement(
     AxisDirection.right => const Offset(300, 0.0),
     AxisDirection.up => const Offset(0.0, -300),
     AxisDirection.down => const Offset(0.0, 300),
-  };
+  }
   await tester.fling(finder, delta, 1000.0, initialOffset: delta * initialOffsetFactor);
 }
 
@@ -235,7 +235,7 @@ Future<void> rollbackElement(
     AxisDirection.right => const Offset(30.0, 0.0),
     AxisDirection.up => const Offset(0.0, -30.0),
     AxisDirection.down => const Offset(0.0, 30.0),
-  };
+  }
   await tester.fling(finder, delta, 1000.0, initialOffset: delta * initialOffsetFactor);
 }
 

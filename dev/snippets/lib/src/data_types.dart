@@ -304,7 +304,7 @@ String sourceElementTypeAsString(SourceElementType type) {
     SourceElementType.topLevelVariableType => 'variable',
     SourceElementType.functionType => 'function',
     SourceElementType.unknownType => 'unknown',
-  };
+  }
 }
 
 /// A class that represents a Dart element in a source file.

@@ -102,7 +102,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
         angle: math.pi / 4.0,
         child: handle,
       ), // points up
-    };
+    }
   }
 
   /// Gets anchor for material-style text selection handles.
@@ -114,7 +114,7 @@ class MaterialTextSelectionControls extends TextSelectionControls {
       TextSelectionHandleType.collapsed => const Offset(_kHandleSize / 2, -4),
       TextSelectionHandleType.left => const Offset(_kHandleSize, 0),
       TextSelectionHandleType.right => Offset.zero,
-    };
+    }
   }
 
   @Deprecated(

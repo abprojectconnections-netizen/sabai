@@ -115,7 +115,7 @@ abstract class FlutterDriver {
     if (webConnection != null) {
       return WebFlutterDriver.connectedTo(webConnection);
     }
-    return VMServiceFlutterDriver.connectedTo(serviceClient!, appIsolate!);
+    return VMServiceFlutterDriver.connectedTo(serviceClient, appIsolate);
   }
 
   /// Connects to a Flutter application.

@@ -1311,7 +1311,7 @@ mixin WidgetsBinding
       ),
       // Return false for unhandled method.
       _ => Future<bool>.value(false),
-    };
+    }
   }
 
   Future<dynamic> _handleBackGestureInvocation(MethodCall methodCall) async {
@@ -1323,7 +1323,7 @@ mixin WidgetsBinding
       'commitBackGesture' => _handleCommitBackGesture(),
       'cancelBackGesture' => _handleCancelBackGesture(),
       _ => throw MissingPluginException(),
-    };
+    }
   }
 
   @override

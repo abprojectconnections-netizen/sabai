@@ -1113,7 +1113,7 @@ mixin _RenderTheaterMixin on RenderBox {
         theaterSize.height - bottom - child.getDryLayout(childConstraints).height,
       StackParentData() =>
         alignment.alongOffset(theaterSize - child.getDryLayout(childConstraints) as Offset).dy,
-    };
+    }
     return baselineOffset + y;
   }
 
@@ -2567,8 +2567,8 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 
   @override
   _RenderTheater get theater => switch (parent) {
-    final _RenderTheater parent => parent,
-    _ => throw FlutterError('$parent of $this is not a _RenderTheater'),
+    _RenderTheater parent => parent,
+    Never _ => throw FlutterError('$parent of $this is not a _RenderTheater'),
   };
 
   @override
@@ -2793,8 +2793,8 @@ class _RenderLayoutBuilder extends RenderProxyBox
 
   @override
   _RenderTheater get theater => switch (parent) {
-    final _RenderDeferredLayoutBox parent => parent.theater,
-    _ => throw FlutterError('$parent of $this is not a _RenderDeferredLayoutBox'),
+    _RenderDeferredLayoutBox parent => parent.theater,
+    Never _ => throw FlutterError('$parent of $this is not a _RenderDeferredLayoutBox'),
   };
 
   @override
@@ -2854,7 +2854,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
     assert(getTransformTo(theater).isIdentity());
     final Size overlayPortalSize = parent._layoutSurrogate.size;
     final Matrix4 paintTransform = layoutSurrogate.getTransformTo(theater);
-    return OverlayChildLayoutInfo._((overlayPortalSize, paintTransform, size));
+    return OverlayChildLayoutInfo._(overlayPortalSize, paintTransform, size);
   }
 
   @override

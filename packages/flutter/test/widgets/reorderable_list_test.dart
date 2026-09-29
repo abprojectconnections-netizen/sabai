@@ -1989,7 +1989,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    final testCases = <(int, int)>[(3, 1), (3, 3), (3, 5), (0, 5), (5, 0)];
+    final testCases = <(int, int)>[3, 1, 3, 3, 3, 5, 0, 5, 5, 0];
     for (final element in testCases) {
       await testMove(element.$1, element.$2);
       await testMove(element.$1, element.$2, reverse: true);

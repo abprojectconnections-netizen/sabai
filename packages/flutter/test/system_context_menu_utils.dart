@@ -21,5 +21,5 @@ IOSSystemContextMenuItemData systemContextMenuItemDataFromJson(Map<String, dynam
     'captureTextFromCamera' => const IOSSystemContextMenuItemDataLiveText(),
     'custom' => IOSSystemContextMenuItemDataCustom(title: title!, onPressed: () {}),
     _ => throw FlutterError('Invalid json for IOSSystemContextMenuItem.type $type.'),
-  };
+  }
 }

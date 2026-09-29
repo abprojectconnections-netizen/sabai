@@ -327,7 +327,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
   }) {
     // Makes sure we don't send the same id twice.
     assert(!observations.containsKey(id));
-    observations[id] = (
+    observations[id] =
       label: label,
       labelAttributes: labelAttributes,
       hint: hint,
@@ -336,7 +336,7 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
       valueAttributes: valueAttributes,
       childrenInTraversalOrder: childrenInTraversalOrder,
       transform: transform,
-    );
+    ;
   }
 
   @override

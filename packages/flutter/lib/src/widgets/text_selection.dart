@@ -1036,7 +1036,7 @@ class TextSelectionOverlay {
     return switch (textDirection) {
       TextDirection.ltr => ltrType,
       TextDirection.rtl => rtlType,
-    };
+    }
   }
 }
 
@@ -1595,7 +1595,7 @@ class SelectionOverlay {
       to: overlay.context,
     );
 
-    _handles = (
+    _handles =
       start: OverlayEntry(
         builder: (BuildContext context) {
           return capturedThemes.wrap(_buildStartHandle(context));
@@ -1606,7 +1606,7 @@ class SelectionOverlay {
           return capturedThemes.wrap(_buildEndHandle(context));
         },
       ),
-    );
+    ;
     overlay.insertAll(<OverlayEntry>[_handles!.start, _handles!.end]);
   }
 
@@ -2470,7 +2470,7 @@ class TextSelectionGestureDetectorBuilder {
             PointerDeviceKind.stylus ||
             PointerDeviceKind.invertedStylus => editableText.widget.stylusHandwritingEnabled,
             _ => false,
-          };
+          }
           if (stylusEnabled) {
             Scribe.isFeatureAvailable().then((bool isAvailable) {
               if (isAvailable) {
@@ -2795,7 +2795,7 @@ class TextSelectionGestureDetectorBuilder {
     )) {
       Axis.horizontal => Offset(_scrollPosition - _dragStartScrollOffset, 0.0),
       Axis.vertical => Offset(0.0, _scrollPosition - _dragStartScrollOffset),
-    };
+    }
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -3169,7 +3169,7 @@ class TextSelectionGestureDetectorBuilder {
       )) {
         Axis.horizontal => Offset(_scrollPosition - _dragStartScrollOffset, 0.0),
         Axis.vertical => Offset(0.0, _scrollPosition - _dragStartScrollOffset),
-      };
+      }
       final Offset dragStartGlobalPosition = details.globalPosition - details.offsetFromOrigin;
 
       // Select word by word.

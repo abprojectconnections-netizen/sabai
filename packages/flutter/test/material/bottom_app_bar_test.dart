@@ -61,8 +61,8 @@ void main() {
       }),
     );
     switch (tester.widgetList(finder).single) {
-      case PhysicalShape(:final Color color) || PhysicalModel(:final Color color):
-        expect(color, bottomAppBarColor);
+      const (case PhysicalShape(:final Color color) || PhysicalModel(:final Color color):
+        expect(color, bottomAppBarColor);)
       default:
         assert(false); // Should be unreachable: compare with the finder.
     }

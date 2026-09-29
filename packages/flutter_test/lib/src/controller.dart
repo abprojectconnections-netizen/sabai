@@ -48,7 +48,7 @@ const double kDragSlopDefault = 20.0;
   while (i < endIndex && rootSpan.getSpanForPosition(TextPosition(offset: i)) == subspan) {
     i += 1;
   }
-  return (subspan, i);
+  return subspan, i;
 }
 
 // Examples can assume:
@@ -2057,7 +2057,7 @@ abstract class WidgetController {
     int spanStart = range.start;
     while (spanStart < range.end) {
       switch (_findEndOfSpan(textRangeContext.renderObject.text, spanStart, range.end)) {
-        case (final HitTestTarget target, final int endIndex):
+        case final HitTestTarget target, final int endIndex:
           // Uses BoxHeightStyle.tight in getBoxesForSelection to make sure the
           // returned boxes don't extend outside of the hit-testable region.
           final Iterable<Offset> testOffsets = textRangeContext.renderObject
@@ -2074,7 +2074,7 @@ abstract class WidgetController {
             }
           }
           spanStart = endIndex;
-        case (_, final int endIndex):
+        case _, final int endIndex:
           spanStart = endIndex;
         case null:
           break;

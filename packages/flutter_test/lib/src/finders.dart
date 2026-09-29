@@ -594,7 +594,7 @@ class CommonFinders {
       final RegExp regExp => 'a semantics label matching the pattern "${regExp.pattern}"',
       final String labelString => 'a semantics label named "$labelString"',
       _ => 'a semantics label matching "$label"',
-    };
+    }
 
     return _bySemanticsProperty(
       label,
@@ -625,7 +625,7 @@ class CommonFinders {
       final RegExp regExp => 'a semantics identifier matching the pattern "${regExp.pattern}"',
       final String id => 'a semantics identifier named "$id"',
       _ => 'a semantics identifier matching "$identifier"',
-    };
+    }
 
     return _bySemanticsProperty(
       identifier,
@@ -725,10 +725,10 @@ class CommonSemanticsFinders {
     return byPredicate(
       (SemanticsNode node) => _matchesPattern(node.label, label),
       describeMatch: (Plurality plurality) =>
-          '${switch (plurality) {
+          '$switch (plurality) {
             Plurality.one => 'SemanticsNode',
             Plurality.zero || Plurality.many => 'SemanticsNodes',
-          }} with label "$label"',
+          } with label "$label"',
       view: view,
     );
   }
@@ -741,10 +741,10 @@ class CommonSemanticsFinders {
     return byPredicate(
       (SemanticsNode node) => _matchesPattern(node.value, value),
       describeMatch: (Plurality plurality) =>
-          '${switch (plurality) {
+          '$switch (plurality) {
             Plurality.one => 'SemanticsNode',
             Plurality.zero || Plurality.many => 'SemanticsNodes',
-          }} with value "$value"',
+          } with value "$value"',
       view: view,
     );
   }
@@ -757,10 +757,10 @@ class CommonSemanticsFinders {
     return byPredicate(
       (SemanticsNode node) => _matchesPattern(node.hint, hint),
       describeMatch: (Plurality plurality) =>
-          '${switch (plurality) {
+          '$switch (plurality) {
             Plurality.one => 'SemanticsNode',
             Plurality.zero || Plurality.many => 'SemanticsNodes',
-          }} with hint "$hint"',
+          } with hint "$hint"',
       view: view,
     );
   }
@@ -772,10 +772,10 @@ class CommonSemanticsFinders {
     return byPredicate(
       (SemanticsNode node) => node.getSemanticsData().hasAction(action),
       describeMatch: (Plurality plurality) =>
-          '${switch (plurality) {
+          '$switch (plurality) {
             Plurality.one => 'SemanticsNode',
             Plurality.zero || Plurality.many => 'SemanticsNodes',
-          }} with action "$action"',
+          } with action "$action"',
       view: view,
     );
   }
@@ -792,10 +792,10 @@ class CommonSemanticsFinders {
     return byPredicate(
       (SemanticsNode node) => node.getSemanticsData().actions & actionsInt != 0,
       describeMatch: (Plurality plurality) =>
-          '${switch (plurality) {
+          '$switch (plurality) {
             Plurality.one => 'SemanticsNode',
             Plurality.zero || Plurality.many => 'SemanticsNodes',
-          }} with any of the following actions: $actions',
+          } with any of the following actions: $actions',
       view: view,
     );
   }
@@ -807,10 +807,10 @@ class CommonSemanticsFinders {
     return byPredicate(
       (SemanticsNode node) => node.hasFlag(flag),
       describeMatch: (Plurality plurality) =>
-          '${switch (plurality) {
+          '$switch (plurality) {
             Plurality.one => 'SemanticsNode',
             Plurality.zero || Plurality.many => 'SemanticsNodes',
-          }} with flag "$flag"',
+          } with flag "$flag"',
       view: view,
     );
   }
@@ -824,10 +824,10 @@ class CommonSemanticsFinders {
     return byPredicate(
       (SemanticsNode node) => node.getSemanticsData().flags & flagsInt != 0,
       describeMatch: (Plurality plurality) =>
-          '${switch (plurality) {
+          '$switch (plurality) {
             Plurality.one => 'SemanticsNode',
             Plurality.zero || Plurality.many => 'SemanticsNodes',
-          }} with any of the following flags: $flags',
+          } with any of the following flags: $flags',
       view: view,
     );
   }
@@ -920,7 +920,7 @@ enum Plurality {
       0 => Plurality.zero,
       1 => Plurality.one,
       _ => Plurality.many,
-    };
+    }
   }
 }
 
@@ -1227,7 +1227,7 @@ abstract class Finder extends FinderBase<Element> with _LegacyFinderMixin {
     return switch (plurality) {
       Plurality.zero || Plurality.many => 'widgets with $description',
       Plurality.one => 'widget with $description',
-    };
+    }
   }
 
   /// Returns a variant of this finder that only matches elements reachable by
@@ -1303,11 +1303,11 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
 
     void visitor(RenderObject child) {
       switch (child) {
-        case RenderParagraph():
+        case const RenderParagraph():
           paragraphs.add(child);
         // No need to continue, we are piggybacking off of a text matcher, so
         // inline text widgets will be reported separately.
-        case RenderBox():
+        case const RenderBox():
           child.visitChildren(visitor);
         case _:
       }
@@ -1339,7 +1339,7 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
       Plurality.zero ||
       Plurality.many => 'non-overlapping TextRanges that match the Pattern "$pattern"',
       Plurality.one => 'non-overlapping TextRange that matches the Pattern "$pattern"',
-    };
+    }
   }
 }
 

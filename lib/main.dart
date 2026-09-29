@@ -21,9 +21,9 @@ class TravelApp extends StatelessWidget {
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF0A1628),
         cardColor: const Color(0xFF162035),
-        colorScheme: ColorScheme.dark(
-          primary: const Color(0xFF00C9A7),
-          secondary: const Color(0xFF00A88C),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF00C9A7),
+          secondary: Color(0xFF00A88C),
         ),
         iconTheme: const IconThemeData(color: Color(0xFFE8F0FE)),
         textTheme: const TextTheme(
@@ -206,15 +206,15 @@ class HomeScreen extends StatelessWidget {
         Expanded(
           child: ListView(
             padding: const EdgeInsets.only(bottom: 16),
-            children: [
-              const _HomeHeader(),
-              const SizedBox(height: 8),
-              const _SearchBox(),
-              const _FilterChips(),
-              const _SectionHeader(title: 'Trending Destinations', actionText: 'See all →'),
-              const _TrendingDestinations(),
-              const _SectionHeader(title: 'Your Upcoming Trips', actionText: 'Manage →'),
-              const _TripCard(
+            children: const [
+              _HomeHeader(),
+              SizedBox(height: 8),
+              _SearchBox(),
+              _FilterChips(),
+              _SectionHeader(title: 'Trending Destinations', actionText: 'See all →'),
+              _TrendingDestinations(),
+              _SectionHeader(title: 'Your Upcoming Trips', actionText: 'Manage →'),
+              _TripCard(
                 emoji: '🏯',
                 title: 'Kyoto Explorer',
                 subtitle: 'May 12 – May 20, 2025 · 8 days',
@@ -222,7 +222,7 @@ class HomeScreen extends StatelessWidget {
                 status: '65% planned · 3 activities left',
                 gradient: LinearGradient(colors: [Color(0xFF0F4C6D), Color(0xFF0A2840)]),
               ),
-              const _TripCard(
+              _TripCard(
                 emoji: '🌴',
                 title: 'Bali Escape',
                 subtitle: 'Jul 3 – Jul 10, 2025 · 7 days',
@@ -230,8 +230,8 @@ class HomeScreen extends StatelessWidget {
                 status: '20% planned · Just started',
                 gradient: LinearGradient(colors: [Color(0xFF1A3A20), Color(0xFF0D2D15)]),
               ),
-              const SizedBox(height: 12),
-              const _AdBanner(
+              SizedBox(height: 12),
+              _AdBanner(
                 label: 'AD',
                 title: 'Get 30% off travel insurance',
                 subtitle: 'Protect your trip with AXA Travel Guard',
@@ -344,22 +344,22 @@ class ExploreScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.only(bottom: 16),
-      children: [
-        const Padding(
+      children: const [
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: _ScreenHeader(title: 'Explore', subtitle: 'Attractions · Hotels · Restaurants'),
         ),
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _CategoryGrid(),
         ),
-        const SizedBox(height: 20),
-        const Padding(
+        SizedBox(height: 20),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _SectionHeader(title: 'Top Attractions', actionText: 'Map view'),
         ),
-        const SizedBox(height: 12),
-        const Padding(
+        SizedBox(height: 12),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _AttractionCard(
             emoji: '⛩️',
@@ -370,8 +370,8 @@ class ExploreScreen extends StatelessWidget {
             tag: 'History · Free entry',
           ),
         ),
-        const SizedBox(height: 12),
-        const Padding(
+        SizedBox(height: 12),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _AttractionCard(
             emoji: '🏔️',
@@ -382,18 +382,18 @@ class ExploreScreen extends StatelessWidget {
             tag: 'Adventure · From ฿1,200',
           ),
         ),
-        const SizedBox(height: 20),
-        const Padding(
+        SizedBox(height: 20),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _MapPlaceholder(),
         ),
-        const SizedBox(height: 20),
-        const Padding(
+        SizedBox(height: 20),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _SectionHeader(title: 'Recommended Hotels', actionText: 'See all'),
         ),
-        const SizedBox(height: 12),
-        const Padding(
+        SizedBox(height: 12),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _HotelCard(
             emoji: '🏨',
@@ -415,17 +415,17 @@ class CalendarScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.only(bottom: 16),
-      children: [
-        const Padding(
+      children: const [
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: _ScreenHeader(title: 'Trip Timeline', subtitle: 'Kyoto Explorer · May 2025'),
         ),
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _CalendarBlock(),
         ),
-        const SizedBox(height: 20),
-        const Padding(
+        SizedBox(height: 20),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _TimelineItem(
             day: 'Day 1',
@@ -449,8 +449,8 @@ class CalendarScreen extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
-        const Padding(
+        SizedBox(height: 16),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _TimelineItem(
             day: 'Day 2',
@@ -481,28 +481,28 @@ class AssistScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.only(bottom: 16),
-      children: [
-        const Padding(
+      children: const [
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: _ScreenHeader(
               title: 'Travel Assistant', subtitle: 'Everything you need, offline-ready'),
         ),
-        const Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _WeatherStrip(),
         ),
-        const SizedBox(height: 16),
-        const Padding(
+        SizedBox(height: 16),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _CurrencyCard(),
         ),
-        const SizedBox(height: 16),
-        const Padding(
+        SizedBox(height: 16),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _AssistGrid(),
         ),
-        const SizedBox(height: 12),
-        const Padding(
+        SizedBox(height: 12),
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: _AdBanner(
             label: 'AFFILIATE',
@@ -606,9 +606,9 @@ class _StatusBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: const [
+      children: [
         Text('9:41 AM', style: TextStyle(color: Color(0xFF8BA0BC), fontSize: 11)),
         Text('▌▌▌ WiFi ⚡ 87%', style: TextStyle(color: Color(0xFF8BA0BC), fontSize: 11)),
       ],
@@ -633,7 +633,7 @@ class _HomeHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
+          const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Good morning, traveler ✈️',
                 style: TextStyle(color: Color(0xFF8BA0BC), fontSize: 13)),
             SizedBox(height: 2),
@@ -668,8 +668,8 @@ class _SearchBox extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white12),
       ),
-      child: Row(
-        children: const [
+      child: const Row(
+        children: [
           Icon(Icons.search, color: Color(0xFF8BA0BC), size: 18),
           SizedBox(width: 10),
           Expanded(
@@ -715,9 +715,9 @@ class _FilterChips extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.title, required this.actionText});
   final String title;
   final String actionText;
-  const _SectionHeader({required this.title, required this.actionText});
 
   @override
   Widget build(BuildContext context) {
@@ -762,7 +762,7 @@ class _TrendingDestinationsState extends State<_TrendingDestinations> {
           );
         }
 
-        final cards = snapshot.data ?? [];
+        final List<Destination> cards = snapshot.data ?? [];
 
         if (cards.isEmpty) {
           return const SizedBox(
@@ -781,7 +781,7 @@ class _TrendingDestinationsState extends State<_TrendingDestinations> {
             itemCount: cards.length,
             separatorBuilder: (_, __) => const SizedBox(width: 14),
             itemBuilder: (context, index) {
-              final card = cards[index];
+              final Destination card = cards[index];
               return Container(
                 width: 170,
                 decoration: BoxDecoration(
@@ -802,7 +802,6 @@ class _TrendingDestinationsState extends State<_TrendingDestinations> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Align(
-                              alignment: Alignment.center,
                               child: Container(
                                 width: double.infinity,
                                 height: 120,
@@ -847,26 +846,20 @@ class _TrendingDestinationsState extends State<_TrendingDestinations> {
 }
 
 class _DestCardData {
-  final String emoji;
-  final String label;
-  final String title;
-  final String meta;
-  final Gradient gradient;
   const _DestCardData(
       {required this.emoji,
       required this.label,
       required this.title,
       required this.meta,
       required this.gradient});
+  final String emoji;
+  final String label;
+  final String title;
+  final String meta;
+  final Gradient gradient;
 }
 
 class _TripCard extends StatelessWidget {
-  final String emoji;
-  final String title;
-  final String subtitle;
-  final double progress;
-  final String status;
-  final Gradient gradient;
   const _TripCard(
       {required this.emoji,
       required this.title,
@@ -874,6 +867,12 @@ class _TripCard extends StatelessWidget {
       required this.progress,
       required this.status,
       required this.gradient});
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final double progress;
+  final String status;
+  final Gradient gradient;
 
   @override
   Widget build(BuildContext context) {
@@ -923,17 +922,17 @@ class _TripCard extends StatelessWidget {
 }
 
 class _AdBanner extends StatelessWidget {
-  final String label;
-  final String title;
-  final String subtitle;
-  final String buttonText;
-  final Gradient gradient;
   const _AdBanner(
       {required this.label,
       required this.title,
       required this.subtitle,
       required this.buttonText,
       required this.gradient});
+  final String label;
+  final String title;
+  final String subtitle;
+  final String buttonText;
+  final Gradient gradient;
 
   @override
   Widget build(BuildContext context) {
@@ -973,9 +972,9 @@ class _AdBanner extends StatelessWidget {
 }
 
 class _ScreenHeader extends StatelessWidget {
+  const _ScreenHeader({required this.title, required this.subtitle});
   final String title;
   final String subtitle;
-  const _ScreenHeader({required this.title, required this.subtitle});
 
   @override
   Widget build(BuildContext context) {
@@ -1006,7 +1005,7 @@ class _RouteSelector extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: _RouteField(label: 'FROM', code: 'BKK', city: 'Bangkok, Thailand')),
+              const Expanded(child: _RouteField(label: 'FROM', code: 'BKK', city: 'Bangkok, Thailand')),
               Container(
                 width: 32,
                 height: 32,
@@ -1014,12 +1013,12 @@ class _RouteSelector extends StatelessWidget {
                 child: const Icon(Icons.swap_vert, color: Color(0xFF0A1628), size: 18),
               ),
               const SizedBox(width: 12),
-              Expanded(child: _RouteField(label: 'TO', code: 'NRT', city: 'Tokyo, Japan')),
+              const Expanded(child: _RouteField(label: 'TO', code: 'NRT', city: 'Tokyo, Japan')),
             ],
           ),
           const SizedBox(height: 10),
-          Row(
-            children: const [
+          const Row(
+            children: [
               Expanded(child: _DateField(label: 'DEPART', value: '12 May 2025')),
               SizedBox(width: 8),
               Expanded(child: _DateField(label: 'RETURN', value: '20 May 2025')),
@@ -1034,10 +1033,10 @@ class _RouteSelector extends StatelessWidget {
 }
 
 class _RouteField extends StatelessWidget {
+  const _RouteField({required this.label, required this.code, required this.city});
   final String label;
   final String code;
   final String city;
-  const _RouteField({required this.label, required this.code, required this.city});
 
   @override
   Widget build(BuildContext context) {
@@ -1057,9 +1056,9 @@ class _RouteField extends StatelessWidget {
 }
 
 class _DateField extends StatelessWidget {
+  const _DateField({required this.label, required this.value});
   final String label;
   final String value;
-  const _DateField({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -1078,17 +1077,6 @@ class _DateField extends StatelessWidget {
 }
 
 class _FlightResultCard extends StatelessWidget {
-  final String icon;
-  final String airline;
-  final String details;
-  final String price;
-  final String depart;
-  final String departAirport;
-  final String arrive;
-  final String arriveAirport;
-  final String duration;
-  final String stopInfo;
-  final String? badge;
   const _FlightResultCard(
       {required this.icon,
       required this.airline,
@@ -1101,6 +1089,17 @@ class _FlightResultCard extends StatelessWidget {
       required this.duration,
       required this.stopInfo,
       this.badge});
+  final String icon;
+  final String airline;
+  final String details;
+  final String price;
+  final String depart;
+  final String departAirport;
+  final String arrive;
+  final String arriveAirport;
+  final String duration;
+  final String stopInfo;
+  final String? badge;
 
   @override
   Widget build(BuildContext context) {
@@ -1164,9 +1163,9 @@ class _FlightResultCard extends StatelessWidget {
 }
 
 class _FlightTimeBlock extends StatelessWidget {
+  const _FlightTimeBlock({required this.time, required this.airport});
   final String time;
   final String airport;
-  const _FlightTimeBlock({required this.time, required this.airport});
 
   @override
   Widget build(BuildContext context) {
@@ -1184,22 +1183,22 @@ class _CategoryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      _CategoryData(
+      const _CategoryData(
           emoji: '🌿',
           title: 'Nature',
           subtitle: '142 places',
           colors: [Color(0xFF1A3A2A), Color(0xFF0F6E56)]),
-      _CategoryData(
+      const _CategoryData(
           emoji: '🏛️',
           title: 'History',
           subtitle: '89 places',
           colors: [Color(0xFF2A1A0A), Color(0xFF854F0B)]),
-      _CategoryData(
+      const _CategoryData(
           emoji: '☕',
           title: 'Lifestyle',
           subtitle: '211 places',
           colors: [Color(0xFF1A1A3A), Color(0xFF534AB7)]),
-      _CategoryData(
+      const _CategoryData(
           emoji: '🧗',
           title: 'Adventure',
           subtitle: '63 places',
@@ -1212,7 +1211,7 @@ class _CategoryGrid extends StatelessWidget {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: 1.05),
       itemBuilder: (context, index) {
-        final item = items[index];
+        final _CategoryData item = items[index];
         return Container(
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
@@ -1232,21 +1231,15 @@ class _CategoryGrid extends StatelessWidget {
 }
 
 class _CategoryData {
+  const _CategoryData(
+      {required this.emoji, required this.title, required this.subtitle, required this.colors});
   final String emoji;
   final String title;
   final String subtitle;
   final List<Color> colors;
-  const _CategoryData(
-      {required this.emoji, required this.title, required this.subtitle, required this.colors});
 }
 
 class _AttractionCard extends StatelessWidget {
-  final String emoji;
-  final String name;
-  final String location;
-  final String rating;
-  final String reviews;
-  final String tag;
   const _AttractionCard(
       {required this.emoji,
       required this.name,
@@ -1254,6 +1247,12 @@ class _AttractionCard extends StatelessWidget {
       required this.rating,
       required this.reviews,
       required this.tag});
+  final String emoji;
+  final String name;
+  final String location;
+  final String rating;
+  final String reviews;
+  final String tag;
 
   @override
   Widget build(BuildContext context) {
@@ -1320,11 +1319,11 @@ class _MapPlaceholder extends StatelessWidget {
         ),
         const Positioned(top: 40, left: 130, child: Text('📍', style: TextStyle(fontSize: 24))),
         const Positioned(top: 70, left: 180, child: Text('📍', style: TextStyle(fontSize: 24))),
-        Positioned(
+        const Positioned(
           bottom: 12,
           left: 16,
           right: 16,
-          child: Row(children: const [
+          child: Row(children: [
             Icon(Icons.location_pin, color: Color(0xFF00C9A7), size: 20),
             SizedBox(width: 8),
             Expanded(
@@ -1356,17 +1355,17 @@ class _GridPainter extends CustomPainter {
 }
 
 class _HotelCard extends StatelessWidget {
-  final String emoji;
-  final String name;
-  final String stars;
-  final String reviews;
-  final String price;
   const _HotelCard(
       {required this.emoji,
       required this.name,
       required this.stars,
       required this.reviews,
       required this.price});
+  final String emoji;
+  final String name;
+  final String stars;
+  final String reviews;
+  final String price;
 
   @override
   Widget build(BuildContext context) {
@@ -1379,9 +1378,9 @@ class _HotelCard extends StatelessWidget {
       child: Column(children: [
         Container(
           height: 110,
-          decoration: BoxDecoration(
-              color: const Color(0xFF1E2E47),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24))),
+          decoration: const BoxDecoration(
+              color: Color(0xFF1E2E47),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
           child: Center(child: Text(emoji, style: const TextStyle(fontSize: 48))),
         ),
         Padding(
@@ -1475,13 +1474,13 @@ class _CalendarBlock extends StatelessWidget {
           ...['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((label) => Center(
               child: Text(label, style: const TextStyle(fontSize: 10, color: Color(0xFF8BA0BC))))),
           ...days.map((day) {
-            final isEmpty = day.isEmpty;
-            final isSelected = day == '12' || day == '20';
+            final bool isEmpty = day.isEmpty;
+            final bool isSelected = day == '12' || day == '20';
             final isToday = day == '23';
-            final isRange = ['13', '14', '15', '16', '17', '18', '19'].contains(day);
-            final hasEvent = ['13', '14', '15', '16', '17', '18', '19'].contains(day);
+            final bool isRange = ['13', '14', '15', '16', '17', '18', '19'].contains(day);
+            final bool hasEvent = ['13', '14', '15', '16', '17', '18', '19'].contains(day);
             Color? bg;
-            Color textColor = const Color(0xFFB0C4DE);
+            var textColor = const Color(0xFFB0C4DE);
             if (isSelected) {
               bg = const Color(0xFF00C9A7);
               textColor = const Color(0xFF0A1628);
@@ -1509,21 +1508,21 @@ class _CalendarBlock extends StatelessWidget {
         ],
       ),
       const SizedBox(height: 12),
-      Row(children: [
-        _LegendDot(color: const Color(0xFFFF6B6B), label: 'Flight'),
-        const SizedBox(width: 16),
-        _LegendDot(color: const Color(0xFFFFB347), label: 'Hotel check-in'),
-        const SizedBox(width: 16),
-        _LegendDot(color: const Color(0xFF00C9A7), label: 'Activity'),
+      const Row(children: [
+        _LegendDot(color: Color(0xFFFF6B6B), label: 'Flight'),
+        SizedBox(width: 16),
+        _LegendDot(color: Color(0xFFFFB347), label: 'Hotel check-in'),
+        SizedBox(width: 16),
+        _LegendDot(color: Color(0xFF00C9A7), label: 'Activity'),
       ]),
     ]);
   }
 }
 
 class _LegendDot extends StatelessWidget {
+  const _LegendDot({required this.color, required this.label});
   final Color color;
   final String label;
-  const _LegendDot({required this.color, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -1539,10 +1538,10 @@ class _LegendDot extends StatelessWidget {
 }
 
 class _TimelineItem extends StatelessWidget {
+  const _TimelineItem({required this.day, required this.date, required this.events});
   final String day;
   final String date;
   final List<_TimelineEvent> events;
-  const _TimelineItem({required this.day, required this.date, required this.events});
 
   @override
   Widget build(BuildContext context) {
@@ -1597,12 +1596,12 @@ class _TimelineItem extends StatelessWidget {
 }
 
 class _TimelineEvent {
+  const _TimelineEvent(
+      {required this.time, required this.color, required this.title, required this.subtitle});
   final String time;
   final Color color;
   final String title;
   final String subtitle;
-  const _TimelineEvent(
-      {required this.time, required this.color, required this.title, required this.subtitle});
 }
 
 class _WeatherStrip extends StatelessWidget {
@@ -1617,14 +1616,14 @@ class _WeatherStrip extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: Colors.white12)),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-          Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
+        const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text('Kyoto, Japan', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
             SizedBox(height: 4),
             Text('Partly cloudy · Humidity 68%',
                 style: TextStyle(fontSize: 12, color: Color(0xFF8BA0BC))),
           ]),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: const [
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
             Text('⛅', style: TextStyle(fontSize: 40)),
             SizedBox(height: 4),
             Text('24°C', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700)),
@@ -1651,10 +1650,10 @@ class _CurrencyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rates = [
-      _CurrencyData(flag: '🇯🇵', name: 'Japanese Yen', code: 'JPY', rate: '4.24 ¥'),
-      _CurrencyData(flag: '🇺🇸', name: 'US Dollar', code: 'USD', rate: '0.028 \$'),
-      _CurrencyData(flag: '🇪🇺', name: 'Euro', code: 'EUR', rate: '0.026 €'),
-      _CurrencyData(flag: '🇸🇬', name: 'Singapore Dollar', code: 'SGD', rate: '0.038 S\$'),
+      const _CurrencyData(flag: '🇯🇵', name: 'Japanese Yen', code: 'JPY', rate: '4.24 ¥'),
+      const _CurrencyData(flag: '🇺🇸', name: 'US Dollar', code: 'USD', rate: r'0.028 $'),
+      const _CurrencyData(flag: '🇪🇺', name: 'Euro', code: 'EUR', rate: '0.026 €'),
+      const _CurrencyData(flag: '🇸🇬', name: 'Singapore Dollar', code: 'SGD', rate: r'0.038 S$'),
     ];
     return Container(
       padding: const EdgeInsets.all(16),
@@ -1688,12 +1687,12 @@ class _CurrencyCard extends StatelessWidget {
 }
 
 class _CurrencyData {
+  const _CurrencyData(
+      {required this.flag, required this.name, required this.code, required this.rate});
   final String flag;
   final String name;
   final String code;
   final String rate;
-  const _CurrencyData(
-      {required this.flag, required this.name, required this.code, required this.rate});
 }
 
 class _AssistGrid extends StatelessWidget {
@@ -1702,16 +1701,16 @@ class _AssistGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = [
-      _AssistData(
+      const _AssistData(
           icon: '🗺️',
           title: 'Offline Maps',
           subtitle: 'Downloaded for Kyoto region',
           badge: '532 MB saved'),
-      _AssistData(
+      const _AssistData(
           icon: '🛂', title: 'Documents', subtitle: 'Passport, Visa, Insurance', badge: '3 stored'),
-      _AssistData(
+      const _AssistData(
           icon: '📡', title: 'Travel SIM', subtitle: 'eSIM for Japan · 10GB', badge: 'Active'),
-      _AssistData(
+      const _AssistData(
           icon: '🆘',
           title: 'Emergency',
           subtitle: 'Local contacts & hotlines',
@@ -1724,7 +1723,7 @@ class _AssistGrid extends StatelessWidget {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2, mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: 1.05),
       itemBuilder: (context, index) {
-        final item = items[index];
+        final _AssistData item = items[index];
         return Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
@@ -1754,12 +1753,12 @@ class _AssistGrid extends StatelessWidget {
 }
 
 class _AssistData {
+  const _AssistData(
+      {required this.icon, required this.title, required this.subtitle, required this.badge});
   final String icon;
   final String title;
   final String subtitle;
   final String badge;
-  const _AssistData(
-      {required this.icon, required this.title, required this.subtitle, required this.badge});
 }
 
 class _ProfileHero extends StatelessWidget {
@@ -1795,7 +1794,7 @@ class _ProfileHero extends StatelessWidget {
               color: const Color(0xFF162035),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(color: Colors.white12)),
-          child: Row(children: const [
+          child: const Row(children: [
             Expanded(child: _ProfileStat(value: '14', label: 'Trips')),
             Expanded(child: _ProfileStat(value: '23', label: 'Countries')),
             Expanded(child: _ProfileStat(value: '142', label: 'Places')),
@@ -1807,9 +1806,9 @@ class _ProfileHero extends StatelessWidget {
 }
 
 class _ProfileStat extends StatelessWidget {
+  const _ProfileStat({required this.value, required this.label});
   final String value;
   final String label;
-  const _ProfileStat({required this.value, required this.label});
 
   @override
   Widget build(BuildContext context) {
@@ -1825,15 +1824,15 @@ class _ProfileStat extends StatelessWidget {
 }
 
 class _MenuItem extends StatelessWidget {
-  final String emoji;
-  final String title;
-  final String subtitle;
-  final Color backgroundColor;
   const _MenuItem(
       {required this.emoji,
       required this.title,
       required this.subtitle,
       required this.backgroundColor});
+  final String emoji;
+  final String title;
+  final String subtitle;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {

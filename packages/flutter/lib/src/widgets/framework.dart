@@ -189,9 +189,9 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// The current state is null if (1) there is no widget in the tree that
   /// matches this global key, (2) that widget is not a [StatefulWidget], or the
   /// associated [State] object is not a subtype of `T`.
-  T? get currentState => switch (_currentElement) {
+  T? get currentState => switch (currentElement) {
     StatefulElement(:final T state) => state,
-    _ => null,
+    Null _ => null,
   };
 }
 
@@ -2158,8 +2158,8 @@ class _InactiveElements {
         _elements.add(element);
       case _ElementLifecycle.inactive:
         _elements.add(element);
-      case _ElementLifecycle.initial || _ElementLifecycle.failed || _ElementLifecycle.defunct:
-        assert(false, '$element must not be deactivated when in ${element._lifecycleState} state.');
+      const (case _ElementLifecycle.initial || _ElementLifecycle.failed || _ElementLifecycle.defunct:
+        assert(false, '$element must not be deactivated when in ${element._lifecycleState} state.');)
     }
   }
 
@@ -3366,7 +3366,7 @@ class BuildOwner {
                 }
               }
               final keyLabels = <String>[
-                for (final MapEntry<String, int>(:String key, value: int count)
+                for (final MapEntry<String, int>( =String key, value: int count)
                     in keyStringCount.entries)
                   if (count == 1)
                     key
@@ -3386,7 +3386,7 @@ class BuildOwner {
                 }
               }
               final elementLabels = <String>[
-                for (final MapEntry<String, int>(key: String element, value: int count)
+                for (final MapEntry<String, int>(key = String element, value: int count)
                     in elementStringCount.entries)
                   if (count == 1)
                     element

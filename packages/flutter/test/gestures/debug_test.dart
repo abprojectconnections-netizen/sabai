@@ -222,11 +222,11 @@ void main() {
 
   test('Gesture details debugFillProperties', () {
     final pairs = <(Diagnosticable, List<String>)>[
-      (
+
         DragDownDetails(),
         <String>['globalPosition: Offset(0.0, 0.0)', 'localPosition: Offset(0.0, 0.0)'],
-      ),
-      (
+      ,
+
         DragStartDetails(),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
@@ -234,8 +234,8 @@ void main() {
           'sourceTimeStamp: null',
           'kind: null',
         ],
-      ),
-      (
+      ,
+
         DragUpdateDetails(globalPosition: Offset.zero),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
@@ -244,8 +244,8 @@ void main() {
           'delta: Offset(0.0, 0.0)',
           'primaryDelta: null',
         ],
-      ),
-      (
+      ,
+
         DragEndDetails(),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
@@ -253,15 +253,15 @@ void main() {
           'velocity: Velocity(0.0, 0.0)',
           'primaryVelocity: null',
         ],
-      ),
-      (
+      ,
+
         ForcePressDetails(globalPosition: Offset.zero, pressure: 1.0),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'pressure: 1.0',
         ],
-      ),
+      ,
       (
         const LongPressDownDetails(),
         <String>[
@@ -291,7 +291,7 @@ void main() {
           'velocity: Velocity(0.0, 0.0)',
         ],
       ),
-      (
+
         SerialTapDownDetails(kind: PointerDeviceKind.unknown),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
@@ -300,9 +300,9 @@ void main() {
           'buttons: 0',
           'count: 1',
         ],
-      ),
-      (SerialTapCancelDetails(), <String>['count: 1']),
-      (
+      ,
+      SerialTapCancelDetails(), <String>['count: 1'],
+
         SerialTapUpDetails(),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
@@ -310,8 +310,8 @@ void main() {
           'kind: null',
           'count: 1',
         ],
-      ),
-      (
+      ,
+
         ScaleStartDetails(),
         <String>[
           'focalPoint: Offset(0.0, 0.0)',
@@ -319,8 +319,8 @@ void main() {
           'pointerCount: 0',
           'sourceTimeStamp: null',
         ],
-      ),
-      (
+      ,
+
         ScaleUpdateDetails(),
         <String>[
           'focalPointDelta: Offset(0.0, 0.0)',
@@ -333,28 +333,28 @@ void main() {
           'pointerCount: 0',
           'sourceTimeStamp: null',
         ],
-      ),
-      (
+      ,
+
         ScaleEndDetails(),
         <String>['velocity: Velocity(0.0, 0.0)', 'scaleVelocity: 0.0', 'pointerCount: 0'],
-      ),
-      (
+      ,
+
         TapDownDetails(kind: PointerDeviceKind.unknown),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'kind: unknown',
         ],
-      ),
-      (
+      ,
+
         TapUpDetails(kind: PointerDeviceKind.unknown),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
           'localPosition: Offset(0.0, 0.0)',
           'kind: unknown',
         ],
-      ),
-      (
+      ,
+
         TapDragDownDetails(
           globalPosition: Offset.zero,
           localPosition: Offset.zero,
@@ -366,8 +366,8 @@ void main() {
           'kind: null',
           'consecutiveTapCount: 1',
         ],
-      ),
-      (
+      ,
+
         TapDragUpDetails(
           globalPosition: Offset.zero,
           localPosition: Offset.zero,
@@ -380,8 +380,8 @@ void main() {
           'kind: unknown',
           'consecutiveTapCount: 1',
         ],
-      ),
-      (
+      ,
+
         TapDragStartDetails(
           globalPosition: Offset.zero,
           localPosition: Offset.zero,
@@ -394,8 +394,8 @@ void main() {
           'kind: null',
           'consecutiveTapCount: 1',
         ],
-      ),
-      (
+      ,
+
         TapDragUpdateDetails(
           globalPosition: Offset.zero,
           localPosition: Offset.zero,
@@ -414,8 +414,8 @@ void main() {
           'localOffsetFromOrigin: Offset(0.0, 0.0)',
           'consecutiveTapCount: 1',
         ],
-      ),
-      (
+      ,
+
         TapDragEndDetails(consecutiveTapCount: 1),
         <String>[
           'globalPosition: Offset(0.0, 0.0)',
@@ -424,7 +424,7 @@ void main() {
           'primaryVelocity: null',
           'consecutiveTapCount: 1',
         ],
-      ),
+      ,
     ];
 
     for (final (Diagnosticable detail, List<String> expected) in pairs) {

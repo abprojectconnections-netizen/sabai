@@ -255,7 +255,7 @@ class TestsCrossImportChecker {
       _Library.material => throw UnimplementedError(
         'Material is responsible for testing its interactions with Cupertino, so it is allowed to cross-import.',
       ),
-    };
+    }
     buffer.writeln('However, they now need to be removed from the');
     buffer.write('$knownListName list in the script /dev/bots/check_tests_cross_imports.dart.');
     return buffer.toString().trimRight();

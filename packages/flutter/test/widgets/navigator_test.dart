@@ -6014,19 +6014,19 @@ void main() {
         key.currentState!.maybePop(true);
         await tester.pumpAndSettle();
         expect(find.text('page3'), findsOneWidget);
-        expect(page3.popInvoked, <CanPopPageInvoke>[(false, true)]);
+        expect(page3.popInvoked, <CanPopPageInvoke>[false, true]);
 
         page3CanPop = true;
         key.currentState!.maybePop(false);
         await tester.pumpAndSettle();
         expect(find.text('page3'), findsNothing);
         expect(find.text('page2'), findsOneWidget);
-        expect(page3.popInvoked, <CanPopPageInvoke>[(false, true), (true, false)]);
+        expect(page3.popInvoked, <CanPopPageInvoke>[false, true, true, false]);
 
         key.currentState!.maybePop('some string');
         await tester.pumpAndSettle();
         expect(find.text('page2'), findsOneWidget);
-        expect(page2.popInvoked, <CanPopPageInvoke>[(false, 'some string')]);
+        expect(page2.popInvoked, <CanPopPageInvoke>[false, 'some string']);
 
         page2CanPop = true;
         key.currentState!.maybePop('another string');
@@ -6034,14 +6034,14 @@ void main() {
         expect(find.text('page2'), findsNothing);
         expect(find.text('page1'), findsOneWidget);
         expect(page2.popInvoked, <CanPopPageInvoke>[
-          (false, 'some string'),
-          (true, 'another string'),
+          false, 'some string',
+          true, 'another string',
         ]);
 
         key.currentState!.maybePop(1);
         await tester.pumpAndSettle();
         expect(find.text('page1'), findsOneWidget);
-        expect(page1.popInvoked, <CanPopPageInvoke>[(false, 1)]);
+        expect(page1.popInvoked, <CanPopPageInvoke>[false, 1]);
       });
     });
   });
@@ -6480,7 +6480,7 @@ class CanPopPage<T> extends Page<T> {
 
   @override
   PopInvokedWithResultCallback<T> get onPopInvoked => (bool didPop, T? result) {
-    popInvoked.add((didPop, result));
+    popInvoked.add(didPop, result);
   };
 
   @override

@@ -396,7 +396,7 @@ class DropdownMenu<T> extends StatefulWidget {
     }
     return _inputDecorationTheme is InputDecorationTheme
         ? _inputDecorationTheme.data
-        : _inputDecorationTheme as InputDecorationThemeData;
+        : _inputDecorationTheme! as InputDecorationThemeData;
   }
 
   final Object? _inputDecorationTheme;
@@ -817,7 +817,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
         switch (Theme.of(context).platform) {
           TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => false,
           TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
-        };
+        }
   }
 
   bool get selectOnly => widget.selectOnly;
@@ -1220,7 +1220,7 @@ class _DropdownMenuState<T> extends State<DropdownMenu<T>> {
     final MouseCursor? effectiveMouseCursor = switch (widget.enabled) {
       true => isButton ? SystemMouseCursors.click : SystemMouseCursors.text,
       false => null,
-    };
+    }
 
     Widget menuAnchor = MenuAnchor(
       style: effectiveMenuStyle,

@@ -2214,8 +2214,8 @@ Stream<File> _allFiles(
         continue;
       }
       switch (path.basename(entity.path)) {
-        case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
-          continue;
+        const (case 'flutter_export_environment.sh' || 'gradlew.bat' || '.DS_Store':
+          continue;)
       }
       if (extension == null || path.extension(entity.path) == '.$extension') {
         matches += 1;
@@ -2226,8 +2226,8 @@ Stream<File> _allFiles(
         continue;
       }
       switch (path.basename(entity.path)) {
-        case '.git' || '.idea' || '.gradle' || '.dart_tool' || 'build':
-          continue;
+        const (case '.git' || '.idea' || '.gradle' || '.dart_tool' || 'build':
+          continue;)
       }
       pending.addAll(entity.listSync());
     }

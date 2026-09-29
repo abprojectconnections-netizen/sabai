@@ -2119,7 +2119,7 @@ class EditableText extends StatefulWidget {
       TargetPlatform.linux => true,
       TargetPlatform.macOS => true,
       TargetPlatform.windows => true,
-    };
+    }
   }
 
   /// Returns the [ContextMenuButtonItem]s representing the buttons in this
@@ -3151,10 +3151,10 @@ class EditableTextState extends State<EditableText>
     final String prevText = span.toPlainText();
     final String currText = textEditingValue.text;
     if (prevText != currText || !selection.isValid || selection.isCollapsed) {
-      return (
+      return
         startGlyphHeight: renderEditable.preferredLineHeight,
         endGlyphHeight: renderEditable.preferredLineHeight,
-      );
+      ;
     }
 
     final String selectedGraphemes = selection.textInside(currText);
@@ -3166,10 +3166,10 @@ class EditableTextState extends State<EditableText>
     final Rect? endCharacterRect = renderEditable.getRectForComposingRange(
       TextRange(start: selection.end - lastSelectedGraphemeExtent, end: selection.end),
     );
-    return (
+    return
       startGlyphHeight: startCharacterRect?.height ?? renderEditable.preferredLineHeight,
       endGlyphHeight: endCharacterRect?.height ?? renderEditable.preferredLineHeight,
-    );
+    ;
   }
 
   /// {@template flutter.widgets.EditableText.getAnchors}
@@ -3742,7 +3742,7 @@ class EditableTextState extends State<EditableText>
         // Only non-null when starting a floating cursor via long press.
         if (point.startLocation != null) {
           shouldResetOrigin = false;
-          (startCaretCenter, currentTextPosition) = point.startLocation!;
+          startCaretCenter, currentTextPosition = point.startLocation;
         } else {
           shouldResetOrigin = true;
           currentTextPosition = TextPosition(
@@ -4233,13 +4233,13 @@ class EditableTextState extends State<EditableText>
       return;
     }
     switch (notification) {
-      case ScrollStartNotification() when _dataWhenToolbarShowScheduled != null:
-      case ScrollEndNotification() when _dataWhenToolbarShowScheduled == null:
+      case const ScrollStartNotification() when _dataWhenToolbarShowScheduled != null:
+      case const ScrollEndNotification() when _dataWhenToolbarShowScheduled == null:
         break;
-      case ScrollEndNotification() when _dataWhenToolbarShowScheduled!.value != _value:
+      case const ScrollEndNotification() when _dataWhenToolbarShowScheduled!.value != _value:
         _dataWhenToolbarShowScheduled = null;
         _disposeScrollNotificationObserver();
-      case ScrollNotification(:final BuildContext? context)
+      case const ScrollNotification(:final BuildContext? context)
           when !_isInternalScrollableNotification(context) &&
               _scrollableNotificationIsFromSameSubtree(context):
         _handleContextMenuOnScroll(notification);
@@ -4298,7 +4298,7 @@ class EditableTextState extends State<EditableText>
           : selectionBoxes
                 .map((TextBox box) => box.toRect())
                 .reduce((Rect result, Rect rect) => result.expandToInclude(rect));
-      _dataWhenToolbarShowScheduled = (value: _value, selectionBounds: selectionBounds);
+      _dataWhenToolbarShowScheduled = value: _value, selectionBounds: selectionBounds;
       _selectionOverlay?.hideToolbar();
     } else if (notification is ScrollEndNotification) {
       if (_dataWhenToolbarShowScheduled == null) {
@@ -4926,11 +4926,11 @@ class EditableTextState extends State<EditableText>
 
     final InlineSpan inlineSpan = renderEditable.text!;
     final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
-    final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
+    final TextScaler effectiveTextScaler = switch (widget.textScaler, widget.textScaleFactor) {
       (final TextScaler textScaler, _) => textScaler,
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null) => MediaQuery.textScalerOf(context),
-    };
+    }
 
     final newCacheKey = _ScribbleCacheKey(
       inlineSpan: inlineSpan,
@@ -5720,11 +5720,11 @@ class EditableTextState extends State<EditableText>
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls? controls = widget.selectionControls;
-    final TextScaler effectiveTextScaler = switch ((widget.textScaler, widget.textScaleFactor)) {
+    final TextScaler effectiveTextScaler = switch (widget.textScaler, widget.textScaleFactor) {
       (final TextScaler textScaler, _) => textScaler,
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null) => MediaQuery.textScalerOf(context),
-    };
+    }
     final double? lineHeightScaleFactor = MediaQuery.maybeLineHeightScaleFactorOverrideOf(context);
     final double? letterSpacing = MediaQuery.maybeLetterSpacingOverrideOf(context);
     final double? wordSpacing = MediaQuery.maybeWordSpacingOverrideOf(context);

@@ -784,7 +784,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
     return switch (Directionality.of(context)) {
       TextDirection.rtl => -value,
       TextDirection.ltr => value,
-    };
+    }
   }
 
   @override
@@ -795,7 +795,7 @@ class _CupertinoBackGestureDetectorState<T> extends State<_CupertinoBackGestureD
     final double dragAreaWidth = switch (Directionality.of(context)) {
       TextDirection.rtl => MediaQuery.paddingOf(context).right,
       TextDirection.ltr => MediaQuery.paddingOf(context).left,
-    };
+    }
     return Stack(
       fit: StackFit.passthrough,
       children: <Widget>[
@@ -1072,7 +1072,7 @@ class _CupertinoEdgeShadowPainter extends BoxPainter {
     final (double shadowDirection, double start) = switch (textDirection!) {
       TextDirection.rtl => (1, offset.dx + configuration.size!.width),
       TextDirection.ltr => (-1, offset.dx),
-    };
+    }
 
     var bandColorIndex = 0;
     for (var dx = 0; dx < shadowWidth; dx += 1) {

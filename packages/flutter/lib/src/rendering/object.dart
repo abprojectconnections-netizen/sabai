@@ -6058,7 +6058,7 @@ class _RenderObjectSemantics extends _SemanticsFragment with DiagnosticableTreeM
       }
     }
 
-    return (mergeUp, siblingMergeGroups);
+    return mergeUp, siblingMergeGroups;
   }
 
   void _didUpdateParentData(_SemanticsParentData newParentData) {

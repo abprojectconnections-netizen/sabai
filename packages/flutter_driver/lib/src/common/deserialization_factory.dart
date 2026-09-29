@@ -39,7 +39,7 @@ mixin DeserializeFinderFactory {
       'Descendant' => Descendant.deserialize(json, this, path: path),
       'Ancestor' => Ancestor.deserialize(json, this, path: path),
       _ => throw DriverError('Unsupported search specification type $finderType'),
-    };
+    }
   }
 }
 
@@ -83,6 +83,6 @@ mixin DeserializeCommandFactory {
       'get_diagnostics_tree' => GetDiagnosticsTree.deserialize(params, finderFactory, path: path),
       'screenshot' => ScreenshotCommand.deserialize(params),
       final String? kind => throw DriverError('Unsupported command kind $kind'),
-    };
+    }
   }
 }

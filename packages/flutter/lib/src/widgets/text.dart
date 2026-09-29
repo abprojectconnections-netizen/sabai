@@ -743,12 +743,12 @@ class Text extends StatelessWidget {
       StrutStyle(height: lineHeightScaleFactor),
     );
     final SelectionRegistrar? registrar = SelectionContainer.maybeOf(context);
-    final TextScaler textScaler = switch ((this.textScaler, textScaleFactor)) {
+    final TextScaler textScaler = switch (this.textScaler, textScaleFactor) {
       (final TextScaler textScaler, _) => textScaler,
       // For unmigrated apps, fall back to textScaleFactor.
       (null, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (null, null) => MediaQuery.textScalerOf(context),
-    };
+    }
     late Widget result;
     if (registrar != null) {
       result = MouseRegion(
@@ -1134,12 +1134,12 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     final hasOppositeEdge = isEnd
         ? currentSelectionStartIndex != -1
         : currentSelectionEndIndex != -1;
-    int newIndex = switch ((isEnd, hasOppositeEdge)) {
+    int newIndex = switch (isEnd, hasOppositeEdge) {
       (true, true) => currentSelectionStartIndex,
       (true, false) => 0,
       (false, true) => currentSelectionEndIndex,
       (false, false) => 0,
-    };
+    }
     bool? forward;
     late SelectionResult currentSelectableResult;
     // This loop sends the selection event to one of the following to determine
@@ -1218,7 +1218,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
     final isOppositeEdgeWithinViewport = isEnd
         ? value.startSelectionPoint != null
         : value.endSelectionPoint != null;
-    int newIndex = switch ((isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport)) {
+    int newIndex = switch (isEnd, isCurrentEdgeWithinViewport, isOppositeEdgeWithinViewport) {
       (true, true, true) => currentSelectionEndIndex,
       (true, true, false) => currentSelectionEndIndex,
       (true, false, true) => currentSelectionStartIndex,
@@ -1227,7 +1227,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
       (false, true, false) => currentSelectionStartIndex,
       (false, false, true) => currentSelectionEndIndex,
       (false, false, false) => 0,
-    };
+    }
     bool? forward;
     late SelectionResult currentSelectableResult;
     // This loop sends the selection event to one of the following to determine
@@ -1434,7 +1434,7 @@ class _SelectableTextContainerDelegate extends StaticSelectionContainerDelegate 
   SelectedContentRange? getSelection() {
     final selections = <_SelectionInfo>[
       for (final Selectable selectable in selectables)
-        (contentLength: selectable.contentLength, range: selectable.getSelection()),
+        contentLength: selectable.contentLength, range: selectable.getSelection(),
     ];
     return _calculateLocalRange(selections);
   }

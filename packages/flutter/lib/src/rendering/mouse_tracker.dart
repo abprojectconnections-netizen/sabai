@@ -308,7 +308,7 @@ class MouseTracker extends ChangeNotifier {
     final HitTestResult result = switch (event) {
       PointerRemovedEvent() => HitTestResult(),
       _ => hitTestResult ?? _hitTestInView(event.position, event.viewId),
-    };
+    }
     final int device = event.device;
     final _MouseState? existingState = _mouseStates[device];
     if (!_shouldMarkStateDirty(existingState, event)) {

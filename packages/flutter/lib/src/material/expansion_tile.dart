@@ -640,7 +640,7 @@ class _ExpansionTileState extends State<ExpansionTile> {
             ? '${localizations.collapsedHint}\n ${localizations.expansionTileExpandedHint}'
             : '${localizations.expandedHint}\n ${localizations.expansionTileCollapsedHint}',
       _ => _tileController.isExpanded ? localizations.collapsedHint : localizations.expandedHint,
-    };
+    }
 
     final Widget child = ListTileTheme.merge(
       iconColor: _iconColor.value ?? _expansionTileTheme.iconColor,

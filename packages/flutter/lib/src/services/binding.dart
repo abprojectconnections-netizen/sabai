@@ -376,7 +376,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
         ending == AppLifecycleState.paused || ending == AppLifecycleState.inactive,
       AppLifecycleState.paused =>
         ending == AppLifecycleState.hidden || ending == AppLifecycleState.detached,
-    };
+    }
   }
 
   /// Listenable that notifies when the accessibility focus on the system have changed.
@@ -452,7 +452,7 @@ mixin ServicesBinding on BindingBase, SchedulerBinding {
       'AppLifecycleState.paused' => AppLifecycleState.paused,
       'AppLifecycleState.detached' => AppLifecycleState.detached,
       _ => null,
-    };
+    }
   }
 
   /// Handles any requests for application exit that may be received on the

@@ -846,7 +846,7 @@ class _ContextMenuRoute<T> extends PopupRoute<T> {
       _ContextMenuLocation.center => AlignmentDirectional.topCenter,
       _ContextMenuLocation.right => AlignmentDirectional.topEnd,
       _ContextMenuLocation.left => AlignmentDirectional.topStart,
-    };
+    }
   }
 
   // The place to start the sheetRect animation from.
@@ -1467,7 +1467,7 @@ class _ContextMenuAlignedChildrenDelegate extends MultiChildLayoutDelegate {
     final double availableWidthForChild = switch (orientation) {
       Orientation.portrait => availableWidth,
       Orientation.landscape => availableWidth - _ContextMenuSheetState._kMenuWidth,
-    };
+    }
     assert(availableWidthForChild >= 0.0);
     assert(availableHeightForChild >= 0.0);
 
@@ -1482,7 +1482,7 @@ class _ContextMenuAlignedChildrenDelegate extends MultiChildLayoutDelegate {
       Orientation.portrait =>
         availableHeightForChild - (childSize.height + _ContextMenuRouteStaticState._kPadding),
       Orientation.landscape => availableHeightForChild,
-    };
+    }
 
     final Size menuSize = layoutChild(
       _ContextMenuChild.menuSheet,
@@ -1507,7 +1507,7 @@ class _ContextMenuAlignedChildrenDelegate extends MultiChildLayoutDelegate {
           _ContextMenuLocation.center => childSize.width / 2 - menuSize.width / 2,
           _ContextMenuLocation.left => 0.0,
           _ContextMenuLocation.right => childSize.width - menuSize.width,
-        };
+        } {}
         secondChildOffset = Offset(
           secondChildDx,
           childSize.height + _ContextMenuRouteStaticState._kPadding,

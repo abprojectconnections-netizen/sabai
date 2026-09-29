@@ -1215,7 +1215,7 @@ void main() {
       return switch (axis) {
         Axis.horizontal => renderBox.size.width,
         Axis.vertical => renderBox.size.height,
-      };
+      }
     }
 
     group('animated: $animated, scrollDirection: $axis', () {

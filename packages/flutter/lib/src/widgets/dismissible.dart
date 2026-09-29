@@ -349,7 +349,7 @@ class _DismissibleState extends State<Dismissible>
         TextDirection.rtl when extent < 0 => DismissDirection.startToEnd,
         TextDirection.ltr when extent > 0 => DismissDirection.startToEnd,
         TextDirection.rtl || TextDirection.ltr => DismissDirection.endToStart,
-      };
+      }
     }
     return extent > 0 ? DismissDirection.down : DismissDirection.up;
   }

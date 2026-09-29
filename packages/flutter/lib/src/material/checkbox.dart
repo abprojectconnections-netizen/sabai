@@ -522,7 +522,7 @@ class _CheckboxState extends State<Checkbox> with TickerProviderStateMixin, Togg
         kMinInteractiveDimension - 8.0,
         kMinInteractiveDimension - 8.0,
       ),
-    };
+    }
     size += effectiveVisualDensity.baseSizeAdjustment;
 
     final WidgetStateProperty<MouseCursor> effectiveMouseCursor =
@@ -791,7 +791,7 @@ class _CheckboxPainter extends ToggleablePainter {
     final double tNormalized = switch (position.status) {
       AnimationStatus.forward || AnimationStatus.completed => position.value,
       AnimationStatus.reverse || AnimationStatus.dismissed => 1.0 - position.value,
-    };
+    }
 
     // Four cases: false to null, false to true, null to false, true to false
     if (previousValue == false || value == false) {

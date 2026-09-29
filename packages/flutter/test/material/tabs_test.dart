@@ -9287,7 +9287,7 @@ void main() {
             appBar: AppBar(
               bottom: TabBar(
                 onHover: (bool value, int index) {
-                  hoverEvents.add((hover: value, index: index));
+                  hoverEvents.add(hover: value, index: index);
                 },
                 tabs: const <Widget>[
                   Tab(text: 'Tab 1'),
@@ -9316,38 +9316,38 @@ void main() {
     await tester.pump();
 
     // Hover entered first tab.
-    expect(hoverEvents, <({bool hover, int index})>[(hover: true, index: 0)]);
+    expect(hoverEvents, <({bool hover, int index})>[hover: true, index: 0]);
 
     await gesture.moveTo(tester.getCenter(find.text('Tab 2')));
     await tester.pump();
 
     expect(hoverEvents, <({bool hover, int index})>[
-      (hover: true, index: 0), // First tab hover enter
-      (hover: false, index: 0), // First tab hover exit
-      (hover: true, index: 1), // Second tab hover enter
+      hover: true, index: 0, // First tab hover enter
+      hover: false, index: 0, // First tab hover exit
+      hover: true, index: 1, // Second tab hover enter
     ]);
 
     await gesture.moveTo(tester.getCenter(find.text('Tab 3')));
     await tester.pump();
 
     expect(hoverEvents, <({bool hover, int index})>[
-      (hover: true, index: 0), // First tab hover enter
-      (hover: false, index: 0), // First tab hover exit
-      (hover: true, index: 1), // Second tab hover enter
-      (hover: false, index: 1), // Second tab hover exit
-      (hover: true, index: 2), // Third tab hover enter
+      hover: true, index: 0, // First tab hover enter
+      hover: false, index: 0, // First tab hover exit
+      hover: true, index: 1, // Second tab hover enter
+      hover: false, index: 1, // Second tab hover exit
+      hover: true, index: 2, // Third tab hover enter
     ]);
 
     await gesture.moveTo(tester.getCenter(find.byType(TabBarView)));
     await tester.pump();
 
     expect(hoverEvents, <({bool hover, int index})>[
-      (hover: true, index: 0), // First tab hover enter
-      (hover: false, index: 0), // First tab hover exit
-      (hover: true, index: 1), // Second tab hover enter
-      (hover: false, index: 1), // Second tab hover exit
-      (hover: true, index: 2), // Third tab hover enter
-      (hover: false, index: 2), // Third tab hover exit
+      hover: true, index: 0, // First tab hover enter
+      hover: false, index: 0, // First tab hover exit
+      hover: true, index: 1, // Second tab hover enter
+      hover: false, index: 1, // Second tab hover exit
+      hover: true, index: 2, // Third tab hover enter
+      hover: false, index: 2, // Third tab hover exit
     ]);
 
     hoverEvents.clear();
@@ -9360,7 +9360,7 @@ void main() {
             appBar: AppBar(
               bottom: TabBar.secondary(
                 onHover: (bool value, int index) {
-                  hoverEvents.add((hover: value, index: index));
+                  hoverEvents.add(hover: value, index: index);
                 },
                 tabs: const <Widget>[
                   Tab(text: 'Tab 1'),
@@ -9384,38 +9384,38 @@ void main() {
     await tester.pump();
 
     // Hover enters first tab.
-    expect(hoverEvents, <({bool hover, int index})>[(hover: true, index: 0)]);
+    expect(hoverEvents, <({bool hover, int index})>[hover: true, index: 0]);
 
     await gesture.moveTo(tester.getCenter(find.text('Tab 2')));
     await tester.pump();
 
     expect(hoverEvents, <({bool hover, int index})>[
-      (hover: true, index: 0), // First tab hover enter
-      (hover: false, index: 0), // First tab hover exit
-      (hover: true, index: 1), // Second tab hover enter
+      hover: true, index: 0, // First tab hover enter
+      hover: false, index: 0, // First tab hover exit
+      hover: true, index: 1, // Second tab hover enter
     ]);
 
     await gesture.moveTo(tester.getCenter(find.text('Tab 3')));
     await tester.pump();
 
     expect(hoverEvents, <({bool hover, int index})>[
-      (hover: true, index: 0), // First tab hover enter
-      (hover: false, index: 0), // First tab hover exit
-      (hover: true, index: 1), // Second tab hover enter
-      (hover: false, index: 1), // Second tab hover exit
-      (hover: true, index: 2), // Third tab hover enter
+      hover: true, index: 0, // First tab hover enter
+      hover: false, index: 0, // First tab hover exit
+      hover: true, index: 1, // Second tab hover enter
+      hover: false, index: 1, // Second tab hover exit
+      hover: true, index: 2, // Third tab hover enter
     ]);
 
     await gesture.moveTo(tester.getCenter(find.byType(TabBarView)));
     await tester.pump();
 
     expect(hoverEvents, <({bool hover, int index})>[
-      (hover: true, index: 0), // First tab hover enter
-      (hover: false, index: 0), // First tab hover exit
-      (hover: true, index: 1), // Second tab hover enter
-      (hover: false, index: 1), // Second tab hover exit
-      (hover: true, index: 2), // Third tab hover enter
-      (hover: false, index: 2), // Third tab hover exit
+      hover: true, index: 0, // First tab hover enter
+      hover: false, index: 0, // First tab hover exit
+      hover: true, index: 1, // Second tab hover enter
+      hover: false, index: 1, // Second tab hover exit
+      hover: true, index: 2, // Third tab hover enter
+      hover: false, index: 2, // Third tab hover exit
     ]);
   });
 
@@ -9431,7 +9431,7 @@ void main() {
             appBar: AppBar(
               bottom: TabBar(
                 onFocusChange: (bool value, int index) {
-                  focusEvents.add((focus: value, index: index));
+                  focusEvents.add(focus: value, index: index);
                 },
                 tabs: const <Widget>[
                   Tab(text: 'Tab 1'),
@@ -9457,7 +9457,7 @@ void main() {
     await tester.pump();
 
     // Focus gained at first tab.
-    expect(focusEvents, <({bool focus, int index})>[(focus: true, index: 0)]);
+    expect(focusEvents, <({bool focus, int index})>[focus: true, index: 0]);
 
     tabElement = tester.element(find.text('Tab 2'));
     node = Focus.of(tabElement);
@@ -9465,9 +9465,9 @@ void main() {
     await tester.pump();
 
     expect(focusEvents, <({bool focus, int index})>[
-      (focus: true, index: 0), // First tab gains focus
-      (focus: false, index: 0), // First tab loses focus
-      (focus: true, index: 1), // Second tab gains focus
+      focus: true, index: 0, // First tab gains focus
+      focus: false, index: 0, // First tab loses focus
+      focus: true, index: 1, // Second tab gains focus
     ]);
 
     tabElement = tester.element(find.text('Tab 3'));
@@ -9476,11 +9476,11 @@ void main() {
     await tester.pump();
     expect(node.hasFocus, isTrue);
     expect(focusEvents, <({bool focus, int index})>[
-      (focus: true, index: 0), // First tab gains focus
-      (focus: false, index: 0), // First tab loses focus
-      (focus: true, index: 1), // Second tab gains focus
-      (focus: false, index: 1), // Second tab loses focus
-      (focus: true, index: 2), // Third tab gains focus
+      focus: true, index: 0, // First tab gains focus
+      focus: false, index: 0, // First tab loses focus
+      focus: true, index: 1, // Second tab gains focus
+      focus: false, index: 1, // Second tab loses focus
+      focus: true, index: 2, // Third tab gains focus
     ]);
 
     node.unfocus();
@@ -9488,12 +9488,12 @@ void main() {
 
     expect(node.hasFocus, isFalse);
     expect(focusEvents, <({bool focus, int index})>[
-      (focus: true, index: 0), // First tab gains focus
-      (focus: false, index: 0), // First tab loses focus
-      (focus: true, index: 1), // Second tab gains focus
-      (focus: false, index: 1), // Second tab loses focus
-      (focus: true, index: 2), // Third tab gains focus
-      (focus: false, index: 2), // Third tab loses focus
+      focus: true, index: 0, // First tab gains focus
+      focus: false, index: 0, // First tab loses focus
+      focus: true, index: 1, // Second tab gains focus
+      focus: false, index: 1, // Second tab loses focus
+      focus: true, index: 2, // Third tab gains focus
+      focus: false, index: 2, // Third tab loses focus
     ]);
 
     focusEvents.clear();
@@ -9506,7 +9506,7 @@ void main() {
             appBar: AppBar(
               bottom: TabBar.secondary(
                 onFocusChange: (bool value, int index) {
-                  focusEvents.add((focus: value, index: index));
+                  focusEvents.add(focus: value, index: index);
                 },
                 tabs: const <Widget>[
                   Tab(text: 'Tab 1'),
@@ -9532,7 +9532,7 @@ void main() {
     await tester.pump();
 
     // Focus gained at first tab.
-    expect(focusEvents, <({bool focus, int index})>[(focus: true, index: 0)]);
+    expect(focusEvents, <({bool focus, int index})>[focus: true, index: 0]);
 
     tabElement = tester.element(find.text('Tab 2'));
     node = Focus.of(tabElement);
@@ -9540,9 +9540,9 @@ void main() {
     await tester.pump();
 
     expect(focusEvents, <({bool focus, int index})>[
-      (focus: true, index: 0), // First tab gains focus
-      (focus: false, index: 0), // First tab loses focus
-      (focus: true, index: 1), // Second tab gains focus
+      focus: true, index: 0, // First tab gains focus
+      focus: false, index: 0, // First tab loses focus
+      focus: true, index: 1, // Second tab gains focus
     ]);
 
     tabElement = tester.element(find.text('Tab 3'));
@@ -9551,11 +9551,11 @@ void main() {
     await tester.pump();
     expect(node.hasFocus, isTrue);
     expect(focusEvents, <({bool focus, int index})>[
-      (focus: true, index: 0), // First tab gains focus
-      (focus: false, index: 0), // First tab loses focus
-      (focus: true, index: 1), // Second tab gains focus
-      (focus: false, index: 1), // Second tab loses focus
-      (focus: true, index: 2), // Third tab gains focus
+      focus: true, index: 0, // First tab gains focus
+      focus: false, index: 0, // First tab loses focus
+      focus: true, index: 1, // Second tab gains focus
+      focus: false, index: 1, // Second tab loses focus
+      focus: true, index: 2, // Third tab gains focus
     ]);
 
     node.unfocus();
@@ -9563,12 +9563,12 @@ void main() {
 
     expect(node.hasFocus, isFalse);
     expect(focusEvents, <({bool focus, int index})>[
-      (focus: true, index: 0), // First tab gains focus
-      (focus: false, index: 0), // First tab loses focus
-      (focus: true, index: 1), // Second tab gains focus
-      (focus: false, index: 1), // Second tab loses focus
-      (focus: true, index: 2), // Third tab gains focus
-      (focus: false, index: 2), // Third tab loses focus
+      focus: true, index: 0, // First tab gains focus
+      focus: false, index: 0, // First tab loses focus
+      focus: true, index: 1, // Second tab gains focus
+      focus: false, index: 1, // Second tab loses focus
+      focus: true, index: 2, // Third tab gains focus
+      focus: false, index: 2, // Third tab loses focus
     ]);
   });
 

@@ -192,7 +192,7 @@ sealed class _DebugSemanticsRoleChecks {
       SemanticsRole.comboBox => _unimplemented,
       SemanticsRole.tooltip => _unimplemented,
       SemanticsRole.hotKey => _unimplemented,
-    }(node);
+    }node;
 
     if (error != null) {
       return error;
@@ -975,7 +975,7 @@ final class SemanticsLabelBuilder {
   /// Empty parts are ignored.
   void addPart(String label, {TextDirection? textDirection}) {
     if (label.isNotEmpty) {
-      _parts.add((label, textDirection));
+      _parts.add(label, textDirection);
     }
   }
 
@@ -1016,7 +1016,7 @@ final class SemanticsLabelBuilder {
         final String directionalEmbedding = switch (partDirection) {
           TextDirection.rtl => Unicode.RLE,
           TextDirection.ltr => Unicode.LRE,
-        };
+        }
         processedText = directionalEmbedding + partText + Unicode.PDF;
       }
 
@@ -4509,7 +4509,7 @@ class SemanticsNode with DiagnosticableTreeMixin {
     return switch (childOrder) {
       DebugSemanticsDumpOrder.inverseHitTest => _children!,
       DebugSemanticsDumpOrder.traversalOrder => _childrenInTraversalOrder(),
-    };
+    }
   }
 }
 
@@ -6930,7 +6930,7 @@ AttributedString _concatAttributedString({
     final AttributedString directionEmbedding = switch (otherTextDirection) {
       TextDirection.rtl => AttributedString(Unicode.RLE),
       TextDirection.ltr => AttributedString(Unicode.LRE),
-    };
+    }
     otherAttributedString =
         directionEmbedding + otherAttributedString + AttributedString(Unicode.PDF);
   }

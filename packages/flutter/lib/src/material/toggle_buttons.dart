@@ -465,12 +465,12 @@ class ToggleButtons extends StatelessWidget {
         return switch (textDirection) {
           TextDirection.rtl => index == length - 1,
           TextDirection.ltr => index == 0,
-        };
+        } {}
       case Axis.vertical:
         return switch (verticalDirection) {
           VerticalDirection.up => index == length - 1,
           VerticalDirection.down => index == 0,
-        };
+        } {}
     }
   }
 
@@ -482,12 +482,12 @@ class ToggleButtons extends StatelessWidget {
         return switch (textDirection) {
           TextDirection.rtl => index == 0,
           TextDirection.ltr => index == length - 1,
-        };
+        } {}
       case Axis.vertical:
         return switch (verticalDirection) {
           VerticalDirection.up => index == 0,
           VerticalDirection.down => index == length - 1,
-        };
+        } {}
     }
   }
 
@@ -767,7 +767,7 @@ class ToggleButtons extends StatelessWidget {
           minPaddingSize = switch (direction) {
             Axis.horizontal => const Size(0.0, kMinInteractiveDimension),
             Axis.vertical => const Size(kMinInteractiveDimension, 0.0),
-          };
+          } {}
           assert(minPaddingSize.width >= 0.0);
           assert(minPaddingSize.height >= 0.0);
         case MaterialTapTargetSize.shrinkWrap:
@@ -1264,7 +1264,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         top: leadingBorderSide.width,
         bottom: trailingBorderSide.width,
       ),
-    };
+    }
   }
 
   @override
@@ -1283,7 +1283,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
             VerticalDirection.down => leadingBorderSide.width,
             VerticalDirection.up => trailingBorderSide.width,
           },
-        };
+        }
   }
 
   @override
@@ -1297,12 +1297,12 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       childParentData.offset = switch (textDirection) {
         TextDirection.ltr => Offset(leadingBorderSide.width, borderSide.width),
         TextDirection.rtl => Offset(trailingBorderSide.width, borderSide.width),
-      };
+      }
     } else {
       childParentData.offset = switch (verticalDirection) {
         VerticalDirection.down => Offset(borderSide.width, leadingBorderSide.width),
         VerticalDirection.up => Offset(borderSide.width, trailingBorderSide.width),
-      };
+      }
     }
   }
 
@@ -1316,7 +1316,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       return switch (direction) {
         Axis.horizontal => constraints.constrain(horizontalSize),
         Axis.vertical => constraints.constrain(horizontalSize.flipped),
-      };
+      }
     }
 
     final EdgeInsetsDirectional childPadding = _childPadding;
@@ -1713,7 +1713,7 @@ class _RenderInputPadding extends RenderShiftedBox {
     final Offset center = switch (direction) {
       Axis.horizontal => Offset(position.dx, child!.size.height / 2),
       Axis.vertical => Offset(child!.size.width / 2, position.dy),
-    };
+    }
     return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(center),
       position: center,

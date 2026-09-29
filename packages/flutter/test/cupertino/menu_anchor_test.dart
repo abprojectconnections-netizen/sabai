@@ -2302,7 +2302,7 @@ void main() {
             < -0.2 => -1.0,
             > 0.2 => 1.0,
             _ => 0.0,
-          };
+          }
 
           final y = vertical < 0.2 ? 1.0 : -1.0;
           final alignment = Alignment(x, y);
@@ -2364,7 +2364,7 @@ void main() {
             < -0.2 => -1.0,
             > 0.2 => 1.0,
             _ => 0.0,
-          };
+          }
 
           final y = vertical < 0.2 ? 1.0 : -1.0;
           final alignment = Alignment(x, y);
@@ -2424,7 +2424,7 @@ void main() {
             < -0.2 => -1.0,
             > 0.2 => 1.0,
             _ => 0.0,
-          };
+          }
 
           final y = vertical < 0.2 ? 1.0 : -1.0;
           final ui.Offset position = Alignment(x, y).alongSize(size);
@@ -2483,7 +2483,7 @@ void main() {
             < -0.2 => -1.0,
             > 0.2 => 1.0,
             _ => 0.0,
-          };
+          }
 
           final y = vertical < 0.2 ? 1.0 : -1.0;
           final ui.Offset position = Alignment(x, y).alongSize(size);
@@ -5945,7 +5945,7 @@ void main() {
               CupertinoMenuItem(
                 onPressed: () {},
                 onHover: (bool value) {
-                  hovered.add((Tag.a, value));
+                  hovered.add(Tag.a, value);
                 },
                 child: Text(Tag.a.text),
               ),
@@ -5953,7 +5953,7 @@ void main() {
               // Disabled item -- should not request focus
               CupertinoMenuItem(
                 onHover: (bool value) {
-                  hovered.add((Tag.b, value));
+                  hovered.add(Tag.b, value);
                 },
                 child: Text(Tag.b.text, key: Tag.b.key),
               ),
@@ -5961,7 +5961,7 @@ void main() {
               CupertinoMenuItem(
                 onPressed: () {},
                 onHover: (bool value) {
-                  hovered.add((Tag.c, value));
+                  hovered.add(Tag.c, value);
                 },
                 child: Text(Tag.c.text),
               ),
@@ -5994,11 +5994,11 @@ void main() {
       await tester.pump();
 
       expect(hovered, <(Tag, bool)>[
-        (Tag.a, true),
-        (Tag.a, false),
-        (Tag.c, true),
-        (Tag.c, false),
-        (Tag.a, true),
+        Tag.a, true,
+        Tag.a, false,
+        Tag.c, true,
+        Tag.c, false,
+        Tag.a, true,
       ]);
     });
 
@@ -6098,7 +6098,7 @@ void main() {
             menuChildren: <Widget>[
               CupertinoMenuItem(
                 onFocusChange: (bool value) {
-                  focusChanges.add((Tag.a, value));
+                  focusChanges.add(Tag.a, value);
                 },
                 onPressed: () {},
                 child: Text(Tag.a.text),
@@ -6107,14 +6107,14 @@ void main() {
               // Disabled item -- should not request focus
               CupertinoMenuItem(
                 onFocusChange: (bool value) {
-                  focusChanges.add((Tag.b, value));
+                  focusChanges.add(Tag.b, value);
                 },
                 child: Text(Tag.b.text, key: Tag.b.key),
               ),
 
               CupertinoMenuItem(
                 onFocusChange: (bool value) {
-                  focusChanges.add((Tag.c, value));
+                  focusChanges.add(Tag.c, value);
                 },
                 onPressed: () {},
                 child: Text(Tag.c.text),
@@ -6124,7 +6124,7 @@ void main() {
               CupertinoMenuItem(
                 requestFocusOnHover: false,
                 onFocusChange: (bool value) {
-                  focusChanges.add((Tag.d, value));
+                  focusChanges.add(Tag.d, value);
                 },
                 onPressed: () {},
                 child: Text(Tag.d.text),
@@ -6161,11 +6161,11 @@ void main() {
       await tester.pump();
 
       expect(focusChanges, <(Tag, bool)>[
-        (Tag.a, true),
-        (Tag.a, false),
-        (Tag.c, true),
-        (Tag.c, false),
-        (Tag.a, true),
+        Tag.a, true,
+        Tag.a, false,
+        Tag.c, true,
+        Tag.c, false,
+        Tag.a, true,
       ]);
     });
 
@@ -6853,7 +6853,7 @@ enum DynamicTypeStyle {
       == 30 => ax4,
       == 36 => ax5,
       _ => ax5,
-    };
+    }
   }
 }
 

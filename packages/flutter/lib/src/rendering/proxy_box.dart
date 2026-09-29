@@ -2186,7 +2186,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
     return switch (_shape) {
       BoxShape.rectangle => (borderRadius ?? BorderRadius.zero).toRRect(rect),
       BoxShape.circle => RRect.fromRectXY(rect, rect.width / 2, rect.height / 2),
-    };
+    }
   }
 
   @override
@@ -3275,7 +3275,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       PointerPanZoomEndEvent() => onPointerPanZoomEnd?.call(event),
       PointerSignalEvent() => onPointerSignal?.call(event),
       _ => null,
-    };
+    }
   }
 
   @override
@@ -3700,7 +3700,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
           _ when debugAsymmetricPaintCount > 0 =>
             'this repaint boundary is not very effective and should probably be removed',
           _ => 'this repaint boundary is astoundingly ineffectual and should be removed',
-        };
+        }
 
         properties.add(
           PercentProperty(

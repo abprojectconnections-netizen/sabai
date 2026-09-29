@@ -556,7 +556,7 @@ class _SearchAnchorState extends State<SearchAnchor> {
         switch (Theme.of(context).platform) {
           TargetPlatform.iOS || TargetPlatform.android || TargetPlatform.fuchsia => true,
           TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => false,
-        };
+        }
   }
 
   double _getOpacity() {
@@ -1734,11 +1734,11 @@ class _SearchBarState extends State<SearchBar> {
     final Color defaultColor = switch (colorScheme.brightness) {
       Brightness.light => kDefaultIconDarkColor,
       Brightness.dark => kDefaultIconLightColor,
-    };
+    }
     final IconThemeData? customTheme = switch (IconTheme.of(context)) {
       final IconThemeData iconTheme when iconTheme.color != defaultColor => iconTheme,
       _ => null,
-    };
+    }
 
     Widget? leading;
     if (widget.leading != null) {

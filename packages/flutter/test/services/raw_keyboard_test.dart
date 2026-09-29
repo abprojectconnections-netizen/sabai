@@ -2511,7 +2511,7 @@ void main() {
         GLFWKeyHelper.modifierNumericPad => 282,
         GLFWKeyHelper.modifierCapsLock => 280,
         _ => 65, // keyA
-      };
+      }
     }
 
     test('modifier keys are recognized individually', () {
@@ -2748,7 +2748,7 @@ void main() {
         GtkKeyHelper.modifierMod2 => 65407,
         GtkKeyHelper.modifierCapsLock => 65509,
         _ => 65, // keyA
-      };
+      }
     }
 
     test('modifier keys are recognized individually', () {

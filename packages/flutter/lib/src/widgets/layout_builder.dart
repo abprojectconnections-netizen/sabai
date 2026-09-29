@@ -135,7 +135,7 @@ class _LayoutBuilderElement<LayoutInfoType> extends RenderObjectElement {
       SchedulerPhase.transientCallbacks ||
       SchedulerPhase.midFrameMicrotasks ||
       SchedulerPhase.persistentCallbacks => false,
-    };
+    }
     if (!deferMarkNeedsLayout) {
       renderObject.scheduleLayoutCallback();
       return;

@@ -2440,7 +2440,7 @@ final class SystemTextScaler extends TextScaler {
       // equivalent.
       TextScaler.noScaling => textScaleFactor == 1.0,
       _ => false,
-    };
+    }
   }
 
   @override

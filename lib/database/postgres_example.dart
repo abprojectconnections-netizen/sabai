@@ -15,12 +15,12 @@ Future<void> runPostgresExample() async {
 
   await service.open();
   try {
-    final result = await service.mappedQuery(
+    final List<Map<String, Map<String, dynamic>>> result = await service.mappedQuery(
       'SELECT id, name, description FROM destinations LIMIT 10',
     );
 
     for (final row in result) {
-      final data = row.values.first;
+      final Map<String, dynamic> data = row.values.first;
       print('Destination: ${data['name']} - ${data['description']}');
     }
   } finally {

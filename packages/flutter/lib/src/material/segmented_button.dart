@@ -319,7 +319,7 @@ class SegmentedButton<T> extends StatefulWidget {
               selectedForegroundColor,
               overlayColor,
             ),
-          };
+          }
     return TextButton.styleFrom(
       textStyle: textStyle,
       shadowColor: shadowColor,
@@ -681,7 +681,7 @@ class SegmentedButtonState<T> extends State<SegmentedButton<T>> {
         0,
         kMinInteractiveDimension + densityAdjustment.dy - effectedButtonHeight,
       ),
-    };
+    }
 
     return Material(
       type: MaterialType.transparency,

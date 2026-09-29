@@ -2775,11 +2775,11 @@ class SizedBox extends SingleChildRenderObjectWidget {
 
   @override
   String toStringShort() {
-    final String type = switch ((width, height)) {
+    final String type = switch (width, height) {
       (double.infinity, double.infinity) => '${objectRuntimeType(this, 'SizedBox')}.expand',
       (0.0, 0.0) => '${objectRuntimeType(this, 'SizedBox')}.shrink',
       _ => objectRuntimeType(this, 'SizedBox'),
-    };
+    }
     return key == null ? type : '$type-$key';
   }
 
@@ -3165,7 +3165,7 @@ class UnconstrainedBox extends StatelessWidget {
       Axis.horizontal => ConstraintsTransformBox.heightUnconstrained,
       Axis.vertical => ConstraintsTransformBox.widthUnconstrained,
       null => ConstraintsTransformBox.unconstrained,
-    };
+    }
   }
 
   @override
@@ -5087,9 +5087,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   factory Positioned.directional({
     Key? key,
     required TextDirection textDirection,
-    double? start,
     double? top,
-    double? end,
     double? bottom,
     double? width,
     double? height,
@@ -5098,7 +5096,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
     final (double? left, double? right) = switch (textDirection) {
       TextDirection.rtl => (end, start),
       TextDirection.ltr => (start, end),
-    };
+    }
     return Positioned(
       key: key,
       left: left,
@@ -6640,11 +6638,11 @@ class RichText extends MultiChildRenderObjectWidget {
        );
 
   static TextScaler _effectiveTextScalerFrom(TextScaler textScaler, double textScaleFactor) {
-    return switch ((textScaler, textScaleFactor)) {
+    return switch (textScaler, textScaleFactor) {
       (final TextScaler scaler, 1.0) => scaler,
       (TextScaler.noScaling, final double textScaleFactor) => TextScaler.linear(textScaleFactor),
       (final TextScaler scaler, _) => scaler,
-    };
+    }
   }
 
   /// The text to display in this widget.

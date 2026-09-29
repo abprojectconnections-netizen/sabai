@@ -891,7 +891,7 @@ class _SnippetChecker {
       );
     }
 
-    final List<_Line> headers = switch ((importPreviousExample, customImports.length)) {
+    final List<_Line> headers = switch (importPreviousExample, customImports.length) {
       (true, _) => <_Line>[],
       (false, 0) => headersWithImports,
       (false, _) => <_Line>[
@@ -899,7 +899,7 @@ class _SnippetChecker {
         const _Line.generated(code: '// ignore_for_file: unused_import'),
         ...customImports,
       ],
-    };
+    }
     if (hasStatefulWidgetComment) {
       return _SnippetFile.fromStrings(
         startingLine,

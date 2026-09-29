@@ -117,7 +117,7 @@ void main() {
               },
             ),
             _ => throw Exception('Invalid route.'),
-          };
+          }
         },
       ),
     );
@@ -215,7 +215,7 @@ void main() {
               },
             ),
             _ => throw Exception('Invalid route.'),
-          };
+          }
         },
       ),
     );

@@ -446,7 +446,7 @@ class _CupertinoCheckboxState extends State<CupertinoCheckbox>
           TargetPlatform.macOS ||
           TargetPlatform.linux ||
           TargetPlatform.windows => const Size.square(CupertinoCheckbox.width),
-        };
+        }
 
     return Semantics(
       label: widget.semanticLabel,

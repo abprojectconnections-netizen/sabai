@@ -660,7 +660,7 @@ class _AndroidMotionEventConverter {
       PointerMoveEvent() => AndroidViewController.kActionMove,
       PointerCancelEvent() => AndroidViewController.kActionCancel,
       _ => null,
-    };
+    }
     if (action == null) {
       return null;
     }
@@ -694,7 +694,7 @@ class _AndroidMotionEventConverter {
       PointerDeviceKind.stylus => AndroidViewController.kInputDeviceSourceStylus,
       PointerDeviceKind.invertedStylus => AndroidViewController.kInputDeviceSourceStylus,
       PointerDeviceKind.unknown => AndroidViewController.kInputDeviceSourceUnknown,
-    };
+    }
   }
 
   AndroidPointerProperties propertiesFor(PointerEvent event, int pointerId) {
@@ -809,7 +809,7 @@ abstract class AndroidViewController extends PlatformViewController {
     return switch (direction) {
       TextDirection.ltr => kAndroidLayoutDirectionLtr,
       TextDirection.rtl => kAndroidLayoutDirectionRtl,
-    };
+    }
   }
 
   /// Creates a masked Android MotionEvent action value for an indexed pointer.

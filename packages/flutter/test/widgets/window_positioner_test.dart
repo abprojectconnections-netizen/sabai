@@ -227,7 +227,7 @@ void main() {
           WindowPositionerAnchor.bottomLeft => rect.bottomLeft,
           WindowPositionerAnchor.topRight => rect.topRight,
           WindowPositionerAnchor.bottomRight => rect.bottomRight,
-        };
+        }
       }
 
       for (final WindowPositionerAnchor parentAnchor in WindowPositionerAnchor.values) {

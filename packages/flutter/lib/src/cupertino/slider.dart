@@ -496,7 +496,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     final double visualPosition = switch (textDirection) {
       TextDirection.rtl => 1.0 - _value,
       TextDirection.ltr => _value,
-    };
+    }
     return lerpDouble(
       _trackLeft + CupertinoThumbPainter.radius,
       _trackRight - CupertinoThumbPainter.radius,
@@ -522,7 +522,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     _currentDragValue += switch (textDirection) {
       TextDirection.rtl => -valueDelta,
       TextDirection.ltr => valueDelta,
-    };
+    }
 
     // Default to false if no source timestamp is available.
     var isFast = false;
@@ -573,7 +573,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox implements MouseTracke
     final (double visualPosition, Color leftColor, Color rightColor) = switch (textDirection) {
       TextDirection.rtl => (1.0 - _position.value, _activeColor, trackColor),
       TextDirection.ltr => (_position.value, trackColor, _activeColor),
-    };
+    }
 
     final double trackCenter = offset.dy + size.height / 2.0;
     final double trackLeft = offset.dx + _trackLeft;

@@ -65,7 +65,7 @@ List<double> _deepRed = <double>[1.0931, -0.2268, -0.1501];
       closestColor = <double>[red, green, blue];
     }
   }
-  return (foundColor, closestColor);
+  return foundColor, closestColor;
 }
 
 (bool, List<double>) _findColor(List<dynamic> result, List<double> color, {double? epsilon}) {

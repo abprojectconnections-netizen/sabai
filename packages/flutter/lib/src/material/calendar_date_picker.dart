@@ -277,7 +277,7 @@ class _CalendarDatePickerState extends State<CalendarDatePicker> {
         final String message = switch (mode) {
           DatePickerMode.day => widget.calendarDelegate.formatMonthYear(selected, _localizations),
           DatePickerMode.year => widget.calendarDelegate.formatYear(selected.year, _localizations),
-        };
+        }
         _announce(message);
       }
     });

@@ -327,11 +327,11 @@ class _TabStyle extends AnimatedWidget {
     final Color defaultIconColor = switch (theme.colorScheme.brightness) {
       Brightness.light => kDefaultIconDarkColor,
       Brightness.dark => kDefaultIconLightColor,
-    };
+    }
     final IconThemeData? customIconTheme = switch (IconTheme.of(context)) {
       final IconThemeData iconTheme when iconTheme.color != defaultIconColor => iconTheme,
       _ => null,
-    };
+    }
     final Color iconColor = _resolveWithLabelColor(
       context,
       iconTheme: customIconTheme,
@@ -599,10 +599,10 @@ class _IndicatorPainter extends CustomPainter {
     assert(tabIndex >= 0);
     assert(tabIndex <= maxTabIndex);
     double tabLeft, tabRight;
-    (tabLeft, tabRight) = switch (_currentTextDirection!) {
+    tabLeft, tabRight = switch (_currentTextDirection!) {
       TextDirection.rtl => (_currentTabOffsets![tabIndex + 1], _currentTabOffsets![tabIndex]),
       TextDirection.ltr => (_currentTabOffsets![tabIndex], _currentTabOffsets![tabIndex + 1]),
-    };
+    }
 
     if (indicatorSize == TabBarIndicatorSize.label) {
       final double tabWidth = tabKeys[tabIndex].currentContext!.size!.width;
@@ -635,7 +635,7 @@ class _IndicatorPainter extends CustomPainter {
     _currentRect = switch (indicatorAnimation) {
       TabIndicatorAnimation.linear => _applyLinearEffect(size: size, value: value),
       TabIndicatorAnimation.elastic => _applyElasticEffect(size: size, value: value),
-    };
+    }
 
     assert(_currentRect != null);
 
@@ -726,7 +726,7 @@ class _IndicatorPainter extends CustomPainter {
     final bool isMovingRight = switch (textDirection) {
       TextDirection.ltr => controller.indexIsChanging ? index > value : value > index,
       TextDirection.rtl => controller.indexIsChanging ? value > index : index > value,
-    };
+    }
     if (isMovingRight) {
       leftFraction = accelerateInterpolation(tabChangeProgress);
       rightFraction = decelerateInterpolation(tabChangeProgress);
@@ -748,11 +748,11 @@ class _IndicatorPainter extends CustomPainter {
       lerpRectLeft = switch (isMovingRight) {
         true => lerpDouble(fromRect.left, toRect.left, leftFraction)!,
         false => lerpDouble(toRect.left, fromRect.left, leftFraction)!,
-      };
+      }
       lerpRectRight = switch (isMovingRight) {
         true => lerpDouble(fromRect.right, toRect.right, rightFraction)!,
         false => lerpDouble(toRect.right, fromRect.right, rightFraction)!,
-      };
+      }
     }
 
     return Rect.fromLTRB(lerpRectLeft, rect.top, lerpRectRight, rect.bottom);
@@ -1623,7 +1623,7 @@ class _TabBarState extends State<TabBar> {
     final bool primaryWithLabelIndicator = switch (indicatorSize) {
       TabBarIndicatorSize.label => widget._isPrimary,
       TabBarIndicatorSize.tab => false,
-    };
+    }
     final BorderRadius? effectiveBorderRadius = theme.useMaterial3 && primaryWithLabelIndicator
         ? BorderRadius.only(
             topLeft: Radius.circular(effectiveIndicatorWeight),
@@ -1703,7 +1703,7 @@ class _TabBarState extends State<TabBar> {
     final TabIndicatorAnimation defaultTabIndicatorAnimation = switch (indicatorSize) {
       TabBarIndicatorSize.label => TabIndicatorAnimation.elastic,
       TabBarIndicatorSize.tab => TabIndicatorAnimation.linear,
-    };
+    }
 
     _indicatorPainter = !_controllerIsValid
         ? null
@@ -1853,7 +1853,7 @@ class _TabBarState extends State<TabBar> {
         trailingPosition == null
             ? middlePosition
             : lerpDouble(middlePosition, trailingPosition, value - index)!,
-    };
+    }
 
     _effectiveScrollController.jumpTo(offset);
   }
@@ -2159,7 +2159,7 @@ class _TabBarState extends State<TabBar> {
           TabAlignment.start ||
           TabAlignment.startOffset ||
           TabAlignment.fill => AlignmentDirectional.centerStart,
-        };
+        }
 
         final Color dividerColor =
             widget.dividerColor ?? tabBarTheme.dividerColor ?? _defaults.dividerColor!;
@@ -2862,7 +2862,7 @@ class _TabsPrimaryDefaultsM3 extends TabBarThemeData {
     return switch (indicatorSize) {
       TabBarIndicatorSize.label => 3.0,
       TabBarIndicatorSize.tab   => 2.0,
-    };
+    }
   }
 
   // TODO(davidmartos96): This value doesn't currently exist in

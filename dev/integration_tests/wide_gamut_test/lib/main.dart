@@ -265,8 +265,8 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     switch (widget.setup) {
-      case Setup.image || Setup.blur:
-        break;
+      const (case Setup.image || Setup.blur:
+        break;)
       case Setup.canvasSaveLayer:
         _loadCodecImage().then(
           (ui.Image? value) => setState(() {
@@ -285,13 +285,13 @@ class _MyHomePageState extends State<MyHomePage> {
             _image = value;
           }),
         );
-      case Setup.none ||
+      const (case Setup.none ||
           Setup.container ||
           Setup.linearGradient ||
           Setup.radialGradient ||
           Setup.conicalGradient ||
           Setup.sweepGradient:
-        break;
+        break;)
     }
     super.initState();
   }

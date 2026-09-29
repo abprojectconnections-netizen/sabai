@@ -1608,11 +1608,11 @@ mixin WidgetInspectorService {
   @protected
   bool setSelection(Object? object, [String? groupName]) {
     switch (object) {
-      case Element() when object != selection.currentElement:
+      case const Element() when object != selection.currentElement:
         selection.currentElement = object;
         _notifyToolsOfSelection(selection.currentElement);
         return true;
-      case RenderObject() when object != selection.current:
+      case const RenderObject() when object != selection.current:
         selection.current = object;
         _notifyToolsOfSelection(selection.current);
         return true;
@@ -1720,7 +1720,7 @@ mixin WidgetInspectorService {
       _ => throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}'),
       ]),
-    };
+    }
 
     InspectorSerializationDelegate createDelegate() =>
         InspectorSerializationDelegate(groupName: groupName, service: this);

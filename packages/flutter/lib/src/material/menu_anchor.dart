@@ -2114,12 +2114,12 @@ class _SubmenuButtonState extends State<SubmenuButton> {
 
     // Move the submenu over by the size of the menu padding, so that
     // the first menu item aligns with the submenu button that opens it.
-    menuPaddingOffset += switch ((orientation, Directionality.of(context))) {
+    menuPaddingOffset += switch (orientation, Directionality.of(context)) {
       (Axis.horizontal, TextDirection.rtl) => Offset(menuPadding.right, 0),
       (Axis.horizontal, TextDirection.ltr) => Offset(-menuPadding.left, 0),
       (Axis.vertical, TextDirection.rtl) => Offset(0, -menuPadding.top),
       (Axis.vertical, TextDirection.ltr) => Offset(0, -menuPadding.top),
-    };
+    }
     final states = <WidgetState>{
       if (!_enabled) WidgetState.disabled,
       if (_isHovered) WidgetState.hovered,
@@ -2381,9 +2381,8 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
   void invoke(DirectionalFocusIntent intent) {
     assert(_debugMenuInfo('${intent.direction}: Invoking directional focus intent.'));
     final TextDirection directionality = Directionality.of(submenu.context);
-    switch ((_orientation, directionality, intent.direction)) {
-      case (Axis.horizontal, TextDirection.ltr, TraversalDirection.left):
-      case (Axis.horizontal, TextDirection.rtl, TraversalDirection.right):
+    switch (_orientation, directionality, intent.direction) {
+      case Axis.horizontal, TextDirection.ltr, TraversalDirection.left:
         assert(_debugMenuInfo('Moving to previous $MenuBar item'));
         // Focus this MenuBar SubmenuButton, then move focus to the previous focusable
         // MenuBar item.
@@ -2391,8 +2390,8 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
           ..requestFocus()
           ..previousFocus();
         return;
-      case (Axis.horizontal, TextDirection.ltr, TraversalDirection.right):
-      case (Axis.horizontal, TextDirection.rtl, TraversalDirection.left):
+      case Axis.horizontal, TextDirection.ltr, TraversalDirection.right:
+      case Axis.horizontal, TextDirection.rtl, TraversalDirection.left:
         assert(_debugMenuInfo('Moving to next $MenuBar item'));
         // Focus this MenuBar SubmenuButton, then move focus to the next focusable
         // MenuBar item.
@@ -2400,14 +2399,14 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
           ..requestFocus()
           ..nextFocus();
         return;
-      case (Axis.horizontal, _, TraversalDirection.down):
+      case Axis.horizontal, _, TraversalDirection.down:
         if (isSubmenu) {
           // If this is a top-level (horizontal) button in a menubar, focus the
           // first item in this button's submenu.
           _anchorState?._focusFirstMenuItem();
           return;
         }
-      case (Axis.horizontal, _, TraversalDirection.up):
+      case Axis.horizontal, _, TraversalDirection.up:
         if (isSubmenu) {
           // If this is a top-level (horizontal) button in a menubar, focus the
           // last item in this button's submenu. This makes navigating into
@@ -2415,8 +2414,8 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
           _anchorState?._focusLastMenuItem();
           return;
         }
-      case (Axis.vertical, TextDirection.ltr, TraversalDirection.left):
-      case (Axis.vertical, TextDirection.rtl, TraversalDirection.right):
+      case Axis.vertical, TextDirection.ltr, TraversalDirection.left:
+      case Axis.vertical, TextDirection.rtl, TraversalDirection.right:
         if (_parent?._parent?._orientation == Axis.horizontal) {
           if (isSubmenu) {
             _parent!.widget.childFocusNode
@@ -2446,8 +2445,7 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
           assert(_debugMenuInfo('Exiting submenu'));
         }
         return;
-      case (Axis.vertical, TextDirection.ltr, TraversalDirection.right) when isSubmenu:
-      case (Axis.vertical, TextDirection.rtl, TraversalDirection.left) when isSubmenu:
+      case Axis.vertical, TextDirection.ltr, TraversalDirection.right when isSubmenu:
         assert(_debugMenuInfo('Entering submenu'));
         if (_controller.isOpen) {
           _anchorState?._focusFirstMenuItem();
@@ -3444,7 +3442,7 @@ class _MenuLayout extends SingleChildLayoutDelegate {
         directionalOffset = switch (textDirection) {
           TextDirection.rtl => Offset(-alignmentOffset.dx, alignmentOffset.dy),
           TextDirection.ltr => alignmentOffset,
-        };
+        }
       } else {
         directionalOffset = alignmentOffset;
       }
@@ -3619,7 +3617,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     final (MenuStyle? themeStyle, MenuStyle defaultStyle) = switch (widget.orientation) {
       Axis.horizontal => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),
       Axis.vertical => (MenuTheme.of(context).style, _MenuDefaultsM3(context)),
-    };
+    }
     final MenuStyle? widgetStyle = widget.menuStyle;
 
     T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
@@ -3698,7 +3696,7 @@ class _MenuPanelState extends State<_MenuPanel> {
       AnimationStatus.reverse ||
       AnimationStatus.dismissed ||
       null => false,
-    };
+    }
 
     Widget menuPanel = Padding(
       padding: resolvedPadding,
@@ -3765,7 +3763,7 @@ class _MenuPanelState extends State<_MenuPanel> {
     return switch (widget.orientation) {
       Axis.horizontal => IntrinsicHeight(child: child),
       Axis.vertical => IntrinsicWidth(child: child),
-    };
+    }
   }
 
   Widget _buildAnimatedHeight(BuildContext context, Widget? child) {
@@ -3817,7 +3815,7 @@ class _Submenu extends StatelessWidget {
     final (MenuStyle? themeStyle, MenuStyle defaultStyle) = switch (anchor._parent?._orientation) {
       Axis.horizontal || null => (MenuBarTheme.of(context).style, _MenuBarDefaultsM3(context)),
       Axis.vertical => (MenuTheme.of(context).style, _MenuDefaultsM3(context)),
-    };
+    }
     T? effectiveValue<T>(T? Function(MenuStyle? style) getProperty) {
       return getProperty(menuStyle) ?? getProperty(themeStyle) ?? getProperty(defaultStyle);
     }

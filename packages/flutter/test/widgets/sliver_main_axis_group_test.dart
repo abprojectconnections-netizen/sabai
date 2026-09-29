@@ -1025,7 +1025,7 @@ void main() {
         return switch (scrollDirection) {
           Axis.vertical => SizedBox(height: size, child: child),
           Axis.horizontal => SizedBox(width: size, child: child),
-        };
+        }
       }
 
       await tester.pumpWidget(
@@ -1241,7 +1241,7 @@ void main() {
       return SliverToBoxAdapter(
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTapDown: (TapDownDetails details) => tapDownLog.add((index: index, details: details)),
+          onTapDown: (TapDownDetails details) => tapDownLog.add(index: index, details: details),
           child: const SizedBox(height: 20),
         ),
       );

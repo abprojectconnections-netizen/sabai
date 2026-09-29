@@ -356,10 +356,10 @@ class RenderTreeSliver extends RenderSliverVariedExtentList {
     final paintSegments = <_PaintSegment>[];
     while (animationIndices.isNotEmpty) {
       final int trailingIndex = animationIndices.removeAt(0);
-      paintSegments.add((leadingIndex: leadingIndex, trailingIndex: trailingIndex));
+      paintSegments.add(leadingIndex: leadingIndex, trailingIndex: trailingIndex);
       leadingIndex = trailingIndex + 1;
     }
-    paintSegments.add((leadingIndex: leadingIndex, trailingIndex: indexOf(lastChild!)));
+    paintSegments.add(leadingIndex: leadingIndex, trailingIndex: indexOf(lastChild!));
 
     // Paint, clipping for all but the first segment.
     paintUpTo(paintSegments.removeAt(0).trailingIndex, nextChild, context, offset);

@@ -190,7 +190,7 @@ class _SegmentState<T> extends State<_Segment<T>> with TickerProviderStateMixin<
       _SegmentLocation.leftmost => Alignment.centerLeft,
       _SegmentLocation.rightmost => Alignment.centerRight,
       _SegmentLocation.inbetween => Alignment.center,
-    };
+    }
 
     return MetaData(
       // Expand the hitTest area of this widget.
@@ -878,7 +878,7 @@ class _SegmentedControlState<T extends Object> extends State<CupertinoSlidingSeg
         TextDirection.rtl when index == widget.children.length - 1 => _SegmentLocation.leftmost,
         TextDirection.rtl when index == 0 => _SegmentLocation.rightmost,
         TextDirection.ltr || TextDirection.rtl => _SegmentLocation.inbetween,
-      };
+      }
       final GlobalKey<_SlidingSegmentButtonState<T>> segmentKey = _segmentKeys.putIfAbsent(
         entry.key,
         () => GlobalKey<_SlidingSegmentButtonState<T>>(),
@@ -1448,7 +1448,7 @@ class _RenderSegmentedControl<T extends Object> extends RenderBox
         _SegmentLocation.rightmost =>
           unscaledThumbRect.width * thumbScale - unscaledThumbRect.width,
         _SegmentLocation.inbetween => 0,
-      };
+      }
 
       final thumbRect = Rect.fromCenter(
         center: unscaledThumbRect.center - Offset(delta / 2, 0),

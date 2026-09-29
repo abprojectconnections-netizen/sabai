@@ -326,12 +326,12 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       begin: sliderTheme.disabledInactiveTrackColor,
       end: sliderTheme.inactiveTrackColor,
     );
-    final activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
-    final inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation);
+    final inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation);
     final (Paint leftTrackPaint, Paint rightTrackPaint) = switch (textDirection) {
       TextDirection.ltr => (activePaint, inactivePaint),
       TextDirection.rtl => (inactivePaint, activePaint),
-    };
+    }
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -365,7 +365,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
         switch (textDirection) {
           TextDirection.rtl => secondaryOffset.dx < thumbCenter.dx,
           TextDirection.ltr => secondaryOffset.dx > thumbCenter.dx,
-        };
+        }
 
     if (showSecondaryTrack) {
       final secondaryTrackColorTween = ColorTween(
@@ -373,7 +373,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
         end: sliderTheme.secondaryActiveTrackColor,
       );
       final secondaryTrackPaint = Paint()
-        ..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
+        ..color = secondaryTrackColorTween.evaluate(enableAnimation);
       final Rect secondaryTrackSegment = switch (textDirection) {
         TextDirection.rtl => Rect.fromLTRB(
           secondaryOffset.dx,
@@ -387,7 +387,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
           secondaryOffset.dx,
           trackRect.bottom,
         ),
-      };
+      }
       if (!secondaryTrackSegment.isEmpty) {
         context.canvas.drawRect(secondaryTrackSegment, secondaryTrackPaint);
       }
@@ -460,12 +460,12 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
       begin: sliderTheme.disabledInactiveTrackColor,
       end: sliderTheme.inactiveTrackColor,
     );
-    final activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation)!;
-    final inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation)!;
+    final activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation);
+    final inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation);
     final (Paint leftTrackPaint, Paint rightTrackPaint) = switch (textDirection) {
       TextDirection.ltr => (activePaint, inactivePaint),
       TextDirection.rtl => (inactivePaint, activePaint),
-    };
+    }
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -519,7 +519,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
         end: sliderTheme.secondaryActiveTrackColor,
       );
       final secondaryTrackPaint = Paint()
-        ..color = secondaryTrackColorTween.evaluate(enableAnimation)!;
+        ..color = secondaryTrackColorTween.evaluate(enableAnimation);
       if (isLTR) {
         context.canvas.drawRRect(
           RRect.fromLTRBAndCorners(
@@ -621,7 +621,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
         sliderTheme.disabledActiveTickMarkColor,
         sliderTheme.activeTickMarkColor,
       ),
-    };
+    }
     final paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     // The tick marks are tiny circles that are the same height as the track.
@@ -1173,7 +1173,7 @@ class GappedSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape 
         switch (isLTR) {
           true => secondaryOffset.dx > thumbCenter.dx + trackGap,
           false => secondaryOffset.dx < thumbCenter.dx - trackGap,
-        };
+        }
 
     if (showSecondaryTrack) {
       final secondaryTrackColorTween = ColorTween(

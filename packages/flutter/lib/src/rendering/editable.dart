@@ -74,7 +74,7 @@ class TextSelectionPoint {
       TextDirection.ltr => '$point-ltr',
       TextDirection.rtl => '$point-rtl',
       null => '$point',
-    };
+    }
   }
 
   @override
@@ -1488,13 +1488,13 @@ class RenderEditable extends RenderBox
             attributes: info.stringAttributes,
           );
         switch (info.recognizer) {
-          case TapGestureRecognizer(onTap: final VoidCallback? handler):
-          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
+          case const TapGestureRecognizer(onTap: final VoidCallback? handler):
+          case const DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
             if (handler != null) {
               configuration.onTap = handler;
               configuration.isLink = true;
             }
-          case LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
+          case const LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
             if (onLongPress != null) {
               configuration.onLongPress = onLongPress;
             }
@@ -1693,7 +1693,7 @@ class RenderEditable extends RenderBox
 
   Axis get _viewportAxis => _isMultiline ? Axis.vertical : Axis.horizontal;
 
-  Offset get _paintOffset => switch (_viewportAxis) {
+  Offset get _paintOffset => switch (viewportAxis) {
     Axis.horizontal => Offset(-offset.pixels, 0.0),
     Axis.vertical => Offset(0.0, -offset.pixels),
   };
@@ -1703,7 +1703,7 @@ class RenderEditable extends RenderBox
     return switch (_viewportAxis) {
       Axis.horizontal => size.width,
       Axis.vertical => size.height,
-    };
+    }
   }
 
   double _getMaxScrollExtent(Size contentSize) {
@@ -1711,7 +1711,7 @@ class RenderEditable extends RenderBox
     return switch (_viewportAxis) {
       Axis.horizontal => math.max(0.0, contentSize.width - size.width),
       Axis.vertical => math.max(0.0, contentSize.height - size.height),
-    };
+    }
   }
 
   // We need to check the paint offset here because during animation, the start of
@@ -2421,7 +2421,7 @@ class RenderEditable extends RenderBox
         preferredLineHeight * (minLines ?? maxLines),
         preferredLineHeight * maxLines,
       ),
-    };
+    }
 
     size = Size(width, constraints.constrainHeight(preferredHeight));
     final contentSize = Size(_textPainter.width + _caretMargin, _textPainter.height);

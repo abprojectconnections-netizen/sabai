@@ -715,11 +715,11 @@ class _RadioListTileState<T> extends State<RadioListTile<T>> with RadioClient<T>
     final ListTileControlAffinity effectiveControlAffinity =
         widget.controlAffinity ?? listTileTheme.controlAffinity ?? ListTileControlAffinity.platform;
     Widget? leading, trailing;
-    (leading, trailing) = switch (effectiveControlAffinity) {
+    leading, trailing = switch (effectiveControlAffinity) {
       ListTileControlAffinity.leading ||
       ListTileControlAffinity.platform => (control, widget.secondary),
       ListTileControlAffinity.trailing => (widget.secondary, control),
-    };
+    }
     final ThemeData theme = Theme.of(context);
     final RadioThemeData radioThemeData = RadioTheme.of(context);
     final states = <WidgetState>{if (widget.selected) WidgetState.selected};

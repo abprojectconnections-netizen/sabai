@@ -508,7 +508,7 @@ class Scrollable extends StatefulWidget {
     ScrollableState? scrollable = Scrollable.maybeOf(context);
     while (scrollable != null) {
       final List<Future<void>> newFutures;
-      (newFutures, scrollable) = scrollable._performEnsureVisible(
+      newFutures, scrollable = scrollable._performEnsureVisible(
         context.findRenderObject()!,
         alignment: alignment,
         duration: duration,
@@ -945,7 +945,7 @@ class ScrollableState extends State<Scrollable>
     final double delta = switch (axis) {
       Axis.horizontal => event.scrollDelta.dx,
       Axis.vertical => event.scrollDelta.dy,
-    };
+    }
 
     return axisDirectionIsReversed(widget.axisDirection) ? -delta : delta;
   }
@@ -1091,7 +1091,7 @@ class ScrollableState extends State<Scrollable>
       alignmentPolicy: alignmentPolicy,
       targetRenderObject: targetRenderObject,
     );
-    return (<Future<void>>[ensureVisibleFuture], this);
+    return <Future<void>>[ensureVisibleFuture], this;
   }
 
   @protected
@@ -1591,7 +1591,7 @@ Offset _getDeltaToScrollOrigin(ScrollableState scrollableState) {
     AxisDirection.down => Offset(0, scrollableState.position.pixels),
     AxisDirection.left => Offset(-scrollableState.position.pixels, 0),
     AxisDirection.right => Offset(scrollableState.position.pixels, 0),
-  };
+  }
 }
 
 /// With [_ScrollSemantics] certain child [SemanticsNode]s can be
@@ -1697,7 +1697,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
     final double offset = switch (axis) {
       Axis.horizontal => targetOffset.dx,
       Axis.vertical => targetOffset.dy,
-    };
+    }
     _position.jumpTo(offset);
   }
 
@@ -2217,7 +2217,7 @@ class _VerticalOuterDimensionState extends ScrollableState {
       'of a TwoDimensionalScrollable. This should not happen as the horizontal '
       'scrollable handles both axes.',
     );
-    return (<Future<void>>[], this);
+    return <Future<void>>[], this;
   }
 
   void _evaluateLockedAxis(Offset offset) {
@@ -2503,7 +2503,7 @@ class _HorizontalInnerDimensionState extends ScrollableState {
       ),
     ];
 
-    return (newFutures, verticalScrollable);
+    return newFutures, verticalScrollable;
   }
 
   @override

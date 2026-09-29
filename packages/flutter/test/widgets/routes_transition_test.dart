@@ -85,7 +85,7 @@ void main() {
               },
             ),
             _ => throw Exception('Invalid route.'),
-          };
+          }
         },
       ),
     );

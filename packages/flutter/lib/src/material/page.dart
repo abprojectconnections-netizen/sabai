@@ -107,7 +107,7 @@ mixin MaterialRouteTransitionMixin<T> on PageRoute<T> {
           TargetPlatform.fuchsia ||
           TargetPlatform.windows ||
           TargetPlatform.linux => const ZoomPageTransitionsBuilder(),
-        };
+        }
   }
 
   // The transitionDuration is used to create the AnimationController which is only

@@ -1856,7 +1856,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       TooltipWindowController() => '',
       PopupWindowController() => '',
       SatelliteWindowController() => controller.title,
-    };
+    }
   }
 
   /// Returns title of the nearest [WindowScope], or null if not found.
@@ -1880,7 +1880,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       TooltipWindowController() => '',
       PopupWindowController() => '',
       SatelliteWindowController() => controller.title,
-    };
+    }
   }
 
   /// Returns the activation status of the nearest [WindowScope].
@@ -1905,7 +1905,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       TooltipWindowController() => false,
       PopupWindowController() => controller.isActivated,
       SatelliteWindowController() => controller.isActivated,
-    };
+    }
   }
 
   /// Returns the activation status of the nearest [WindowScope],
@@ -1930,7 +1930,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       TooltipWindowController() => false,
       PopupWindowController() => controller.isActivated,
       SatelliteWindowController() => controller.isActivated,
-    };
+    }
   }
 
   /// Returns the minimization status of the nearest [WindowScope].
@@ -1955,7 +1955,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       TooltipWindowController() => false,
       PopupWindowController() => false,
       SatelliteWindowController() => false,
-    };
+    }
   }
 
   /// Returns the minimization status of the nearest [WindowScope],
@@ -1980,7 +1980,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       TooltipWindowController() => false,
       PopupWindowController() => false,
       SatelliteWindowController() => false,
-    };
+    }
   }
 
   /// Returns the maximization status of the nearest [WindowScope].
@@ -2005,7 +2005,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       TooltipWindowController() => false,
       PopupWindowController() => false,
       SatelliteWindowController() => false,
-    };
+    }
   }
 
   /// Returns the maximization status of the nearest [WindowScope],
@@ -2030,7 +2030,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       TooltipWindowController() => false,
       PopupWindowController() => false,
       SatelliteWindowController() => false,
-    };
+    }
   }
 
   /// Returns the fullscreen status of the nearest [WindowScope].
@@ -2056,7 +2056,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       TooltipWindowController() => false,
       PopupWindowController() => false,
       SatelliteWindowController() => false,
-    };
+    }
   }
 
   /// Returns the fullscreen status of the nearest [WindowScope],
@@ -2081,7 +2081,7 @@ class WindowScope extends InheritedModel<_WindowControllerAspect> {
       TooltipWindowController() => false,
       PopupWindowController() => false,
       SatelliteWindowController() => false,
-    };
+    }
   }
 
   static BaseWindowController _of(BuildContext context, [_WindowControllerAspect? aspect]) {
@@ -2449,7 +2449,7 @@ class _WindowManagerState extends State<WindowManager> {
                 controller: satellite,
                 child: entry.builder(context),
               ),
-            };
+            }
           }).toList();
 
           final FlutterView? view = View.maybeOf(context);

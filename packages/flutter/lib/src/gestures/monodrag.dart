@@ -662,7 +662,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         PointerPanZoomStartEvent() => Offset.zero,
         PointerPanZoomUpdateEvent() => event.pan,
         _ => event.localPosition,
-      };
+      }
       _velocityTrackers[event.pointer]!.addPosition(event.timeStamp, position);
     }
     if (event is PointerMoveEvent && event.buttons != _initialButtons) {
@@ -686,7 +686,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       _lastPosition = OffsetPair(local: localPosition, global: position);
       final Offset resolvedDelta = _resolveLocalDeltaForMultitouch(event.pointer, localDelta);
       switch (_state) {
-        case _DragState.ready || _DragState.possible:
+        const (case _DragState.ready || _DragState.possible:
           _pendingDragOffset += OffsetPair(local: localDelta, global: delta);
           _lastPendingEventTimestamp = event.timeStamp;
           _lastTransform = event.transform;
@@ -708,7 +708,7 @@ sealed class DragGestureRecognizer extends OneSequenceGestureRecognizer {
             } else {
               resolve(GestureDisposition.accepted);
             }
-          }
+          })
         case _DragState.accepted:
           _checkUpdate(
             sourceTimeStamp: event.timeStamp,

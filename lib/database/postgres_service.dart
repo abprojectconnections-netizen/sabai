@@ -5,7 +5,6 @@ import 'package:postgres/postgres.dart';
 /// Note: the `postgres` package is not supported on Flutter Web. Do not import
 /// this file from code that must compile for Chrome/web.
 class PostgresService {
-  final PostgreSQLConnection _connection;
 
   PostgresService({
     required String host,
@@ -22,6 +21,7 @@ class PostgresService {
           password: password,
           useSSL: useSSL,
         );
+  final PostgreSQLConnection _connection;
 
   Future<void> open() async {
     if (_connection.isClosed) {

@@ -48,7 +48,7 @@ final class _FakeGoldenFileComparator extends Fake implements GoldenFileComparat
       _CannedComparisonMode.alwaysFail => false,
       _CannedComparisonMode.alwaysThrowTestFailure => throw TestFailure('An expected error'),
       _CannedComparisonMode.alwaysThrowStateError => throw StateError('An unexpected error'),
-    };
+    }
   }
 
   @override

@@ -211,18 +211,18 @@ class TextButton extends ButtonStyleButton {
     ButtonLayerBuilder? backgroundBuilder,
     ButtonLayerBuilder? foregroundBuilder,
   }) {
-    final WidgetStateProperty<Color?>? backgroundColorProp = switch ((
+    final WidgetStateProperty<Color?>? backgroundColorProp = switch (
       backgroundColor,
       disabledBackgroundColor,
-    )) {
+    ) {
       (_?, null) => MaterialStatePropertyAll<Color?>(backgroundColor),
       (_, _) => ButtonStyleButton.defaultColor(backgroundColor, disabledBackgroundColor),
-    };
-    final WidgetStateProperty<Color?>? iconColorProp = switch ((iconColor, disabledIconColor)) {
+    }
+    final WidgetStateProperty<Color?>? iconColorProp = switch (iconColor, disabledIconColor) {
       (_?, null) => MaterialStatePropertyAll<Color?>(iconColor),
       (_, _) => ButtonStyleButton.defaultColor(iconColor, disabledIconColor),
-    };
-    final WidgetStateProperty<Color?>? overlayColorProp = switch ((foregroundColor, overlayColor)) {
+    }
+    final WidgetStateProperty<Color?>? overlayColorProp = switch (foregroundColor, overlayColor) {
       (null, null) => null,
       (_, Color(a: 0.0)) => WidgetStatePropertyAll<Color?>(overlayColor),
       (_, final Color color) ||
@@ -231,7 +231,7 @@ class TextButton extends ButtonStyleButton {
         WidgetState.hovered: color.withOpacity(0.08),
         WidgetState.focused: color.withOpacity(0.1),
       }),
-    };
+    }
 
     return ButtonStyle(
       textStyle: ButtonStyleButton.allOrNull<TextStyle>(textStyle),

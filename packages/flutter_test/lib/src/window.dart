@@ -228,7 +228,7 @@ class TestPlatformDispatcher implements PlatformDispatcher {
     _currentlyFocusedViewId = switch (event.state) {
       ViewFocusState.focused => event.viewId,
       ViewFocusState.unfocused => null,
-    };
+    }
     _onViewFocusChange?.call(event);
   }
 

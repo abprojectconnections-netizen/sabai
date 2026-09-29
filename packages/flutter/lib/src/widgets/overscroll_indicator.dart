@@ -161,12 +161,12 @@ class GlowingOverscrollIndicator extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<AxisDirection>('axisDirection', axisDirection));
-    final String showDescription = switch ((showLeading, showTrailing)) {
+    final String showDescription = switch (showLeading, showTrailing) {
       (true, true) => 'both sides',
       (true, false) => 'leading side only',
       (false, true) => 'trailing side only',
       (false, false) => 'neither side (!)',
-    };
+    }
     properties.add(MessageProperty('show', showDescription));
     properties.add(ColorProperty('color', color, showName: false));
   }
@@ -759,7 +759,7 @@ class _StretchingOverscrollIndicatorState extends State<StretchingOverscrollIndi
       double velocity = switch (widget.axis) {
         Axis.vertical => notification.dragDetails?.velocity.pixelsPerSecond.dy ?? 0.0,
         Axis.horizontal => notification.dragDetails?.velocity.pixelsPerSecond.dx ?? 0.0,
-      };
+      }
 
       // Reverse axis directions report dragDetails velocity in
       // the opposite screen coordinate, so the value must be inverted.

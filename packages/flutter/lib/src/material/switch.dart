@@ -611,7 +611,7 @@ class Switch extends StatelessWidget {
         switchConfig.switchWidth + effectivePadding.horizontal,
         switchConfig.switchHeightCollapsed + effectivePadding.vertical,
       ),
-    };
+    }
   }
 
   @override
@@ -876,7 +876,7 @@ class _MaterialSwitchState extends State<_MaterialSwitch>
       positionController.value += switch (Directionality.of(context)) {
         TextDirection.rtl => -delta,
         TextDirection.ltr => delta,
-      };
+      }
     }
   }
 
@@ -1513,7 +1513,7 @@ class _SwitchPainter extends ToggleablePainter {
     final double visualPosition = switch (textDirection) {
       TextDirection.rtl => 1.0 - currentValue,
       TextDirection.ltr => currentValue,
-    };
+    }
     if (reaction.status == AnimationStatus.reverse && !_stopPressAnimation) {
       _stopPressAnimation = true;
     } else {

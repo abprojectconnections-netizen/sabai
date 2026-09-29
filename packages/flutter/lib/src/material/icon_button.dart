@@ -681,7 +681,7 @@ class IconButton extends StatelessWidget {
           WidgetState.hovered: hoverColor ?? overlayFallback?.withOpacity(0.08),
           WidgetState.focused: focusColor ?? overlayFallback?.withOpacity(0.1),
         }),
-      };
+      }
     }
 
     return ButtonStyle(
@@ -1019,7 +1019,7 @@ class _IconButtonM3 extends ButtonStyleButton {
       _IconButtonVariant.filledTonal => _FilledTonalIconButtonDefaultsM3(context, toggleable),
       _IconButtonVariant.outlined => _OutlinedIconButtonDefaultsM3(context, toggleable),
       _IconButtonVariant.standard => _IconButtonDefaultsM3(context, toggleable),
-    };
+    }
   }
 
   /// Returns the [IconButtonThemeData.style] of the closest [IconButtonTheme] ancestor.

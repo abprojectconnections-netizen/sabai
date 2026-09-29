@@ -27,7 +27,7 @@ void main() {
                 return switch (axis) {
                   Axis.vertical => SizedBox(height: 100, child: Text('item $index')),
                   Axis.horizontal => SizedBox(width: 100, child: Text('item $index')),
-                };
+                }
               },
             ),
           ],

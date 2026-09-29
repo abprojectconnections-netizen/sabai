@@ -48,7 +48,7 @@ mixin CreateFinderFactory {
       'Ancestor' => _createAncestorFinder(finder as Ancestor),
       'Descendant' => _createDescendantFinder(finder as Descendant),
       final String type => throw DriverError('Unsupported search specification type $type'),
-    };
+    }
   }
 
   Finder _createByTextFinder(ByText arguments) {
@@ -84,7 +84,7 @@ mixin CreateFinderFactory {
       'int' => find.byKey(ValueKey<int>(arguments.keyValue as int)),
       'String' => find.byKey(ValueKey<String>(arguments.keyValue as String)),
       _ => throw UnimplementedError('Unsupported ByValueKey type: ${arguments.keyValueType}'),
-    };
+    }
   }
 
   Finder _createByTypeFinder(ByType arguments) {
@@ -173,7 +173,7 @@ mixin CommandHandlerFactory {
       'get_diagnostics_tree' => _getDiagnosticsTree(command, finderFactory),
       'screenshot' => _takeScreenshot(command),
       final String kind => throw DriverError('Unsupported command kind $kind'),
-    };
+    }
   }
 
   Future<Health> _getHealth(Command command) async => const Health(HealthStatus.ok);
@@ -350,7 +350,7 @@ mixin CommandHandlerFactory {
       OffsetType.bottomLeft => box.size.bottomLeft(Offset.zero),
       OffsetType.bottomRight => box.size.bottomRight(Offset.zero),
       OffsetType.center => box.size.center(Offset.zero),
-    };
+    }
     final Offset globalPoint = box.localToGlobal(localPoint);
     return GetOffsetResult(dx: globalPoint.dx, dy: globalPoint.dy);
   }
@@ -367,7 +367,7 @@ mixin CommandHandlerFactory {
     final DiagnosticsNode diagnosticsNode = switch (diagnosticsCommand.diagnosticsType) {
       DiagnosticsType.renderObject => element.renderObject!.toDiagnosticsNode(),
       DiagnosticsType.widget => element.toDiagnosticsNode(),
-    };
+    }
     return DiagnosticsTreeResult(
       diagnosticsNode.toJsonMap(
         DiagnosticsSerializationDelegate(

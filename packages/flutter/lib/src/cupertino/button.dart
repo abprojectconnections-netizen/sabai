@@ -304,7 +304,7 @@ class CupertinoButton extends StatefulWidget {
       TargetPlatform.android ||
       TargetPlatform.fuchsia => kCupertinoButtonTapMoveSlop,
       TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 0.0,
-    };
+    }
   }
 
   @override
@@ -481,11 +481,11 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
             );
     final Color effectiveForegroundColor =
         widget.foregroundColor ??
-        switch ((widget._style, enabled)) {
+        switch (widget._style, enabled) {
           (_CupertinoButtonStyle.filled, _) => themeData.primaryContrastingColor,
           (_, true) => primaryColor,
           (_, false) => CupertinoDynamicColor.resolve(CupertinoColors.tertiaryLabel, context),
-        };
+        }
 
     final Color effectiveFocusOutlineColor =
         widget.focusColor ??

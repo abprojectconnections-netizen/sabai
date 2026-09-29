@@ -2229,7 +2229,7 @@ class ColorScheme with Diagnosticable {
         isDark: isDark,
         contrastLevel: contrastLevel,
       ),
-    };
+    }
   }
 
   /// The [ThemeData.colorScheme] of the ambient [Theme].

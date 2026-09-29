@@ -2636,7 +2636,7 @@ void main() {
         return switch (defaultTargetPlatform) {
           TargetPlatform.iOS => semantics.properties.selected,
           _ => semantics.properties.checked,
-        };
+        }
       }
 
       expect(getPlatformSemanticProperty(tester.widget<Semantics>(pmButtonSemantics)), isTrue);

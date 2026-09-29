@@ -1275,7 +1275,7 @@ class RenderTable extends RenderBox {
         TableCellVerticalAlignment.bottom ||
         TableCellVerticalAlignment.fill ||
         TableCellVerticalAlignment.intrinsicHeight => null,
-      };
+      }
       if (childBaseline != null && (baselineOffset == null || baselineOffset < childBaseline)) {
         baselineOffset = childBaseline;
       }

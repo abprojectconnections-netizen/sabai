@@ -491,7 +491,7 @@ void main() {
             ),
           ),
         );
-        return (
+        return
           scrollController,
           MaterialApp(
             theme: theme,
@@ -507,7 +507,7 @@ void main() {
               ),
             ),
           ),
-        );
+        ;
       }
 
       // Scrollbar defaults for light themes:

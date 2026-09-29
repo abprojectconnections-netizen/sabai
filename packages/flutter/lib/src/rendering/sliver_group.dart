@@ -48,7 +48,7 @@ class RenderSliverCrossAxisGroup extends RenderSliver
     return switch (constraints.axis) {
       Axis.vertical => paintOffset.dx,
       Axis.horizontal => paintOffset.dy,
-    };
+    }
   }
 
   @override
@@ -123,7 +123,7 @@ class RenderSliverCrossAxisGroup extends RenderSliver
       childParentData.paintOffset = switch (constraints.axis) {
         Axis.vertical => Offset(offset, -paintCorrection),
         Axis.horizontal => Offset(-paintCorrection, offset),
-      };
+      }
       offset += childExtent;
       child = childAfter(child);
     }
@@ -278,7 +278,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
         geometry!.paintExtent - child.geometry!.paintExtent - childParentData.paintOffset.dy,
       AxisDirection.left =>
         geometry!.paintExtent - child.geometry!.paintExtent - childParentData.paintOffset.dx,
-    };
+    }
   }
 
   @override
@@ -301,7 +301,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
     ) = switch (constraints.growthDirection) {
       GrowthDirection.forward => (firstChild, childAfter),
       GrowthDirection.reverse => (lastChild, childBefore),
-    };
+    }
     var child = leadingChild;
     while (child != null) {
       final double beforeOffsetPaintExtent = calculatePaintOffset(
@@ -346,7 +346,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
       childParentData.paintOffset = switch (constraints.axis) {
         Axis.vertical => Offset(0.0, childPaintOffset),
         Axis.horizontal => Offset(childPaintOffset, 0.0),
-      };
+      }
       scrollOffset += childLayoutGeometry.scrollExtent;
       layoutOffset += childLayoutGeometry.layoutExtent;
       maxPaintExtent += childLayoutGeometry.maxPaintExtent;
@@ -386,14 +386,14 @@ class RenderSliverMainAxisGroup extends RenderSliver
         final double childMainAxisPaintOffset = switch (constraints.axis) {
           Axis.vertical => childParentData.paintOffset.dy,
           Axis.horizontal => childParentData.paintOffset.dx,
-        };
+        }
         final double childPaintEnd = childMainAxisPaintOffset + childLayoutGeometry.paintExtent;
         final bool childIsPinned = childLayoutGeometry.maxScrollObstructionExtent > 0;
         if (childPaintEnd > remainingExtent || (pinnedChildrenOverflow && childIsPinned)) {
           childParentData.paintOffset = switch (constraints.axis) {
             Axis.vertical => Offset(0.0, childParentData.paintOffset.dy - paintCorrection),
             Axis.horizontal => Offset(childParentData.paintOffset.dx - paintCorrection, 0.0),
-          };
+          }
         }
         child = childAfter(child);
       }
@@ -433,7 +433,7 @@ class RenderSliverMainAxisGroup extends RenderSliver
           0.0,
         ),
         AxisDirection.right || AxisDirection.down => childParentData.paintOffset,
-      };
+      }
       child = advance(child);
     }
   }

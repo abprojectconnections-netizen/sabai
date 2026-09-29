@@ -1331,7 +1331,7 @@ class _CupertinoActionSheetState extends State<CupertinoActionSheet> {
     final double actionSheetWidth = switch (MediaQuery.orientationOf(context)) {
       Orientation.portrait => MediaQuery.widthOf(context),
       Orientation.landscape => MediaQuery.heightOf(context),
-    };
+    }
 
     return SafeArea(
       minimum: const EdgeInsets.only(bottom: _kActionSheetEdgePadding),
@@ -1556,7 +1556,7 @@ class _ActionSheetActionContent extends StatelessWidget {
       <= 21 => lerpDouble(23.0, 24.0, (contextBodySize - 19.0) / (21.0 - 19.0))!,
       <= 24 => 24.0,
       _ => contextBodySize,
-    };
+    }
   }
 
   @override
@@ -2703,23 +2703,23 @@ class _RenderPriorityColumn extends RenderFlex {
     final double bottomIntrinsic = lastChild!.getMinIntrinsicHeight(width);
     // Try to layout both children as their intrinsic height.
     if (topIntrinsic + bottomIntrinsic <= maxHeight) {
-      return (topChildHeight: topIntrinsic, bottomChildHeight: bottomIntrinsic);
+      return topChildHeight: topIntrinsic, bottomChildHeight: bottomIntrinsic;
     }
     // _bottomMinHeight is only effective when bottom actually needs that much.
     final double effectiveBottomMinHeight = math.min(_bottomMinHeight, bottomIntrinsic);
     // Try to layout top as intrinsics, as long as the bottom has at least
     // effectiveBottomMinHeight.
     if (maxHeight - topIntrinsic >= effectiveBottomMinHeight) {
-      return (topChildHeight: topIntrinsic, bottomChildHeight: maxHeight - topIntrinsic);
+      return topChildHeight: topIntrinsic, bottomChildHeight: maxHeight - topIntrinsic;
     }
     // Try to layout bottom as effectiveBottomMinHeight, as long as top has at
     // least 0.
     if (maxHeight >= effectiveBottomMinHeight) {
-      return (
+      return
         topChildHeight: maxHeight - effectiveBottomMinHeight,
         bottomChildHeight: effectiveBottomMinHeight,
-      );
+      ;
     }
-    return (topChildHeight: 0, bottomChildHeight: maxHeight);
+    return topChildHeight: 0, bottomChildHeight: maxHeight;
   }
 }

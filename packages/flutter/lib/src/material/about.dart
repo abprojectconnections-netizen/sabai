@@ -1366,8 +1366,8 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
     switch (_builtLayout) {
       case _LayoutMode.nested:
         _navigatorKey.currentState!.pushNamed(_navDetail, arguments: arguments);
-      case _LayoutMode.lateral || null:
-        focus = _Focus.detail;
+      const (case _LayoutMode.lateral || null:
+        focus = _Focus.detail;)
     }
   }
 
@@ -1407,7 +1407,7 @@ class _MasterDetailFlowState extends State<_MasterDetailFlow> implements _PageOp
               masterPageRoute,
               _detailPageRoute(_cachedDetailArguments),
             ],
-          };
+          }
         },
         onGenerateRoute: (RouteSettings settings) {
           switch (settings.name) {

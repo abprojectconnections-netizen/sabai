@@ -47,7 +47,7 @@ void main() {
       testCupertinoDirectory: TestsCrossImportChecker.knownCupertinoCrossImports,
     };
 
-    for (final MapEntry<Directory, Set<String>>(key: Directory directory, value: Set<String> files)
+    for (final MapEntry<Directory, Set<String>>(key = Directory directory, value: Set<String> files)
         in knownFiles.entries) {
       for (final filepath in files) {
         if (excludes.contains(filepath)) {

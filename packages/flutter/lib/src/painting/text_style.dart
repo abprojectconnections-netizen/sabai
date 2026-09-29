@@ -1347,7 +1347,7 @@ class TextStyle with Diagnosticable {
       null => null,
       final double size when textScaler == TextScaler.noScaling => size * textScaleFactor,
       final double size => textScaler.scale(size),
-    };
+    }
     return ui.TextStyle(
       color: color,
       decoration: decoration,

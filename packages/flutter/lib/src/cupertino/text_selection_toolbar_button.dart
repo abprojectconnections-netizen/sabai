@@ -97,7 +97,7 @@ class CupertinoTextSelectionToolbarButton extends StatefulWidget {
       ContextMenuButtonType.liveTextInput ||
       ContextMenuButtonType.delete ||
       ContextMenuButtonType.custom => '',
-    };
+    }
   }
 
   @override

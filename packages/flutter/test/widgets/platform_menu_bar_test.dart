@@ -265,30 +265,30 @@ void main() {
 typedef _MenuItem = ({String label, String? tooltip});
 
 const List<_MenuItem> _mainMenu = <_MenuItem>[
-  (label: 'Menu 0', tooltip: 'Menu 0 Tooltip'),
-  (label: 'Menu 1', tooltip: null),
-  (label: 'Menu 2', tooltip: 'Menu 2 Tooltip'),
-  (label: 'Menu 3', tooltip: null),
+  label: 'Menu 0', tooltip: 'Menu 0 Tooltip',
+  label: 'Menu 1', tooltip: null,
+  label: 'Menu 2', tooltip: 'Menu 2 Tooltip',
+  label: 'Menu 3', tooltip: null,
 ];
 
 const List<_MenuItem> _subMenu0 = <_MenuItem>[
-  (label: 'Sub Menu 00', tooltip: 'Sub Menu 00 Tooltip'),
+  label: 'Sub Menu 00', tooltip: 'Sub Menu 00 Tooltip',
 ];
 
 const List<_MenuItem> _subMenu1 = <_MenuItem>[
-  (label: 'Sub Menu 10', tooltip: 'Sub Menu 10 Tooltip'),
-  (label: 'Sub Menu 11', tooltip: null),
-  (label: 'Sub Menu 12', tooltip: 'Sub Menu 12 Tooltip'),
+  label: 'Sub Menu 10', tooltip: 'Sub Menu 10 Tooltip',
+  label: 'Sub Menu 11', tooltip: null,
+  label: 'Sub Menu 12', tooltip: 'Sub Menu 12 Tooltip',
 ];
 
 const List<_MenuItem> _subSubMenu10 = <_MenuItem>[
-  (label: 'Sub Sub Menu 110', tooltip: null),
-  (label: 'Sub Sub Menu 111', tooltip: 'Sub Sub Menu 111 Tooltip'),
-  (label: 'Sub Sub Menu 112', tooltip: null),
-  (label: 'Sub Sub Menu 113', tooltip: 'Sub Sub Menu 113 Tooltip'),
+  label: 'Sub Sub Menu 110', tooltip: null,
+  label: 'Sub Sub Menu 111', tooltip: 'Sub Sub Menu 111 Tooltip',
+  label: 'Sub Sub Menu 112', tooltip: null,
+  label: 'Sub Sub Menu 113', tooltip: 'Sub Sub Menu 113 Tooltip',
 ];
 
-const List<_MenuItem> _subMenu2 = <_MenuItem>[(label: 'Sub Menu 20', tooltip: null)];
+const List<_MenuItem> _subMenu2 = <_MenuItem>[label: 'Sub Menu 20', tooltip: null];
 
 List<PlatformMenuItem> _createTestMenus({
   void Function(String)? onSelected,

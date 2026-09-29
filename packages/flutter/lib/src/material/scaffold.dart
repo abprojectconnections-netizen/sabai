@@ -1222,7 +1222,7 @@ class _ScaffoldLayout extends MultiChildLayoutDelegate {
         FloatingActionButtonLocation.miniEndDocked ||
         FloatingActionButtonLocation.miniEndFloat => true,
         FloatingActionButtonLocation() => true,
-      };
+      }
       if (floatingActionButtonRect.size != Size.zero && isSnackBarFloating && showAboveFab) {
         if (bottomNavigationBarTop != null) {
           snackBarYOffsetBase = math.min(bottomNavigationBarTop, floatingActionButtonRect.top);
@@ -2846,12 +2846,12 @@ class ScaffoldState extends State<Scaffold>
         _updatePersistentBottomSheet();
       }
     }
-    switch ((oldWidget.primary, widget.primary)) {
-      case (true, false):
+    switch (oldWidget.primary, widget.primary) {
+      case true, false:
         WidgetsBinding.instance.removeObserver(this);
-      case (false, true):
+      case false, true:
         WidgetsBinding.instance.addObserver(this);
-      case (true, true) || (false, false):
+      const (case true, true || false, false:)
     }
   }
 
@@ -3196,7 +3196,7 @@ class ScaffoldState extends State<Scaffold>
       TargetPlatform.fuchsia ||
       TargetPlatform.linux ||
       TargetPlatform.windows => null,
-    };
+    }
 
     _addIfNonNull(
       children,

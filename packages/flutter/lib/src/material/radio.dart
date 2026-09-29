@@ -744,7 +744,7 @@ class _RadioPaintState extends State<_RadioPaint> {
         kMinInteractiveDimension - 8.0,
         kMinInteractiveDimension - 8.0,
       ),
-    };
+    }
     size += effectiveVisualDensity.baseSizeAdjustment;
     final BorderSide activeSide =
         _resolveSide(widget.side, activeStates) ??

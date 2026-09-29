@@ -276,7 +276,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
             switch (brightness) {
               Brightness.light => onSurface.withOpacity(0.03),
               Brightness.dark => onSurface.withOpacity(0.05),
-            };
+            }
       }
       return const Color(0x00000000);
     });
@@ -291,7 +291,7 @@ class _MaterialScrollbarState extends RawScrollbarState<_MaterialScrollbar> {
             switch (brightness) {
               Brightness.light => onSurface.withOpacity(0.1),
               Brightness.dark => onSurface.withOpacity(0.25),
-            };
+            }
       }
       return const Color(0x00000000);
     });

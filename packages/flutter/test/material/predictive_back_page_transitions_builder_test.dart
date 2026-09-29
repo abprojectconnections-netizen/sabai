@@ -784,7 +784,7 @@ String _getTransitionsString(PageTransitionsBuilder pageTransitionsBuilder) {
     PredictiveBackPageTransitionsBuilder() => '_PredictiveBackSharedElementPageTransition',
     PredictiveBackFullscreenPageTransitionsBuilder() => '_PredictiveBackFullscreenPageTransition',
     _ => throw UnsupportedError('Unsupported subclass of PageTransitionsBuilder'),
-  };
+  }
 }
 
 Finder _findPredictiveBackPageTransition(PageTransitionsBuilder pageTransitionsBuilder) {
@@ -801,7 +801,7 @@ Finder _findFallbackPageTransition(PageTransitionsBuilder pageTransitionsBuilder
     final PredictiveBackPageTransitionsBuilder _ => '_FadeForwardsPageTransition',
     final PredictiveBackFullscreenPageTransitionsBuilder _ => '_ZoomPageTransition',
     _ => throw TypeError(),
-  };
+  }
   return find.descendant(
     of: find.byType(MaterialApp),
     matching: find.byWidgetPredicate((Widget w) => '${w.runtimeType}' == fallback),

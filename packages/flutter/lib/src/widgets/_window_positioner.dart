@@ -138,7 +138,7 @@ enum WindowPositionerAnchor {
       WindowPositionerAnchor.bottomLeft => WindowPositionerAnchor.bottomRight,
       WindowPositionerAnchor.topRight => WindowPositionerAnchor.topLeft,
       WindowPositionerAnchor.bottomRight => WindowPositionerAnchor.bottomLeft,
-    };
+    }
   }
 
   WindowPositionerAnchor _flipY() {
@@ -152,7 +152,7 @@ enum WindowPositionerAnchor {
       WindowPositionerAnchor.bottomLeft => WindowPositionerAnchor.topLeft,
       WindowPositionerAnchor.topRight => WindowPositionerAnchor.bottomRight,
       WindowPositionerAnchor.bottomRight => WindowPositionerAnchor.topRight,
-    };
+    }
   }
 
   Offset _offsetFor(Size size) {
@@ -166,7 +166,7 @@ enum WindowPositionerAnchor {
       WindowPositionerAnchor.bottomLeft => Offset(0.0, -size.height),
       WindowPositionerAnchor.topRight => Offset(-size.width, 0.0),
       WindowPositionerAnchor.bottomRight => Offset(-size.width, -size.height),
-    };
+    }
   }
 
   Offset _anchorPositionFor(Rect rect) {
@@ -180,7 +180,7 @@ enum WindowPositionerAnchor {
       WindowPositionerAnchor.bottomLeft => rect.bottomLeft,
       WindowPositionerAnchor.topRight => rect.topRight,
       WindowPositionerAnchor.bottomRight => rect.bottomRight,
-    };
+    }
   }
 }
 

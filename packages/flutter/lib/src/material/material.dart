@@ -460,7 +460,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
           MaterialType.canvas => theme.canvasColor,
           MaterialType.card => theme.cardColor,
           MaterialType.button || MaterialType.circle || MaterialType.transparency => null,
-        };
+        }
     final Color modelShadowColor =
         widget.shadowColor ?? (theme.useMaterial3 ? theme.colorScheme.shadow : theme.shadowColor);
     assert(
@@ -535,7 +535,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       MaterialType.card || MaterialType.button => const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(Radius.circular(2.0)),
       ),
-    };
+    }
 
     if (widget.type == MaterialType.transparency) {
       return ClipPath(

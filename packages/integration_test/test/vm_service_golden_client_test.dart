@@ -192,7 +192,7 @@ void main() {
           Map<Object?, Object?> params, {
           String stream = '',
         }) {
-          postedEvents.add((operation, params));
+          postedEvents.add(operation, params);
         });
       });
 
@@ -271,7 +271,7 @@ void main() {
           Map<Object?, Object?> params, {
           String stream = '',
         }) {
-          postedEvents.add((operation, params));
+          postedEvents.add(operation, params);
         });
       });
 

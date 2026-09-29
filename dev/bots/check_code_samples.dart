@@ -252,7 +252,7 @@ class SampleChecker {
         }
       }
     }
-    return (searchStrings, malformedStrings);
+    return searchStrings, malformedStrings;
   }
 
   List<String> checkForMissingLinks(List<File> exampleFilenames, Set<String> searchStrings) {

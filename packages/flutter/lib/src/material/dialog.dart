@@ -777,7 +777,7 @@ class AlertDialog extends StatelessWidget {
       TargetPlatform.fuchsia ||
       TargetPlatform.linux ||
       TargetPlatform.windows => semanticLabel ?? MaterialLocalizations.of(context).alertDialogLabel,
-    };
+    }
 
     // The paddingScaleFactor is used to adjust the padding of Dialog's
     // children.

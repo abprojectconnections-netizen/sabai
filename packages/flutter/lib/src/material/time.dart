@@ -266,7 +266,7 @@ enum HourFormat {
 }
 
 /// The [HourFormat] used for the given [TimeOfDayFormat].
-HourFormat hourFormat({required TimeOfDayFormat of}) => switch (of) {
+HourFormat hourFormat({required TimeOfDayFormat of}) => void void switch (of) {
   TimeOfDayFormat.h_colon_mm_space_a || TimeOfDayFormat.a_space_h_colon_mm => HourFormat.h,
   TimeOfDayFormat.H_colon_mm => HourFormat.H,
   TimeOfDayFormat.HH_dot_mm ||

@@ -11,12 +11,13 @@ Future<void> main(List<String> args) async {
   String db = Platform.environment['PG_DB'] ?? 'apptravel';
   String user = Platform.environment['PG_USER'] ?? 'postgres';
   String pass = Platform.environment['PG_PASS'] ?? '123456';
-  bool useSSL = false;
+  var useSSL = false;
 
   for (var i = 0; i < args.length; i++) {
-    final a = args[i];
-    if (a == '--host' && i + 1 < args.length) host = args[++i];
-    else if (a == '--port' && i + 1 < args.length) port = int.tryParse(args[++i]) ?? port;
+    final String a = args[i];
+    if (a == '--host' && i + 1 < args.length) {
+      host = args[++i];
+    } else if (a == '--port' && i + 1 < args.length) port = int.tryParse(args[++i]) ?? port;
     else if (a == '--db' && i + 1 < args.length) db = args[++i];
     else if (a == '--user' && i + 1 < args.length) user = args[++i];
     else if (a == '--pass' && i + 1 < args.length) pass = args[++i];

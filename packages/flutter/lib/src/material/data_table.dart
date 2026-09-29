@@ -1167,7 +1167,7 @@ class DataTable extends StatelessWidget {
           effectiveHorizontalMargin / 2.0,
         0 => effectiveHorizontalMargin,
         _ => effectiveColumnSpacing / 2.0,
-      };
+      }
 
       final double paddingEnd;
       if (dataColumnIndex == columns.length - 1) {

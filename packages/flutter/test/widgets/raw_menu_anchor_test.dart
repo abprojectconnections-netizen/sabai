@@ -3495,7 +3495,7 @@ class _ButtonState extends State<Button> {
       return switch (_brightness) {
         Brightness.dark => const BoxDecoration(color: Color(0x95007BFF)),
         Brightness.light => const BoxDecoration(color: Color(0x95007BFF)),
-      };
+      }
     }
     if (_states.value.contains(WidgetState.hovered)) {
       return const BoxDecoration(color: Color(0x22BBBBBB));
@@ -3510,7 +3510,7 @@ class _ButtonState extends State<Button> {
     return switch (_brightness) {
       Brightness.dark => const TextStyle(color: Color(0xFFFFFFFF)),
       Brightness.light => const TextStyle(color: Color(0xFF000000)),
-    };
+    }
   }
 }
 

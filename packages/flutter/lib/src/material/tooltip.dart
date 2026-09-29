@@ -426,7 +426,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     return switch (Theme.of(context).platform) {
       TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 24.0,
       TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => 32.0,
-    };
+    }
   }
 
   EdgeInsets _getDefaultPadding() {
@@ -437,14 +437,14 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
       TargetPlatform.android ||
       TargetPlatform.fuchsia ||
       TargetPlatform.iOS => const EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
-    };
+    }
   }
 
   static double _getDefaultFontSize(TargetPlatform platform) {
     return switch (platform) {
       TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => 12.0,
       TargetPlatform.android || TargetPlatform.fuchsia || TargetPlatform.iOS => 14.0,
-    };
+    }
   }
 
   Offset _getDefaultPositionDelegate(TooltipPositionContext context) {
@@ -511,7 +511,7 @@ class TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
             borderRadius: const BorderRadius.all(Radius.circular(4)),
           ),
         ),
-    };
+    }
     final defaultConstraints = BoxConstraints(
       minHeight: widget.height ?? _tooltipTheme.height ?? _getDefaultTooltipHeight(),
     );

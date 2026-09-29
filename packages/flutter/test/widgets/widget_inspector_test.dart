@@ -259,7 +259,7 @@ void main() {
     }
 
     test('throws for $Record', () async {
-      expect(() => InspectorReferenceData((1, 2), 'id'), throwsA(isA<ArgumentError>()));
+      expect(() => InspectorReferenceData(1, 2, 'id'), throwsA(isA<ArgumentError>()));
     });
   });
 

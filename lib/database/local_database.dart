@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
@@ -17,8 +18,8 @@ class LocalDatabase {
       return;
     }
 
-    final databasePath = await _databasePath();
-    final db = await openDatabase(
+    final String databasePath = await _databasePath();
+    final Database db = await openDatabase(
       databasePath,
       version: 1,
       onCreate: _createSchema,
@@ -36,7 +37,7 @@ class LocalDatabase {
   }
 
   static Future<String> _databasePath() async {
-    final documentsDirectory = await getApplicationDocumentsDirectory();
+    final Directory documentsDirectory = await getApplicationDocumentsDirectory();
     return p.join(documentsDirectory.path, 'apptravel.db');
   }
 
@@ -135,7 +136,7 @@ class LocalDatabase {
   }
 
   Future<void> _seedData() async {
-    final count = Sqflite.firstIntValue(
+    final int? count = Sqflite.firstIntValue(
       await db.rawQuery('SELECT COUNT(*) FROM destinations'),
     );
 
@@ -389,47 +390,58 @@ class LocalDatabase {
   }
 
   Future<List<Destination>> getDestinations() async {
-    final rows = await db.query('destinations');
+    final List<Map<String, Object?>> rows = await db.query('destinations');
     return rows.map(Destination.fromMap).toList();
   }
 
   Future<List<TripData>> getTrips() async {
-    final rows = await db.query('trips');
+    final List<Map<String, Object?>> rows = await db.query('trips');
     return rows.map(TripData.fromMap).toList();
   }
 
   Future<List<FlightResult>> getFlights() async {
-    final rows = await db.query('flights');
+    final List<Map<String, Object?>> rows = await db.query('flights');
     return rows.map(FlightResult.fromMap).toList();
   }
 
   Future<List<CategoryData>> getCategories() async {
-    final rows = await db.query('categories');
+    final List<Map<String, Object?>> rows = await db.query('categories');
     return rows.map(CategoryData.fromMap).toList();
   }
 
   Future<List<AttractionData>> getAttractions() async {
-    final rows = await db.query('attractions');
+    final List<Map<String, Object?>> rows = await db.query('attractions');
     return rows.map(AttractionData.fromMap).toList();
   }
 
   Future<List<HotelData>> getHotels() async {
-    final rows = await db.query('hotels');
+    final List<Map<String, Object?>> rows = await db.query('hotels');
     return rows.map(HotelData.fromMap).toList();
   }
 
   Future<List<TimelineEventData>> getTimelineEvents() async {
-    final rows = await db.query('timeline_events', orderBy: 'order_index ASC');
+    final List<Map<String, Object?>> rows = await db.query('timeline_events', orderBy: 'order_index ASC');
     return rows.map(TimelineEventData.fromMap).toList();
   }
 
   Future<List<AssistItem>> getAssistItems() async {
-    final rows = await db.query('assist_items');
+    final List<Map<String, Object?>> rows = await db.query('assist_items');
     return rows.map(AssistItem.fromMap).toList();
   }
 }
 
 class Destination {
+
+  factory Destination.fromMap(Map<String, Object?> map) {
+    return Destination(
+      emoji: map['emoji'] as String,
+      label: map['label'] as String,
+      title: map['title'] as String,
+      meta: map['meta'] as String,
+      gradientStart: map['gradient_start'] as int,
+      gradientEnd: map['gradient_end'] as int,
+    );
+  }
   Destination({
     required this.emoji,
     required this.label,
@@ -445,20 +457,21 @@ class Destination {
   final String meta;
   final int gradientStart;
   final int gradientEnd;
+}
 
-  factory Destination.fromMap(Map<String, Object?> map) {
-    return Destination(
+class TripData {
+
+  factory TripData.fromMap(Map<String, Object?> map) {
+    return TripData(
       emoji: map['emoji'] as String,
-      label: map['label'] as String,
       title: map['title'] as String,
-      meta: map['meta'] as String,
+      subtitle: map['subtitle'] as String,
+      progress: (map['progress'] as num).toDouble(),
+      status: map['status'] as String,
       gradientStart: map['gradient_start'] as int,
       gradientEnd: map['gradient_end'] as int,
     );
   }
-}
-
-class TripData {
   TripData({
     required this.emoji,
     required this.title,
@@ -476,21 +489,25 @@ class TripData {
   final String status;
   final int gradientStart;
   final int gradientEnd;
-
-  factory TripData.fromMap(Map<String, Object?> map) {
-    return TripData(
-      emoji: map['emoji'] as String,
-      title: map['title'] as String,
-      subtitle: map['subtitle'] as String,
-      progress: (map['progress'] as num).toDouble(),
-      status: map['status'] as String,
-      gradientStart: map['gradient_start'] as int,
-      gradientEnd: map['gradient_end'] as int,
-    );
-  }
 }
 
 class FlightResult {
+
+  factory FlightResult.fromMap(Map<String, Object?> map) {
+    return FlightResult(
+      icon: map['icon'] as String,
+      airline: map['airline'] as String,
+      details: map['details'] as String,
+      price: map['price'] as String,
+      depart: map['depart'] as String,
+      departAirport: map['depart_airport'] as String,
+      arrive: map['arrive'] as String,
+      arriveAirport: map['arrive_airport'] as String,
+      duration: map['duration'] as String,
+      stopInfo: map['stop_info'] as String,
+      badge: map['badge'] as String,
+    );
+  }
   FlightResult({
     required this.icon,
     required this.airline,
@@ -516,25 +533,19 @@ class FlightResult {
   final String duration;
   final String stopInfo;
   final String badge;
-
-  factory FlightResult.fromMap(Map<String, Object?> map) {
-    return FlightResult(
-      icon: map['icon'] as String,
-      airline: map['airline'] as String,
-      details: map['details'] as String,
-      price: map['price'] as String,
-      depart: map['depart'] as String,
-      departAirport: map['depart_airport'] as String,
-      arrive: map['arrive'] as String,
-      arriveAirport: map['arrive_airport'] as String,
-      duration: map['duration'] as String,
-      stopInfo: map['stop_info'] as String,
-      badge: map['badge'] as String,
-    );
-  }
 }
 
 class CategoryData {
+
+  factory CategoryData.fromMap(Map<String, Object?> map) {
+    return CategoryData(
+      emoji: map['emoji'] as String,
+      title: map['title'] as String,
+      subtitle: map['subtitle'] as String,
+      colorStart: map['color_start'] as int,
+      colorEnd: map['color_end'] as int,
+    );
+  }
   CategoryData({
     required this.emoji,
     required this.title,
@@ -548,19 +559,20 @@ class CategoryData {
   final String subtitle;
   final int colorStart;
   final int colorEnd;
-
-  factory CategoryData.fromMap(Map<String, Object?> map) {
-    return CategoryData(
-      emoji: map['emoji'] as String,
-      title: map['title'] as String,
-      subtitle: map['subtitle'] as String,
-      colorStart: map['color_start'] as int,
-      colorEnd: map['color_end'] as int,
-    );
-  }
 }
 
 class AttractionData {
+
+  factory AttractionData.fromMap(Map<String, Object?> map) {
+    return AttractionData(
+      emoji: map['emoji'] as String,
+      name: map['name'] as String,
+      location: map['location'] as String,
+      rating: map['rating'] as String,
+      reviews: map['reviews'] as String,
+      tag: map['tag'] as String,
+    );
+  }
   AttractionData({
     required this.emoji,
     required this.name,
@@ -576,20 +588,19 @@ class AttractionData {
   final String rating;
   final String reviews;
   final String tag;
-
-  factory AttractionData.fromMap(Map<String, Object?> map) {
-    return AttractionData(
-      emoji: map['emoji'] as String,
-      name: map['name'] as String,
-      location: map['location'] as String,
-      rating: map['rating'] as String,
-      reviews: map['reviews'] as String,
-      tag: map['tag'] as String,
-    );
-  }
 }
 
 class HotelData {
+
+  factory HotelData.fromMap(Map<String, Object?> map) {
+    return HotelData(
+      emoji: map['emoji'] as String,
+      name: map['name'] as String,
+      stars: map['stars'] as String,
+      reviews: map['reviews'] as String,
+      price: map['price'] as String,
+    );
+  }
   HotelData({
     required this.emoji,
     required this.name,
@@ -603,19 +614,21 @@ class HotelData {
   final String stars;
   final String reviews;
   final String price;
-
-  factory HotelData.fromMap(Map<String, Object?> map) {
-    return HotelData(
-      emoji: map['emoji'] as String,
-      name: map['name'] as String,
-      stars: map['stars'] as String,
-      reviews: map['reviews'] as String,
-      price: map['price'] as String,
-    );
-  }
 }
 
 class TimelineEventData {
+
+  factory TimelineEventData.fromMap(Map<String, Object?> map) {
+    return TimelineEventData(
+      day: map['day'] as String,
+      date: map['date'] as String,
+      time: map['time'] as String,
+      color: map['color'] as int,
+      title: map['title'] as String,
+      subtitle: map['subtitle'] as String,
+      orderIndex: map['order_index'] as int,
+    );
+  }
   TimelineEventData({
     required this.day,
     required this.date,
@@ -633,21 +646,18 @@ class TimelineEventData {
   final String title;
   final String subtitle;
   final int orderIndex;
-
-  factory TimelineEventData.fromMap(Map<String, Object?> map) {
-    return TimelineEventData(
-      day: map['day'] as String,
-      date: map['date'] as String,
-      time: map['time'] as String,
-      color: map['color'] as int,
-      title: map['title'] as String,
-      subtitle: map['subtitle'] as String,
-      orderIndex: map['order_index'] as int,
-    );
-  }
 }
 
 class AssistItem {
+
+  factory AssistItem.fromMap(Map<String, Object?> map) {
+    return AssistItem(
+      icon: map['icon'] as String,
+      title: map['title'] as String,
+      subtitle: map['subtitle'] as String,
+      badge: map['badge'] as String,
+    );
+  }
   AssistItem({
     required this.icon,
     required this.title,
@@ -659,13 +669,4 @@ class AssistItem {
   final String title;
   final String subtitle;
   final String badge;
-
-  factory AssistItem.fromMap(Map<String, Object?> map) {
-    return AssistItem(
-      icon: map['icon'] as String,
-      title: map['title'] as String,
-      subtitle: map['subtitle'] as String,
-      badge: map['badge'] as String,
-    );
-  }
 }

@@ -117,7 +117,7 @@ class _SliverResizingHeader extends SlottedMultiChildRenderObjectWidget<_Slot, R
       _Slot.minExtent => minExtentPrototype,
       _Slot.maxExtent => maxExtentPrototype,
       _Slot.child => child,
-    };
+    }
   }
 
   @override
@@ -140,7 +140,7 @@ class _RenderSliverResizingHeader extends RenderSliver
     return switch (constraints.axis) {
       Axis.vertical => box.size.height,
       Axis.horizontal => box.size.width,
-    };
+    }
   }
 
   double get childExtent => child == null ? 0 : boxExtent(child!);
@@ -174,7 +174,7 @@ class _RenderSliverResizingHeader extends RenderSliver
         -(geometry.scrollExtent - (geometry.paintExtent + constraints.scrollOffset)),
         0.0,
       ),
-    };
+    }
   }
 
   @override
@@ -200,7 +200,7 @@ class _RenderSliverResizingHeader extends RenderSliver
       maxExtent = switch (constraints.axis) {
         Axis.vertical => childSize.height,
         Axis.horizontal => childSize.width,
-      };
+      }
     }
 
     final double scrollOffset = constraints.scrollOffset;

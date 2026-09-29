@@ -436,7 +436,7 @@ class _RenderOverflowBar extends RenderBox
     ) = switch (overflowDirection) {
       VerticalDirection.down => (childAfter, firstChild),
       VerticalDirection.up => (childBefore, lastChild),
-    };
+    }
 
     var maxChildHeight = 0.0;
     var y = 0.0;
@@ -531,7 +531,7 @@ class _RenderOverflowBar extends RenderBox
           OverflowBarAlignment.center => (constraints.maxWidth - child.size.width) / 2,
           OverflowBarAlignment.start => rtl ? constraints.maxWidth - child.size.width : 0,
           OverflowBarAlignment.end => rtl ? 0 : constraints.maxWidth - child.size.width,
-        };
+        }
         childParentData.offset = Offset(x, y);
         y += child.size.height + overflowSpacing;
         child = nextChild();

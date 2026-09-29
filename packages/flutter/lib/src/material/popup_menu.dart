@@ -871,7 +871,7 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
       x = switch (textDirection) {
         TextDirection.rtl => size.width - position.right - childSize.width,
         TextDirection.ltr => position.left,
-      };
+      }
     }
     final wantedPosition = Offset(x, y);
     final Offset originCenter = position.toRect(Offset.zero & size).center;
@@ -1734,7 +1734,7 @@ class PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     return switch (mode) {
       NavigationMode.traditional => widget.enabled,
       NavigationMode.directional => true,
-    };
+    }
   }
 
   @protected

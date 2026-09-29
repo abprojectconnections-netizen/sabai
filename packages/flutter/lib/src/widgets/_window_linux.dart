@@ -643,9 +643,9 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
 
     final _GtkWindow? parentWindow = _owner._windows[_parent.rootView.viewId];
     final _FlView? view = _owner._views[_parent.rootView.viewId];
-    var offset = (0, 0);
+    var offset = 0, 0;
     if (parentWindow != null && view != null) {
-      offset = view.translateCoordinates(parentWindow, (0, 0)) ?? (0, 0);
+      offset = view.translateCoordinates(parentWindow, 0, 0) ?? 0, 0;
     }
     // This is only applied in GTK3 the first time the tooltip is shown as GTK3
     // only sends updates when the popup surface configure event is
@@ -676,7 +676,7 @@ class TooltipWindowControllerLinux extends TooltipWindowController {
       WindowPositionerAnchor.bottomLeft => _GdkGravity.southWest,
       WindowPositionerAnchor.topRight => _GdkGravity.northEast,
       WindowPositionerAnchor.bottomRight => _GdkGravity.southEast,
-    };
+    }
   }
 
   Set<_GdkAnchorHint> _constraintAdjustmentToHints(

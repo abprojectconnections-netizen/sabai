@@ -102,7 +102,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
     final String label = switch (position) {
       DecorationPosition.background => 'bg',
       DecorationPosition.foreground => 'fg',
-    };
+    }
     properties.add(
       EnumProperty<DecorationPosition>('position', position, level: DiagnosticLevel.hidden),
     );
@@ -376,11 +376,11 @@ class Container extends StatelessWidget {
   final Clip clipBehavior;
 
   EdgeInsetsGeometry? get _paddingIncludingDecoration {
-    return switch ((padding, decoration?.padding)) {
+    return switch (padding, decoration?.padding) {
       (null, final EdgeInsetsGeometry? padding) => padding,
       (final EdgeInsetsGeometry? padding, null) => padding,
       (_) => padding!.add(decoration!.padding),
-    };
+    }
   }
 
   @override

@@ -178,11 +178,11 @@ String _jsonToMapEntry(String key, dynamic value) {
 
 String _jsonToObject(dynamic json) {
   switch (json) {
-    case null || num() || bool():
-      return '$json';
-    case String():
+    const (case null || num() || bool():
+      return '$json';)
+    case const String():
       return generateEncodedString(currentLocale, json);
-    case Iterable<Object?>():
+    case const Iterable<Object?>():
       final Type type = json.first.runtimeType;
       final buffer = StringBuffer('const <$type>[');
       for (final Object? value in json) {
@@ -190,7 +190,7 @@ String _jsonToObject(dynamic json) {
       }
       buffer.write(']');
       return buffer.toString();
-    case Map<String, dynamic>():
+    case <String, dynamic>{}:
       final buffer = StringBuffer('<String, Object>{');
       json.forEach((String key, dynamic value) {
         buffer.writeln(_jsonToMapEntry(key, value));
@@ -204,18 +204,18 @@ String _jsonToObject(dynamic json) {
 
 String _jsonToMap(dynamic json) {
   switch (json) {
-    case null || num() || bool():
-      return '$json';
-    case String():
+    const (case null || num() || bool():
+      return '$json';)
+    case const String():
       return generateEncodedString(currentLocale, json);
-    case Iterable<dynamic>():
+    case const Iterable<dynamic>():
       final buffer = StringBuffer('<String>[');
       for (final Object? value in json) {
         buffer.writeln('${_jsonToMap(value)},');
       }
       buffer.write(']');
       return buffer.toString();
-    case Map<String, dynamic>():
+    case const <String, dynamic>{}:
       final buffer = StringBuffer('<String, Object>{');
       json.forEach((String key, dynamic value) {
         buffer.writeln(_jsonToMapEntry(key, value));

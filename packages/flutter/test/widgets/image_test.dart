@@ -1540,7 +1540,7 @@ void main() {
                     frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
                   ),
                 ),
-              };
+              }
             },
           ),
         );
@@ -1710,7 +1710,7 @@ void main() {
                     frameBuilder: imageProvider == imageProvider1 ? buildFrame1 : buildFrame2,
                   ),
                 ),
-              };
+              }
             },
           ),
         );
@@ -1852,7 +1852,7 @@ void main() {
                 data: MediaQueryData(disableAnimations: disableAnimations),
                 child: Image(image: imageProvider),
               ),
-            };
+            }
           },
         ),
       );

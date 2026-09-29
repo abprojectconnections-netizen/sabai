@@ -4166,7 +4166,7 @@ void main() {
         // Find any menu items that are available.
         final Finder menuItems = find.byType(SubmenuButton);
         if (menuItems.evaluate().length < 2) {
-          return (0.0, 0.0);
+          return 0.0, 0.0;
         }
 
         final Rect firstItem = tester.getRect(menuItems.first);
@@ -4175,7 +4175,7 @@ void main() {
 
         final double topPadding = firstItem.top - menuPanel.top;
         final double bottomPadding = menuPanel.bottom - lastItem.bottom;
-        return (topPadding, bottomPadding);
+        return topPadding, bottomPadding;
       }
 
       Future<void> buildSimpleMenuAnchor(

@@ -526,7 +526,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape
     final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
       TextDirection.ltr => (startThumbCenter, endThumbCenter),
       TextDirection.rtl => (endThumbCenter, startThumbCenter),
-    };
+    }
 
     final Rect trackRect = getPreferredRect(
       parentBox: parentBox,
@@ -639,7 +639,7 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape
     final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
       TextDirection.ltr => (startThumbCenter, endThumbCenter),
       TextDirection.rtl => (endThumbCenter, startThumbCenter),
-    };
+    }
     final Size thumbSize = sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
     final double thumbRadius = thumbSize.width / 2;
     assert(thumbRadius > 0);
@@ -752,7 +752,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     final bool isBetweenThumbs = switch (textDirection) {
       TextDirection.ltr => startThumbCenter.dx < center.dx && center.dx < endThumbCenter.dx,
       TextDirection.rtl => endThumbCenter.dx < center.dx && center.dx < startThumbCenter.dx,
-    };
+    }
     final Color? begin = isBetweenThumbs
         ? sliderTheme.disabledActiveTickMarkColor
         : sliderTheme.disabledInactiveTickMarkColor;
@@ -1066,7 +1066,7 @@ class GappedRangeSliderTrackShape extends RangeSliderTrackShape with BaseRangeSl
     final (Offset leftThumbOffset, Offset rightThumbOffset) = switch (textDirection) {
       TextDirection.ltr => (startThumbCenter, endThumbCenter),
       TextDirection.rtl => (endThumbCenter, startThumbCenter),
-    };
+    }
 
     final Size thumbSize = sliderTheme.rangeThumbShape!.getPreferredSize(isEnabled, isDiscrete);
     final double thumbRadius = thumbSize.width / 2;

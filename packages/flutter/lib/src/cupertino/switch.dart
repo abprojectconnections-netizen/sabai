@@ -591,7 +591,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
         _dragDelta = switch (Directionality.of(context)) {
           TextDirection.rtl => -delta,
           TextDirection.ltr => delta,
-        };
+        }
       }
 
       _dragValue = value;
@@ -604,7 +604,7 @@ class _CupertinoSwitchState extends State<CupertinoSwitch>
       _dragDelta += switch (Directionality.of(context)) {
         TextDirection.rtl => -delta,
         TextDirection.ltr => delta,
-      };
+      }
 
       final valueChangedWhileDragging = widget.value != _dragValue;
 
@@ -1105,7 +1105,7 @@ class _SwitchPainter extends ToggleablePainter {
     final double visualPosition = switch (textDirection) {
       TextDirection.rtl => 1.0 - currentValue,
       TextDirection.ltr => currentValue,
-    };
+    }
     if (reaction.status == AnimationStatus.reverse && !_stopPressAnimation) {
       _stopPressAnimation = true;
     } else {
@@ -1178,14 +1178,14 @@ class _SwitchPainter extends ToggleablePainter {
 
     final double currentReactionValue = reaction.value;
     if (_onOffLabelColors != null) {
-      final (Color onLabelColor, Color offLabelColor) = onOffLabelColors!;
+      final (Color onLabelColor, Color offLabelColor) = onOffLabelColors;
 
       final double leftLabelOpacity = visualPosition * (1.0 - currentReactionValue);
       final double rightLabelOpacity = (1.0 - visualPosition) * (1.0 - currentReactionValue);
       final (double onLabelOpacity, double offLabelOpacity) = switch (textDirection) {
         TextDirection.ltr => (leftLabelOpacity, rightLabelOpacity),
         TextDirection.rtl => (rightLabelOpacity, leftLabelOpacity),
-      };
+      }
 
       final (Offset onLabelOffset, Offset offLabelOffset) = switch (textDirection) {
         TextDirection.ltr => (
@@ -1196,7 +1196,7 @@ class _SwitchPainter extends ToggleablePainter {
           trackRect.centerRight.translate(-_kOnLabelPaddingHorizontal, 0),
           trackRect.centerLeft.translate(_kOffLabelPaddingHorizontal, 0),
         ),
-      };
+      }
 
       // Draws '|' label.
       final onLabelRect = Rect.fromCenter(

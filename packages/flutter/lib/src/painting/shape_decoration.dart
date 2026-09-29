@@ -186,7 +186,7 @@ class ShapeDecoration extends Decoration {
       BoxDecoration() => ShapeDecoration.lerp(ShapeDecoration.fromBoxDecoration(a), this, t),
       ShapeDecoration? _ => ShapeDecoration.lerp(a, this, t),
       _ => super.lerpFrom(a, t) as ShapeDecoration?,
-    };
+    }
   }
 
   @override
@@ -195,7 +195,7 @@ class ShapeDecoration extends Decoration {
       BoxDecoration() => ShapeDecoration.lerp(this, ShapeDecoration.fromBoxDecoration(b), t),
       ShapeDecoration? _ => ShapeDecoration.lerp(this, b, t),
       _ => super.lerpTo(b, t) as ShapeDecoration?,
-    };
+    }
   }
 
   /// Linearly interpolate between two shapes.

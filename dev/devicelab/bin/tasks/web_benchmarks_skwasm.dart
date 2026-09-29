@@ -10,12 +10,12 @@ const String buildMode = String.fromEnvironment('buildMode', defaultValue: 'prof
 /// Runs all Web benchmarks using the Skwasm rendering backend.
 Future<void> main() async {
   await task(() async {
-    return runWebBenchmark((
+    return runWebBenchmark(
       useWasm: true,
       forceSingleThreadedSkwasm: false,
       useDdc: false,
       withHotReload: false,
       buildMode: buildMode,
-    ));
+    );
   });
 }

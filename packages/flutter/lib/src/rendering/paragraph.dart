@@ -975,7 +975,7 @@ class RenderParagraph extends RenderBox
             final (double fadeStart, double fadeEnd) = switch (textDirection) {
               TextDirection.rtl => (fadeSizePainter.width, 0.0),
               TextDirection.ltr => (size.width - fadeSizePainter.width, size.width),
-            };
+            }
             _overflowShader = ui.Gradient.linear(
               Offset(fadeStart, 0.0),
               Offset(fadeEnd, 0.0),
@@ -1373,13 +1373,13 @@ class RenderParagraph extends RenderBox
             attributes: info.stringAttributes,
           );
         switch (info.recognizer) {
-          case TapGestureRecognizer(onTap: final VoidCallback? handler):
-          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
+          case const TapGestureRecognizer(onTap: final VoidCallback? handler):
+          case const DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
             if (handler != null) {
               configuration.onTap = handler;
               configuration.isLink = true;
             }
-          case LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
+          case const LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
             if (onLongPress != null) {
               configuration.onLongPress = onLongPress;
             }
@@ -1525,12 +1525,12 @@ class _SelectableFragment
     final (
       TextSelectionHandleType startSelectionHandleType,
       TextSelectionHandleType endSelectionHandleType,
-    ) = switch ((selectionCollapsed, flipHandles)) {
+    ) = switch (selectionCollapsed, flipHandles) {
       // Always prefer collapsed handle when selection is collapsed.
       (true, _) => (TextSelectionHandleType.collapsed, TextSelectionHandleType.collapsed),
       (false, true) => (TextSelectionHandleType.right, TextSelectionHandleType.left),
       (false, false) => (TextSelectionHandleType.left, TextSelectionHandleType.right),
-    };
+    }
     return SelectionGeometry(
       startSelectionPoint: SelectionPoint(
         localPosition: startOffsetInParagraphCoordinates,
@@ -3011,7 +3011,7 @@ class _SelectableFragment
           currentParagraphLocalPosition,
         );
         if (positionWithinCurrentParagraph) {
-          return (paragraph: current, localPosition: currentParagraphLocalPosition);
+          return paragraph: current, localPosition: currentParagraphLocalPosition;
         }
       }
       current = current.parent;
@@ -3135,7 +3135,7 @@ class _SelectableFragment
       start = TextPosition(offset: textBoundary.start);
       end = TextPosition(offset: textBoundary.end, affinity: TextAffinity.upstream);
     }
-    return (boundaryStart: start, boundaryEnd: end);
+    return boundaryStart: start, boundaryEnd: end;
   }
 
   SelectionResult _handleSelectWord(Offset globalPosition) {

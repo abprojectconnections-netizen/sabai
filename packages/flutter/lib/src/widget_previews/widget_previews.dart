@@ -430,8 +430,8 @@ base class PreviewThemeData {
   /// the value of [brightness].
   (ThemeData?, CupertinoThemeData?) themeForBrightness(Brightness brightness) {
     if (brightness == Brightness.light) {
-      return (materialLight, cupertinoLight);
+      return materialLight, cupertinoLight;
     }
-    return (materialDark, cupertinoDark);
+    return materialDark, cupertinoDark;
   }
 }

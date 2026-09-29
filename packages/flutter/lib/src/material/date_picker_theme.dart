@@ -428,7 +428,7 @@ class DatePickerThemeData with Diagnosticable {
     }
     return _inputDecorationTheme is InputDecorationTheme
         ? _inputDecorationTheme.data
-        : _inputDecorationTheme as InputDecorationThemeData;
+        : _inputDecorationTheme! as InputDecorationThemeData;
   }
 
   final Object? _inputDecorationTheme;
