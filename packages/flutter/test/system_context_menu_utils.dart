@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' show FlutterError;
 
 /// Returns a [IOSSystemContextMenuItem] of the correct subclass given its
 /// json data.

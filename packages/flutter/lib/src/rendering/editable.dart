@@ -1488,13 +1488,13 @@ class RenderEditable extends RenderBox
             attributes: info.stringAttributes,
           );
         switch (info.recognizer) {
-          case const TapGestureRecognizer(onTap: final VoidCallback? handler):
-          case const DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
+          case TapGestureRecognizer(onTap: final VoidCallback? handler):
+          case DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
             if (handler != null) {
               configuration.onTap = handler;
               configuration.isLink = true;
             }
-          case const LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
+          case LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
             if (onLongPress != null) {
               configuration.onLongPress = onLongPress;
             }

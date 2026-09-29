@@ -296,8 +296,8 @@ BorderSide? getBorderSide(WidgetTester tester) {
 
 BorderRadius? getBorderRadius(WidgetTester tester) {
   switch (getBorder(tester)!) {
-    case const UnderlineInputBorder(:final BorderRadius borderRadius):
-    case const OutlineInputBorder(:final BorderRadius borderRadius):
+    case UnderlineInputBorder(:final BorderRadius borderRadius):
+    case OutlineInputBorder(:final BorderRadius borderRadius):
       return borderRadius;
   }
   return null;
@@ -15494,8 +15494,8 @@ void main() {
       expect(find.byType(InputDecorator), findsOneWidget);
       expect(find.byType(Icon), findsOneWidget);
 
-      final Offsetdx: double decoratorRight = tester.getTopRight(find.byType(InputDecorator));
-      final Offsetdx: double prefixRight = tester.getTopRight(find.byType(Icon));
+      final Offsetdx: final double decoratorRight = tester.getTopRight(find.byType(InputDecorator));
+      final Offsetdx: final double prefixRight = tester.getTopRight(find.byType(Icon));
 
       // The prefix is inside the decorator.
       expect(decoratorRight, lessThanOrEqualTo(prefixRight));

@@ -336,7 +336,6 @@ class SemanticsUpdateBuilderSpy extends Fake implements ui.SemanticsUpdateBuilde
       valueAttributes: valueAttributes,
       childrenInTraversalOrder: childrenInTraversalOrder,
       transform: transform,
-    ;
   }
 
   @override

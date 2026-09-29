@@ -926,7 +926,6 @@ class _TreeSliverState<T> extends State<TreeSliver<T>>
         // This key helps us keep track of the lifetime of this animation in the
         // render object, since the indexes can change at any time.
         key: UniqueKey(),
-      ;
       switch (node._expanded) {
         case true:
           // Expanding

@@ -1606,7 +1606,6 @@ class SelectionOverlay {
           return capturedThemes.wrap(_buildEndHandle(context));
         },
       ),
-    ;
     overlay.insertAll(<OverlayEntry>[_handles!.start, _handles!.end]);
   }
 

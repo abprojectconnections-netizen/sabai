@@ -876,8 +876,8 @@ class _InteractiveViewerState extends State<InteractiveViewer> with TickerProvid
         _scaleController.duration = Duration(milliseconds: (tFinal * 1000).round());
         _scaleAnimation!.addListener(_handleScaleAnimation);
         _scaleController.forward();
-      const (case _GestureType.rotate || null:
-        break;)
+      const case, _GestureType.rotate || null:
+        break;
     }
   }
 

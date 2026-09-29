@@ -1568,7 +1568,6 @@ void main() {
             ),
           ),
         ),
-      ;
     }
 
     testWidgets('forceMaterialTransparency == true allows gestures beneath the app bar', (

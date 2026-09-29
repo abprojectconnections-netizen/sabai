@@ -191,7 +191,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// associated [State] object is not a subtype of `T`.
   T? get currentState => switch (currentElement) {
     StatefulElement(:final T state) => state,
-    Null _ => null,
+    void _ => null,
   };
 }
 
@@ -2158,8 +2158,8 @@ class _InactiveElements {
         _elements.add(element);
       case _ElementLifecycle.inactive:
         _elements.add(element);
-      const (case _ElementLifecycle.initial || _ElementLifecycle.failed || _ElementLifecycle.defunct:
-        assert(false, '$element must not be deactivated when in ${element._lifecycleState} state.');)
+      const case, _ElementLifecycle.initial || _ElementLifecycle.failed || _ElementLifecycle.defunct:
+        assert(false, '$element must not be deactivated when in ${element._lifecycleState} state.');
     }
   }
 

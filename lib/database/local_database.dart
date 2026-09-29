@@ -431,17 +431,6 @@ class LocalDatabase {
 }
 
 class Destination {
-
-  factory Destination.fromMap(Map<String, Object?> map) {
-    return Destination(
-      emoji: map['emoji'] as String,
-      label: map['label'] as String,
-      title: map['title'] as String,
-      meta: map['meta'] as String,
-      gradientStart: map['gradient_start'] as int,
-      gradientEnd: map['gradient_end'] as int,
-    );
-  }
   Destination({
     required this.emoji,
     required this.label,
@@ -450,6 +439,17 @@ class Destination {
     required this.gradientStart,
     required this.gradientEnd,
   });
+
+  factory Destination.fromMap(Map<String, Object?> map) {
+    return Destination(
+      emoji: map['emoji']! as String,
+      label: map['label']! as String,
+      title: map['title']! as String,
+      meta: map['meta']! as String,
+      gradientStart: map['gradient_start']! as int,
+      gradientEnd: map['gradient_end']! as int,
+    );
+  }
 
   final String emoji;
   final String label;
@@ -460,18 +460,6 @@ class Destination {
 }
 
 class TripData {
-
-  factory TripData.fromMap(Map<String, Object?> map) {
-    return TripData(
-      emoji: map['emoji'] as String,
-      title: map['title'] as String,
-      subtitle: map['subtitle'] as String,
-      progress: (map['progress'] as num).toDouble(),
-      status: map['status'] as String,
-      gradientStart: map['gradient_start'] as int,
-      gradientEnd: map['gradient_end'] as int,
-    );
-  }
   TripData({
     required this.emoji,
     required this.title,
@@ -481,6 +469,18 @@ class TripData {
     required this.gradientStart,
     required this.gradientEnd,
   });
+
+  factory TripData.fromMap(Map<String, Object?> map) {
+    return TripData(
+      emoji: map['emoji']! as String,
+      title: map['title']! as String,
+      subtitle: map['subtitle']! as String,
+      progress: (map['progress']! as num).toDouble(),
+      status: map['status']! as String,
+      gradientStart: map['gradient_start']! as int,
+      gradientEnd: map['gradient_end']! as int,
+    );
+  }
 
   final String emoji;
   final String title;
@@ -492,22 +492,6 @@ class TripData {
 }
 
 class FlightResult {
-
-  factory FlightResult.fromMap(Map<String, Object?> map) {
-    return FlightResult(
-      icon: map['icon'] as String,
-      airline: map['airline'] as String,
-      details: map['details'] as String,
-      price: map['price'] as String,
-      depart: map['depart'] as String,
-      departAirport: map['depart_airport'] as String,
-      arrive: map['arrive'] as String,
-      arriveAirport: map['arrive_airport'] as String,
-      duration: map['duration'] as String,
-      stopInfo: map['stop_info'] as String,
-      badge: map['badge'] as String,
-    );
-  }
   FlightResult({
     required this.icon,
     required this.airline,
@@ -521,6 +505,22 @@ class FlightResult {
     required this.stopInfo,
     required this.badge,
   });
+
+  factory FlightResult.fromMap(Map<String, Object?> map) {
+    return FlightResult(
+      icon: map['icon']! as String,
+      airline: map['airline']! as String,
+      details: map['details']! as String,
+      price: map['price']! as String,
+      depart: map['depart']! as String,
+      departAirport: map['depart_airport']! as String,
+      arrive: map['arrive']! as String,
+      arriveAirport: map['arrive_airport']! as String,
+      duration: map['duration']! as String,
+      stopInfo: map['stop_info']! as String,
+      badge: map['badge']! as String,
+    );
+  }
 
   final String icon;
   final String airline;
@@ -536,16 +536,6 @@ class FlightResult {
 }
 
 class CategoryData {
-
-  factory CategoryData.fromMap(Map<String, Object?> map) {
-    return CategoryData(
-      emoji: map['emoji'] as String,
-      title: map['title'] as String,
-      subtitle: map['subtitle'] as String,
-      colorStart: map['color_start'] as int,
-      colorEnd: map['color_end'] as int,
-    );
-  }
   CategoryData({
     required this.emoji,
     required this.title,
@@ -553,6 +543,16 @@ class CategoryData {
     required this.colorStart,
     required this.colorEnd,
   });
+
+  factory CategoryData.fromMap(Map<String, Object?> map) {
+    return CategoryData(
+      emoji: map['emoji']! as String,
+      title: map['title']! as String,
+      subtitle: map['subtitle']! as String,
+      colorStart: map['color_start']! as int,
+      colorEnd: map['color_end']! as int,
+    );
+  }
 
   final String emoji;
   final String title;
@@ -562,17 +562,6 @@ class CategoryData {
 }
 
 class AttractionData {
-
-  factory AttractionData.fromMap(Map<String, Object?> map) {
-    return AttractionData(
-      emoji: map['emoji'] as String,
-      name: map['name'] as String,
-      location: map['location'] as String,
-      rating: map['rating'] as String,
-      reviews: map['reviews'] as String,
-      tag: map['tag'] as String,
-    );
-  }
   AttractionData({
     required this.emoji,
     required this.name,
@@ -581,6 +570,17 @@ class AttractionData {
     required this.reviews,
     required this.tag,
   });
+
+  factory AttractionData.fromMap(Map<String, Object?> map) {
+    return AttractionData(
+      emoji: map['emoji']! as String,
+      name: map['name']! as String,
+      location: map['location']! as String,
+      rating: map['rating']! as String,
+      reviews: map['reviews']! as String,
+      tag: map['tag']! as String,
+    );
+  }
 
   final String emoji;
   final String name;
@@ -591,16 +591,6 @@ class AttractionData {
 }
 
 class HotelData {
-
-  factory HotelData.fromMap(Map<String, Object?> map) {
-    return HotelData(
-      emoji: map['emoji'] as String,
-      name: map['name'] as String,
-      stars: map['stars'] as String,
-      reviews: map['reviews'] as String,
-      price: map['price'] as String,
-    );
-  }
   HotelData({
     required this.emoji,
     required this.name,
@@ -608,6 +598,16 @@ class HotelData {
     required this.reviews,
     required this.price,
   });
+
+  factory HotelData.fromMap(Map<String, Object?> map) {
+    return HotelData(
+      emoji: map['emoji']! as String,
+      name: map['name']! as String,
+      stars: map['stars']! as String,
+      reviews: map['reviews']! as String,
+      price: map['price']! as String,
+    );
+  }
 
   final String emoji;
   final String name;
@@ -617,18 +617,6 @@ class HotelData {
 }
 
 class TimelineEventData {
-
-  factory TimelineEventData.fromMap(Map<String, Object?> map) {
-    return TimelineEventData(
-      day: map['day'] as String,
-      date: map['date'] as String,
-      time: map['time'] as String,
-      color: map['color'] as int,
-      title: map['title'] as String,
-      subtitle: map['subtitle'] as String,
-      orderIndex: map['order_index'] as int,
-    );
-  }
   TimelineEventData({
     required this.day,
     required this.date,
@@ -638,6 +626,18 @@ class TimelineEventData {
     required this.subtitle,
     required this.orderIndex,
   });
+
+  factory TimelineEventData.fromMap(Map<String, Object?> map) {
+    return TimelineEventData(
+      day: map['day']! as String,
+      date: map['date']! as String,
+      time: map['time']! as String,
+      color: map['color']! as int,
+      title: map['title']! as String,
+      subtitle: map['subtitle']! as String,
+      orderIndex: map['order_index']! as int,
+    );
+  }
 
   final String day;
   final String date;
@@ -649,21 +649,21 @@ class TimelineEventData {
 }
 
 class AssistItem {
-
-  factory AssistItem.fromMap(Map<String, Object?> map) {
-    return AssistItem(
-      icon: map['icon'] as String,
-      title: map['title'] as String,
-      subtitle: map['subtitle'] as String,
-      badge: map['badge'] as String,
-    );
-  }
   AssistItem({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.badge,
   });
+
+  factory AssistItem.fromMap(Map<String, Object?> map) {
+    return AssistItem(
+      icon: map['icon']! as String,
+      title: map['title']! as String,
+      subtitle: map['subtitle']! as String,
+      badge: map['badge']! as String,
+    );
+  }
 
   final String icon;
   final String title;

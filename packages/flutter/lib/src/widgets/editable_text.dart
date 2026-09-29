@@ -3154,7 +3154,6 @@ class EditableTextState extends State<EditableText>
       return
         startGlyphHeight: renderEditable.preferredLineHeight,
         endGlyphHeight: renderEditable.preferredLineHeight,
-      ;
     }
 
     final String selectedGraphemes = selection.textInside(currText);
@@ -3169,7 +3168,6 @@ class EditableTextState extends State<EditableText>
     return
       startGlyphHeight: startCharacterRect?.height ?? renderEditable.preferredLineHeight,
       endGlyphHeight: endCharacterRect?.height ?? renderEditable.preferredLineHeight,
-    ;
   }
 
   /// {@template flutter.widgets.EditableText.getAnchors}
@@ -4233,13 +4231,13 @@ class EditableTextState extends State<EditableText>
       return;
     }
     switch (notification) {
-      case const ScrollStartNotification() when _dataWhenToolbarShowScheduled != null:
-      case const ScrollEndNotification() when _dataWhenToolbarShowScheduled == null:
+      case ScrollStartNotification() when _dataWhenToolbarShowScheduled != null:
+      case ScrollEndNotification() when _dataWhenToolbarShowScheduled == null:
         break;
-      case const ScrollEndNotification() when _dataWhenToolbarShowScheduled!.value != _value:
+      case ScrollEndNotification() when _dataWhenToolbarShowScheduled!.value != _value:
         _dataWhenToolbarShowScheduled = null;
         _disposeScrollNotificationObserver();
-      case const ScrollNotification(:final BuildContext? context)
+      case ScrollNotification(:final BuildContext? context)
           when !_isInternalScrollableNotification(context) &&
               _scrollableNotificationIsFromSameSubtree(context):
         _handleContextMenuOnScroll(notification);

@@ -2390,74 +2390,8 @@ class _SubmenuDirectionalFocusAction extends DirectionalFocusAction {
           ..requestFocus()
           ..previousFocus();
         return;
-      case Axis.horizontal, TextDirection.ltr, TraversalDirection.right:
-      case Axis.horizontal, TextDirection.rtl, TraversalDirection.left:
-        assert(_debugMenuInfo('Moving to next $MenuBar item'));
-        // Focus this MenuBar SubmenuButton, then move focus to the next focusable
-        // MenuBar item.
-        _button
-          ..requestFocus()
-          ..nextFocus();
-        return;
-      case Axis.horizontal, _, TraversalDirection.down:
-        if (isSubmenu) {
-          // If this is a top-level (horizontal) button in a menubar, focus the
-          // first item in this button's submenu.
-          _anchorState?._focusFirstMenuItem();
-          return;
-        }
-      case Axis.horizontal, _, TraversalDirection.up:
-        if (isSubmenu) {
-          // If this is a top-level (horizontal) button in a menubar, focus the
-          // last item in this button's submenu. This makes navigating into
-          // upward-oriented submenus more intuitive.
-          _anchorState?._focusLastMenuItem();
-          return;
-        }
+:
       case Axis.vertical, TextDirection.ltr, TraversalDirection.left:
-      case Axis.vertical, TextDirection.rtl, TraversalDirection.right:
-        if (_parent?._parent?._orientation == Axis.horizontal) {
-          if (isSubmenu) {
-            _parent!.widget.childFocusNode
-              ?..requestFocus()
-              ..previousFocus();
-          } else {
-            assert(_debugMenuInfo('Exiting submenu'));
-            // MenuBar SubmenuButton => SubmenuButton => child
-            // Focus the parent SubmenuButton anchor attached to this child.
-            _anchorState?._focusButton();
-          }
-        } else {
-          if (isSubmenu) {
-            if (_parent?._parent == null) {
-              // Moving in the closing direction while focused on a
-              // SubmenuButton within a root MenuAnchor menu should not close
-              // the menu.
-              return;
-            }
-            _parent?._focusButton();
-            _parent?._menuController.close();
-          } else {
-            // If focus is not on a submenu button, closing the anchor this item
-            // presides in will close the menu and focus the anchor button.
-            _controller.close();
-          }
-          assert(_debugMenuInfo('Exiting submenu'));
-        }
-        return;
-      case Axis.vertical, TextDirection.ltr, TraversalDirection.right when isSubmenu:
-        assert(_debugMenuInfo('Entering submenu'));
-        if (_controller.isOpen) {
-          _anchorState?._focusFirstMenuItem();
-        } else {
-          _controller.open();
-          SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-            if (_controller.isOpen) {
-              _anchorState?._focusFirstMenuItem();
-            }
-          });
-        }
-        return;
       default:
         break;
     }

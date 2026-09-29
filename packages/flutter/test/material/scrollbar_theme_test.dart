@@ -507,7 +507,6 @@ void main() {
               ),
             ),
           ),
-        ;
       }
 
       // Scrollbar defaults for light themes:

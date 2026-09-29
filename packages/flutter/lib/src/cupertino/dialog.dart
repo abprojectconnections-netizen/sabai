@@ -2718,7 +2718,6 @@ class _RenderPriorityColumn extends RenderFlex {
       return
         topChildHeight: maxHeight - effectiveBottomMinHeight,
         bottomChildHeight: effectiveBottomMinHeight,
-      ;
     }
     return topChildHeight: 0, bottomChildHeight: maxHeight;
   }

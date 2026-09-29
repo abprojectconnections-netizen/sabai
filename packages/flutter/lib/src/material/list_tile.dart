@@ -1694,7 +1694,6 @@ class _RenderListTile extends RenderBox
       titleY: titleY,
       textConstraints: textConstraints,
       tileSize: Size(tileWidth, tileHeight),
-    ;
   }
 
   @override

@@ -85,9 +85,9 @@ void main() {
   test('screencap invokes "exec-out screencap -p"', () async {
     final processManager = FakeProcessManager((String exec, List<String> args) async {
       switch (args) {
-        case const ['shell', 'echo', 'connected']:
+        case ['shell', 'echo', 'connected']:
           return FakeProcessManager.ok('connected');
-        case const ['exec-out', 'screencap', '-p']:
+        case ['exec-out', 'screencap', '-p']:
           return FakeProcessManager.okBinary(<int>[0, 1, 2, 3]);
         default:
           throw UnsupportedError('Unknown command: $args');
@@ -103,9 +103,9 @@ void main() {
   test('tap invokes "shell input tap"', () async {
     final processManager = FakeProcessManager((String exec, List<String> args) async {
       switch (args) {
-        case const ['shell', 'echo', 'connected']:
+        case ['shell', 'echo', 'connected']:
           return FakeProcessManager.ok('connected');
-        case const ['shell', 'input', 'tap', '1', '2']:
+        case ['shell', 'input', 'tap', '1', '2']:
           return FakeProcessManager.ok();
         default:
           throw UnsupportedError('Unknown command: $args');

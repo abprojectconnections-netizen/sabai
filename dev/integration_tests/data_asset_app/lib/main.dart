@@ -35,7 +35,7 @@ class _MyAppState extends State<MyApp> {
       // Print for integration test discovery
       if (appAssetData != null) {
         print('VERSION: ${appAssetData.version}');
-        for (final MapEntry:key, :value in appAssetData.found.entries) {
+        for (final MapEntryinkey, :value in appAssetData.found.entries) {
           print('FOUND "$key": "$value".');
         }
         for (final String id in appAssetData.notFound) {
@@ -77,7 +77,7 @@ class _MyAppState extends State<MyApp> {
             if (_assetData != null) ...[
               if (_assetData!.found.isEmpty && _assetData!.notFound.isEmpty)
                 const Text('No assets requested.'),
-              for (final MapEntry:key, :value in _assetData!.found.entries)
+              for (final MapEntryinkey, :value in _assetData!.found.entries)
                 Text('FOUND "$key": "$value"'),
               for (final id in _assetData!.notFound)
                 Text('NOT FOUND "$id"', style: const TextStyle(color: Colors.red)),

@@ -959,7 +959,7 @@ void main() {
 
     final Element actionTextBox = tester.element(find.text('ACTION'));
     expect(actionTextBox.widget, isA<Text>());
-    final Text:TextStyle? style = actionTextBox.widget as Text;
+    final Text:final TextStyle? style = actionTextBox.widget as Text;
 
     final TextStyle defaultStyle = DefaultTextStyle.of(actionTextBox).style;
     expect(defaultStyle.merge(style).color, Colors.lightBlue);
