@@ -69,7 +69,7 @@ CupertinoPageScaffold? scaffoldForNavBar(Widget? navBar) {
         navigationBar = navBar ?? const CupertinoNavigationBar(),
         child = const Placeholder(),
       ) {}
-    case CupertinoSliverNavigationBar():
+    case const CupertinoSliverNavigationBar():
       return CupertinoPageScaffold(
         child: CustomScrollView(
           slivers: <Widget>[

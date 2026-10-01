@@ -4231,13 +4231,13 @@ class EditableTextState extends State<EditableText>
       return;
     }
     switch (notification) {
-      case ScrollStartNotification() when _dataWhenToolbarShowScheduled != null:
-      case ScrollEndNotification() when _dataWhenToolbarShowScheduled == null:
+      case const ScrollStartNotification() when _dataWhenToolbarShowScheduled != null:
+      case const ScrollEndNotification() when _dataWhenToolbarShowScheduled == null:
         break;
-      case ScrollEndNotification() when _dataWhenToolbarShowScheduled!.value != _value:
+      case const ScrollEndNotification() when _dataWhenToolbarShowScheduled!.value != _value:
         _dataWhenToolbarShowScheduled = null;
         _disposeScrollNotificationObserver();
-      case ScrollNotification(:final BuildContext? context)
+      case const ScrollNotification(:final BuildContext? context)
           when !_isInternalScrollableNotification(context) &&
               _scrollableNotificationIsFromSameSubtree(context):
         _handleContextMenuOnScroll(notification);

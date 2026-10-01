@@ -296,8 +296,8 @@ BorderSide? getBorderSide(WidgetTester tester) {
 
 BorderRadius? getBorderRadius(WidgetTester tester) {
   switch (getBorder(tester)!) {
-    case UnderlineInputBorder(:final BorderRadius borderRadius):
-    case OutlineInputBorder(:final BorderRadius borderRadius):
+    case const UnderlineInputBorder(:final BorderRadius borderRadius):
+    case const OutlineInputBorder(:final BorderRadius borderRadius):
       return borderRadius;
   }
   return null;

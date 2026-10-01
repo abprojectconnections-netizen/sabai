@@ -1303,11 +1303,11 @@ class _StaticTextRangeFinder extends FinderBase<TextRangeContext> {
 
     void visitor(RenderObject child) {
       switch (child) {
-        case RenderParagraph():
+        case const RenderParagraph():
           paragraphs.add(child);
         // No need to continue, we are piggybacking off of a text matcher, so
         // inline text widgets will be reported separately.
-        case RenderBox():
+        case const RenderBox():
           child.visitChildren(visitor);
         case _:
       }

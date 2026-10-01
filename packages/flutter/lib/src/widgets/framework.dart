@@ -191,7 +191,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// associated [State] object is not a subtype of `T`.
   T? get currentState => switch (currentElement) {
     StatefulElement(:final T state) => state,
-    void _ => null,
+    void _ {},
   };
 }
 

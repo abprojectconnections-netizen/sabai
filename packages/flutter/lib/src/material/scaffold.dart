@@ -2851,7 +2851,7 @@ class ScaffoldState extends State<Scaffold>
         WidgetsBinding.instance.removeObserver(this);
       case false, true:
         WidgetsBinding.instance.addObserver(this);
-      const case, true, true || false, false:
+      const case, true, true, false:
     }
   }
 
