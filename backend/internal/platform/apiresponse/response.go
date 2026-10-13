@@ -28,6 +28,12 @@ func BadRequest(c *gin.Context, message string) {
 func Unauthorized(c *gin.Context) {
 	c.JSON(http.StatusUnauthorized, envelope{Error: &errorBody{Code: "UNAUTHORIZED", Message: "invalid credentials"}, RequestID: c.GetString("request_id")})
 }
+func Forbidden(c *gin.Context) {
+	c.JSON(http.StatusForbidden, envelope{Error: &errorBody{Code: "FORBIDDEN", Message: "insufficient permissions"}, RequestID: c.GetString("request_id")})
+}
+func NotFound(c *gin.Context, message string) {
+	c.JSON(http.StatusNotFound, envelope{Error: &errorBody{Code: "NOT_FOUND", Message: message}, RequestID: c.GetString("request_id")})
+}
 func Internal(c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, envelope{Error: &errorBody{Code: "INTERNAL_ERROR", Message: "an unexpected error occurred"}, RequestID: c.GetString("request_id")})
 }

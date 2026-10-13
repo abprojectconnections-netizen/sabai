@@ -54,6 +54,9 @@ func (s *Service) Register(ctx context.Context, email, password, displayName str
 	if _, err = tx.ExecContext(ctx, "INSERT INTO user_profiles (id, created_at, updated_at, user_id, first_name) VALUES (?, ?, ?, ?, ?)", uuid.NewString(), now, now, account.ID, account.DisplayName); err != nil {
 		return Account{}, "", err
 	}
+	if _, err = tx.ExecContext(ctx, `INSERT INTO user_roles (id, created_at, updated_at, user_id, role_id) SELECT ?, ?, ?, ?, id FROM roles WHERE code = 'CUSTOMER' AND deleted_at IS NULL`, uuid.NewString(), now, now, account.ID); err != nil {
+		return Account{}, "", err
+	}
 	if err = tx.Commit(); err != nil {
 		return Account{}, "", err
 	}

@@ -31,6 +31,29 @@ class ApiClient {
     return payload;
   }
 
+  Future<Map<String, dynamic>> getAuthorized(String path, String token) async {
+    return _sendAuthorized('GET', path, token);
+  }
+
+  Future<Map<String, dynamic>> patchAuthorized(String path, String token, Map<String, dynamic> body) async {
+    return _sendAuthorized('PATCH', path, token, body: body);
+  }
+
+  Future<Map<String, dynamic>> _sendAuthorized(String method, String path, String token, {Map<String, dynamic>? body}) async {
+    final Uri uri = Uri.parse('${AppConfig.apiBaseUrl}$path');
+    final Map<String, String> headers = {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'};
+    final http.Response response = switch (method) {
+      'GET' => await _client.get(uri, headers: headers),
+      'PATCH' => await _client.patch(uri, headers: headers, body: jsonEncode(body)),
+      _ => throw ArgumentError.value(method, 'method', 'Unsupported HTTP method'),
+    };
+    final Map<String, dynamic> payload = _decodeEnvelope(response.body);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw ApiException(_errorMessage(payload));
+    }
+    return payload;
+  }
+
   @visibleForTesting
   void dispose() => _client.close();
 

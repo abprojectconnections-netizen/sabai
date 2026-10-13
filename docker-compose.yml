@@ -6,7 +6,7 @@ services:
       MYSQL_USER: travel
       MYSQL_PASSWORD: travel
       MYSQL_ROOT_PASSWORD: root
-    ports: ["3307:3306"]
+    ports: ["3308:3306"]
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/migrations:/docker-entrypoint-initdb.d:ro
@@ -31,7 +31,7 @@ services:
       MYSQL_DSN: travel:travel@tcp(mysql:3306)/travel_super_app?parseTime=true
       REDIS_ADDR: redis:6379
       JWT_SECRET: development-only-change-before-production
-    ports: ["8081:8080"]
+    ports: ["8082:8080"]
     restart: unless-stopped
     depends_on:
       mysql:

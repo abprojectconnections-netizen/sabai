@@ -20,6 +20,11 @@
 
 ## Delivery backlog
 
+- [x] Portal RBAC: Customer, Partner, Staff, and Admin roles enforced server-side.
+- [x] Portal operational queue API: bookings, payments, partners, tickets, and disputes.
+- [x] Audit trail records actor, action, affected entity, before/after state, IP, request ID, and timestamp.
+- [ ] Bind authenticated Flutter session state to PortalRepository and replace dashboard fixture cards per role.
+- [ ] Bind authenticated Flutter session state to PortalRepository and replace dashboard fixture cards per role.
 - [ ] OAuth adapters: Google, Facebook, and LINE.
 - [ ] Booking engine and availability locking.
 - [ ] Payment adapters: Stripe and PromptPay with verified webhooks.
