@@ -11,7 +11,7 @@ import (
 
 func main() {
 	router := gin.New()
-	router.Use(gin.Logger(), gin.Recovery(), httpapi.RequestID())
+	router.Use(gin.Logger(), gin.Recovery(), httpapi.CORS(os.Getenv("CORS_ALLOWED_ORIGINS")), httpapi.RequestID())
 	dsn := os.Getenv("MYSQL_DSN")
 	if dsn == "" {
 		log.Fatal("MYSQL_DSN is required")

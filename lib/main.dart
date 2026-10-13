@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'database/local_database.dart';
+import 'features/auth/data/auth_api.dart';
+import 'features/auth/views/auth_screen.dart';
 import 'features/demo/controllers/demo_controller.dart';
 import 'features/demo/views/portal_dashboard.dart';
 
@@ -36,13 +38,55 @@ class TravelApp extends StatelessWidget {
           indicatorColor: Color(0xFFE4EDEA),
         ),
       ),
-      home: const TravelHomePage(),
+      home: const _AuthGate(),
+    );
+  }
+}
+
+class _AuthGate extends StatefulWidget {
+  const _AuthGate();
+
+  @override
+  State<_AuthGate> createState() => _AuthGateState();
+}
+
+class _AuthGateState extends State<_AuthGate> {
+  AuthSession? _session;
+  bool _isGuest = false;
+
+  @override
+  Widget build(BuildContext context) {
+    if (_session == null && !_isGuest) {
+      return AuthScreen(
+        onAuthenticated: (session) => setState(() => _session = session),
+        onContinueAsGuest: () => setState(() => _isGuest = true),
+      );
+    }
+    return TravelHomePage(
+      displayName: _session?.displayName ?? '',
+      email: _session?.email ?? '',
+      isGuest: _isGuest,
+      onLogout: () => setState(() {
+        _session = null;
+        _isGuest = false;
+      }),
     );
   }
 }
 
 class TravelHomePage extends StatefulWidget {
-  const TravelHomePage({super.key});
+  const TravelHomePage({
+    required this.displayName,
+    required this.email,
+    required this.isGuest,
+    required this.onLogout,
+    super.key,
+  });
+
+  final String displayName;
+  final String email;
+  final bool isGuest;
+  final VoidCallback onLogout;
 
   @override
   State<TravelHomePage> createState() => _TravelHomePageState();
@@ -314,26 +358,14 @@ class _TravelHomePageState extends State<TravelHomePage> {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('บันทึกทริปแล้ว')));
   }
 
-  void _recordBooking(Map<String, dynamic> listing) {
-    final title = listing['name'] as String;
-    final destination = listing['location'] as String;
-    final price = listing['price'] as int;
-
+  void _recordBooking(Map<String, dynamic> booking) {
     setState(() {
-      _bookings.insert(0, {
-        'title': title,
-        'destination': destination,
-        'date': '16 ธ.ค. – 18 ธ.ค.',
-        'amount': price * 2,
-        'status': 'จ่ายแล้ว',
-        'icon': listing['icon'] as IconData,
-        'color': listing['color'] as Color,
-      });
+      _bookings.insert(0, booking);
+      _selectedIndex = 3;
+      _showBookings = true;
     });
-
-    setState(() => _selectedIndex = 3);
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('ชำระเงินสำเร็จแล้ว • ตรวจสอบประวัติการจอง')),
+      const SnackBar(content: Text('สร้างรายการจองแล้ว • ยังไม่ได้เรียกเก็บเงิน')),
     );
   }
 
@@ -428,6 +460,10 @@ class _TravelHomePageState extends State<TravelHomePage> {
         return _ProfileMvpScreen(
           onOpenDemo: _showDemoSwitcher,
           onOpenHistory: _openBookingHistory,
+          displayName: widget.displayName,
+          email: widget.email,
+          isGuest: widget.isGuest,
+          onLogout: widget.onLogout,
         );
     }
   }
@@ -1266,6 +1302,16 @@ class _TripsMvpScreen extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(date,
                                 style: const TextStyle(fontSize: 11, color: Color(0xFF5C6A64))),
+                            if (booking['payment_method'] is String) ...[
+                              const SizedBox(height: 3),
+                              Text('ชำระผ่าน ${booking['payment_method']}',
+                                  style: const TextStyle(fontSize: 10, color: Color(0xFF75817B))),
+                            ],
+                            if (booking['booking_id'] is String) ...[
+                              const SizedBox(height: 3),
+                              Text('อ้างอิง ${booking['booking_id']}',
+                                  style: const TextStyle(fontSize: 10, color: Color(0xFF75817B))),
+                            ],
                           ],
                         ),
                       ),
@@ -1307,9 +1353,20 @@ class _TripsMvpScreen extends StatelessWidget {
 }
 
 class _ProfileMvpScreen extends StatelessWidget {
-  const _ProfileMvpScreen({required this.onOpenDemo, required this.onOpenHistory});
+  const _ProfileMvpScreen({
+    required this.onOpenDemo,
+    required this.onOpenHistory,
+    required this.displayName,
+    required this.email,
+    required this.isGuest,
+    required this.onLogout,
+  });
   final VoidCallback onOpenDemo;
   final VoidCallback onOpenHistory;
+  final String displayName;
+  final String email;
+  final bool isGuest;
+  final VoidCallback onLogout;
 
   @override
   Widget build(BuildContext context) => ListView(padding: const EdgeInsets.all(20), children: [
@@ -1319,17 +1376,34 @@ class _ProfileMvpScreen extends StatelessWidget {
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
                 color: const Color(0xFF10403D), borderRadius: BorderRadius.circular(16)),
-            child: const Row(children: [
+            child: Row(children: [
               CircleAvatar(
-                  backgroundColor: Color(0xFFF6E4C1),
-                  child: Text('น',
-                      style: TextStyle(color: Color(0xFF10403D), fontWeight: FontWeight.w800))),
-              SizedBox(width: 12),
-              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('นักเดินทาง Sabai',
-                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-                Text('สมาชิกผู้เยี่ยมชม', style: TextStyle(color: Colors.white70, fontSize: 12))
-              ])
+                  backgroundColor: const Color(0xFFF6E4C1),
+                  child: Text(
+                    displayName.isNotEmpty ? displayName.characters.first.toUpperCase() : 'S',
+                    style: const TextStyle(color: Color(0xFF10403D), fontWeight: FontWeight.w800),
+                  )),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(
+                    displayName.isNotEmpty
+                        ? displayName
+                        : isGuest
+                            ? 'นักเดินทาง Sabai'
+                            : email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                  ),
+                  Text(
+                    isGuest ? 'สมาชิกผู้เยี่ยมชม' : email,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
+                  )
+                ]),
+              )
             ])),
         const SizedBox(height: 18),
         Row(children: const [
@@ -1380,7 +1454,14 @@ class _ProfileMvpScreen extends StatelessWidget {
             label: const Text('เปิดพอร์ทัลเดโม'),
             style: OutlinedButton.styleFrom(
                 foregroundColor: const Color(0xFF10403D),
-                padding: const EdgeInsets.symmetric(vertical: 13)))
+                padding: const EdgeInsets.symmetric(vertical: 13))),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: onLogout,
+          icon: Icon(isGuest ? Icons.exit_to_app_rounded : Icons.logout_rounded),
+          label: Text(isGuest ? 'ออกจากโหมดผู้เยี่ยมชม' : 'ออกจากระบบ'),
+          style: TextButton.styleFrom(foregroundColor: const Color(0xFF8B4234)),
+        ),
       ]);
 }
 
@@ -1476,9 +1557,9 @@ class _ListingSheet extends StatelessWidget {
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                       ),
-                      builder: (_) => _BookingSheet(
+                      builder: (_) => _CheckoutSheet(
                         listing: listing,
-                        onCompletePayment: onCompletePayment,
+                        onCreateOrder: onCompletePayment,
                       ),
                     );
                   },
@@ -1496,107 +1577,445 @@ class _ListingSheet extends StatelessWidget {
   }
 }
 
-class _BookingSheet extends StatelessWidget {
-  const _BookingSheet({required this.listing, required this.onCompletePayment});
+class _CheckoutSheet extends StatefulWidget {
+  const _CheckoutSheet({required this.listing, required this.onCreateOrder});
   final Map<String, dynamic> listing;
-  final ValueChanged<Map<String, dynamic>> onCompletePayment;
+  final ValueChanged<Map<String, dynamic>> onCreateOrder;
+
+  @override
+  State<_CheckoutSheet> createState() => _CheckoutSheetState();
+}
+
+class _CheckoutSheetState extends State<_CheckoutSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  int _step = 0;
+  int _quantity = 1;
+  String _paymentMethod = 'promptpay';
+  DateTimeRange? _stayDates;
+
+  static const _paymentMethods = [
+    _PaymentMethod(
+      id: 'promptpay',
+      title: 'พร้อมเพย์ / QR',
+      subtitle: 'สแกนจ่ายผ่านแอปธนาคาร',
+      icon: Icons.qr_code_2_rounded,
+    ),
+    _PaymentMethod(
+      id: 'card',
+      title: 'บัตรเครดิต / เดบิต',
+      subtitle: 'Visa, Mastercard และบัตรที่รองรับ',
+      icon: Icons.credit_card_rounded,
+    ),
+    _PaymentMethod(
+      id: 'transfer',
+      title: 'โอนผ่านธนาคาร',
+      subtitle: 'รับรายละเอียดบัญชีหลังยืนยันรายการ',
+      icon: Icons.account_balance_rounded,
+    ),
+  ];
+
+  bool get _isStay => widget.listing['type'] == 'ที่พัก';
+  int get _nights => _stayDates == null ? 1 : _stayDates!.duration.inDays;
+  int get _unitPrice => widget.listing['price'] as int;
+  int get _total => _unitPrice * (_isStay ? _nights : _quantity);
+  String get _formattedDates {
+    if (_stayDates == null) return 'เลือกวันเดินทาง';
+    final start = _stayDates!.start;
+    final end = _stayDates!.end;
+    if (!_isStay) return '${start.day}/${start.month}/${start.year}';
+    return '${start.day}/${start.month}/${start.year} - ${end.day}/${end.month}/${end.year}';
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _selectDates() async {
+    final today = DateTime.now();
+    if (!_isStay) {
+      final picked = await showDatePicker(
+        context: context,
+        firstDate: DateTime(today.year, today.month, today.day),
+        lastDate: DateTime(today.year + 2),
+        initialDate: _stayDates?.start,
+        helpText: 'เลือกวันที่ใช้บริการ',
+      );
+      if (picked != null) {
+        setState(() => _stayDates = DateTimeRange(start: picked, end: picked));
+      }
+      return;
+    }
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(today.year, today.month, today.day),
+      lastDate: DateTime(today.year + 2),
+      initialDateRange: _stayDates,
+      helpText: 'เลือกวันเช็กอินและเช็กเอาต์',
+      saveText: 'ยืนยันวันเดินทาง',
+    );
+    if (picked != null) setState(() => _stayDates = picked);
+  }
+
+  String? _validateRequired(String? value) =>
+      value == null || value.trim().isEmpty ? 'กรุณากรอกข้อมูลนี้' : null;
+
+  void _continue() {
+    if (_step == 0) {
+      if (!(_formKey.currentState?.validate() ?? false)) return;
+      if (_stayDates == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text(_isStay ? 'กรุณาเลือกวันเช็กอินและเช็กเอาต์' : 'กรุณาเลือกวันที่ใช้บริการ'),
+          ),
+        );
+        return;
+      }
+      setState(() => _step = 1);
+      return;
+    }
+    if (_step == 1) {
+      setState(() => _step = 2);
+      return;
+    }
+
+    final listing = widget.listing;
+    final booking = <String, dynamic>{
+      'title': listing['name'] as String,
+      'destination': listing['location'] as String,
+      'date': _formattedDates,
+      'amount': _total,
+      'status': 'รอชำระเงิน',
+      'booking_id': 'SB${DateTime.now().microsecondsSinceEpoch}',
+      'payment_method': _paymentMethods.firstWhere((item) => item.id == _paymentMethod).title,
+      'customer_name': _nameController.text.trim(),
+      'customer_email': _emailController.text.trim(),
+      'customer_phone': _phoneController.text.trim(),
+      'quantity': _isStay ? _nights : _quantity,
+      'icon': listing['icon'] as IconData,
+      'color': listing['color'] as Color,
+    };
+    Navigator.pop(context);
+    widget.onCreateOrder(booking);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final price = listing['price'] as int;
+    final listing = widget.listing;
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(22, 20, 22, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Container(
-                width: 42,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFCBD5D1),
-                  borderRadius: BorderRadius.circular(999),
-                ),
+        padding: EdgeInsets.fromLTRB(22, 18, 22, 20 + MediaQuery.viewInsetsOf(context).bottom),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxHeight: MediaQuery.sizeOf(context).height * .88),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                  child: Container(
+                      width: 42,
+                      height: 4,
+                      decoration: BoxDecoration(
+                          color: const Color(0xFFCBD5D1),
+                          borderRadius: BorderRadius.circular(999)))),
+              const SizedBox(height: 16),
+              Row(children: [
+                const Expanded(
+                    child: Text('จองและชำระเงิน',
+                        style: TextStyle(fontSize: 21, fontWeight: FontWeight.w800))),
+                Text('ขั้นตอน ${_step + 1}/3',
+                    style: const TextStyle(fontSize: 12, color: Color(0xFF64716C))),
+              ]),
+              const SizedBox(height: 12),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(99),
+                child: LinearProgressIndicator(
+                    value: (_step + 1) / 3,
+                    minHeight: 5,
+                    backgroundColor: const Color(0xFFE7ECE8),
+                    color: const Color(0xFF10403D)),
               ),
-            ),
-            const SizedBox(height: 18),
-            const Text('ยืนยันการจอง', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE4E1D8)),
-              ),
-              child: Row(children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: (listing['color'] as Color).withOpacity(.13),
-                    borderRadius: BorderRadius.circular(14),
+              const SizedBox(height: 16),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    child: _step == 0
+                        ? _buildDetailsStep(listing)
+                        : _step == 1
+                            ? _buildPaymentStep()
+                            : _buildReviewStep(listing),
                   ),
-                  child: Icon(listing['icon'] as IconData, color: listing['color'] as Color),
                 ),
-                const SizedBox(width: 12),
+              ),
+              const SizedBox(height: 14),
+              Row(children: [
+                if (_step > 0) ...[
+                  Expanded(
+                      child: OutlinedButton(
+                          onPressed: () => setState(() => _step--), child: const Text('ย้อนกลับ'))),
+                  const SizedBox(width: 10),
+                ],
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(listing['name'] as String,
-                          style: const TextStyle(fontWeight: FontWeight.w700)),
-                      const SizedBox(height: 4),
-                      Text(listing['location'] as String,
-                          style: const TextStyle(fontSize: 12, color: Color(0xFF5C6A64))),
-                    ],
+                  flex: _step == 0 ? 1 : 2,
+                  child: FilledButton.icon(
+                    onPressed: _continue,
+                    icon: Icon(
+                        _step == 2 ? Icons.receipt_long_outlined : Icons.arrow_forward_rounded,
+                        size: 18),
+                    label: Text(_step == 2 ? 'สร้างรายการจอง' : 'ดำเนินการต่อ'),
+                    style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF10403D),
+                        padding: const EdgeInsets.symmetric(vertical: 14)),
                   ),
                 ),
               ]),
-            ),
-            const SizedBox(height: 18),
-            const Text('วันเดินทาง', style: TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 8),
-            Row(children: const [
-              _BookingDateChip(label: '14 ธ.ค.'),
-              SizedBox(width: 8),
-              _BookingDateChip(label: '15 ธ.ค.'),
-              SizedBox(width: 8),
-              _BookingDateChip(label: '16 ธ.ค.', selected: true),
-            ]),
-            const SizedBox(height: 18),
-            Row(children: [
-              const Expanded(
-                  child: Text('รวมประมาณ', style: TextStyle(fontWeight: FontWeight.w700))),
-              Text('฿${price * 2}',
-                  style: const TextStyle(
-                      fontSize: 20, fontWeight: FontWeight.w800, color: Color(0xFF10403D))),
-            ]),
-            const SizedBox(height: 12),
-            const Text('รวมค่าที่พัก 2 คืน • พร้อมส่วนลดสำหรับสมาชิก',
-                style: TextStyle(fontSize: 12, color: Color(0xFF5C6A64))),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  onCompletePayment(listing);
-                },
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF10403D),
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                ),
-                child: const Text('ยืนยันการจอง'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+
+  Widget _buildDetailsStep(Map<String, dynamic> listing) => Form(
+        key: _formKey,
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _checkoutProduct(listing),
+          const SizedBox(height: 16),
+          const Text('ข้อมูลผู้จอง', style: TextStyle(fontWeight: FontWeight.w800)),
+          const SizedBox(height: 10),
+          _checkoutField(
+              controller: _nameController,
+              label: 'ชื่อ-นามสกุล',
+              icon: Icons.person_outline,
+              validator: _validateRequired),
+          const SizedBox(height: 10),
+          _checkoutField(
+              controller: _emailController,
+              label: 'อีเมลสำหรับรับการยืนยัน',
+              icon: Icons.mail_outline,
+              keyboardType: TextInputType.emailAddress,
+              validator: (value) {
+                final email = value?.trim() ?? '';
+                return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)
+                    ? null
+                    : 'กรุณากรอกอีเมลให้ถูกต้อง';
+              }),
+          const SizedBox(height: 10),
+          _checkoutField(
+              controller: _phoneController,
+              label: 'เบอร์โทรศัพท์',
+              icon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
+              validator: (value) {
+                final phone = value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                return phone.length >= 9 ? null : 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง';
+              }),
+          const SizedBox(height: 16),
+          Text(_isStay ? 'วันเช็กอิน - เช็กเอาต์' : 'วันที่ใช้บริการ',
+              style: const TextStyle(fontWeight: FontWeight.w700)),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: _selectDates,
+            icon: const Icon(Icons.calendar_month_outlined),
+            label: Text(_stayDates == null ? 'เลือกวันที่' : _formattedDates),
+            style: OutlinedButton.styleFrom(
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13)),
+          ),
+          const SizedBox(height: 14),
+          if (_isStay)
+            _summaryLine('จำนวนคืน', '$_nights คืน')
+          else
+            Row(children: [
+              const Expanded(child: Text('จำนวน', style: TextStyle(fontWeight: FontWeight.w700))),
+              IconButton(
+                  onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
+                  icon: const Icon(Icons.remove_circle_outline)),
+              Text('$_quantity', style: const TextStyle(fontWeight: FontWeight.w800)),
+              IconButton(
+                  onPressed: () => setState(() => _quantity++),
+                  icon: const Icon(Icons.add_circle_outline)),
+            ]),
+          const SizedBox(height: 6),
+          _priceSummary(),
+        ]),
+      );
+
+  Widget _buildPaymentStep() => Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text('เลือกรูปแบบการชำระ', style: TextStyle(fontWeight: FontWeight.w800)),
+        const SizedBox(height: 6),
+        const Text('เลือกช่องทางที่สะดวก ระบบจะแสดงยอดและข้อมูลคำสั่งจองก่อนยืนยัน',
+            style: TextStyle(fontSize: 12, color: Color(0xFF64716C))),
+        const SizedBox(height: 12),
+        for (final method in _paymentMethods)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 9),
+            child: InkWell(
+              onTap: () => setState(() => _paymentMethod = method.id),
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                padding: const EdgeInsets.all(13),
+                decoration: BoxDecoration(
+                  color: _paymentMethod == method.id ? const Color(0xFFEDF5F0) : Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                      color: _paymentMethod == method.id
+                          ? const Color(0xFF10403D)
+                          : const Color(0xFFE1E6E2)),
+                ),
+                child: Row(children: [
+                  Icon(method.icon, color: const Color(0xFF10403D)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(method.title, style: const TextStyle(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 3),
+                    Text(method.subtitle,
+                        style: const TextStyle(fontSize: 11, color: Color(0xFF64716C))),
+                  ])),
+                  Radio<String>(
+                      value: method.id,
+                      groupValue: _paymentMethod,
+                      onChanged: (value) => setState(() => _paymentMethod = value!)),
+                ]),
+              ),
+            ),
+          ),
+        const SizedBox(height: 5),
+        Container(
+          padding: const EdgeInsets.all(13),
+          decoration: BoxDecoration(
+              color: const Color(0xFFFFF5E4),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFEBD8B2))),
+          child: const Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Icon(Icons.info_outline, size: 18, color: Color(0xFF8A5A17)),
+            SizedBox(width: 8),
+            Expanded(
+                child: Text(
+                    'ช่องทางชำระเงินจริงยังรอเชื่อมต่อผู้ให้บริการ ขั้นนี้จะบันทึกคำสั่งจองเป็น “รอชำระเงิน” และยังไม่มีการตัดเงิน',
+                    style: TextStyle(fontSize: 11.5, height: 1.45, color: Color(0xFF694A1B)))),
+          ]),
+        ),
+        const SizedBox(height: 14),
+        _priceSummary(),
+      ]);
+
+  Widget _buildReviewStep(Map<String, dynamic> listing) =>
+      Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        const Text('ตรวจสอบคำสั่งจอง', style: TextStyle(fontWeight: FontWeight.w800)),
+        const SizedBox(height: 12),
+        _checkoutProduct(listing),
+        const SizedBox(height: 12),
+        _summaryLine('ผู้จอง', _nameController.text.trim()),
+        _summaryLine('อีเมล', _emailController.text.trim()),
+        _summaryLine('โทรศัพท์', _phoneController.text.trim()),
+        _summaryLine('วันเดินทาง', _formattedDates),
+        _summaryLine(_isStay ? 'จำนวนคืน' : 'จำนวน', _isStay ? '$_nights คืน' : '$_quantity'),
+        _summaryLine('วิธีชำระที่เลือก',
+            _paymentMethods.firstWhere((method) => method.id == _paymentMethod).title),
+        const Divider(height: 24),
+        _priceSummary(),
+        const SizedBox(height: 12),
+        const Text('ยืนยันแล้วรายการจะอยู่ในประวัติการจอง โดยยังไม่ถือว่าชำระเงินสำเร็จ',
+            style: TextStyle(fontSize: 11, color: Color(0xFF64716C))),
+      ]);
+
+  Widget _checkoutProduct(Map<String, dynamic> listing) => Container(
+        padding: const EdgeInsets.all(13),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFE4E1D8))),
+        child: Row(children: [
+          Container(
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                  color: (listing['color'] as Color).withOpacity(.12),
+                  borderRadius: BorderRadius.circular(12)),
+              child: Icon(listing['icon'] as IconData, color: listing['color'] as Color)),
+          const SizedBox(width: 11),
+          Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(listing['name'] as String, style: const TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 3),
+            Text(listing['location'] as String,
+                style: const TextStyle(fontSize: 11, color: Color(0xFF64716C))),
+          ])),
+          Text('฿$_unitPrice${_isStay ? '/คืน' : '/รายการ'}',
+              style: const TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF10403D))),
+        ]),
+      );
+
+  Widget _priceSummary() => Column(children: [
+        _summaryLine('ราคา ${_isStay ? '$_nights คืน' : '$_quantity รายการ'}',
+            '฿${_unitPrice * (_isStay ? _nights : _quantity)}'),
+        _summaryLine('ค่าบริการ', '฿0'),
+        const Divider(height: 18),
+        _summaryLine('ยอดรวม', '฿$_total', emphasized: true),
+      ]);
+
+  Widget _summaryLine(String label, String value, {bool emphasized = false}) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(children: [
+          Expanded(
+              child: Text(label,
+                  style: TextStyle(
+                      fontSize: emphasized ? 14 : 12,
+                      fontWeight: emphasized ? FontWeight.w800 : FontWeight.w500,
+                      color: const Color(0xFF5C6A64)))),
+          Text(value,
+              style: TextStyle(
+                  fontSize: emphasized ? 18 : 12,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF10403D))),
+        ]),
+      );
+
+  Widget _checkoutField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required String? Function(String?) validator,
+    TextInputType? keyboardType,
+  }) =>
+      TextFormField(
+        controller: controller,
+        validator: validator,
+        keyboardType: keyboardType,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: Icon(icon, size: 19),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE1E6E2))),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Color(0xFFE1E6E2))),
+        ),
+      );
+}
+
+class _PaymentMethod {
+  const _PaymentMethod(
+      {required this.id, required this.title, required this.subtitle, required this.icon});
+
+  final String id;
+  final String title;
+  final String subtitle;
+  final IconData icon;
 }
 
 class _BookingDateChip extends StatelessWidget {
