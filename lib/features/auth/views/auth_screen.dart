@@ -51,8 +51,8 @@ class _AuthScreenState extends State<AuthScreen> {
       _errorMessage = null;
     });
     try {
-      final email = _emailController.text.trim();
-      final session = _isRegistering
+      final String email = _emailController.text.trim();
+      final AuthSession session = _isRegistering
           ? await _authApi.register(
               displayName: _nameController.text.trim(),
               email: email,
@@ -77,7 +77,7 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isWide = MediaQuery.sizeOf(context).width >= 900;
+    final bool isWide = MediaQuery.sizeOf(context).width >= 900;
     return Scaffold(
       body: DecoratedBox(
         decoration: const BoxDecoration(
@@ -143,10 +143,10 @@ class _AuthScreenState extends State<AuthScreen> {
               style: TextStyle(color: Colors.white70, fontSize: 15, height: 1.6),
             ),
             const SizedBox(height: 30),
-            Wrap(
+            const Wrap(
               spacing: 10,
               runSpacing: 10,
-              children: const [
+              children: [
                 _WelcomePill(icon: Icons.auto_awesome, label: 'วางแผนด้วย AI'),
                 _WelcomePill(icon: Icons.bookmark_outline, label: 'เก็บทริปไว้ได้'),
                 _WelcomePill(icon: Icons.support_agent, label: 'ช่วยเหลือระหว่างทาง'),
@@ -231,7 +231,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     icon: Icons.mail_outline_rounded,
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
-                      final email = value?.trim() ?? '';
+                      final String email = value?.trim() ?? '';
                       return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)
                           ? null
                           : 'กรุณากรอกอีเมลให้ถูกต้อง';
@@ -245,10 +245,11 @@ class _AuthScreenState extends State<AuthScreen> {
                     icon: Icons.lock_outline_rounded,
                     obscureText: _obscurePassword,
                     validator: (value) {
-                      final password = value ?? '';
+                      final String password = value ?? '';
                       if (password.isEmpty) return 'กรุณากรอกรหัสผ่าน';
-                      if (_isRegistering && password.length < 8)
+                      if (_isRegistering && password.length < 8) {
                         return 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร';
+                      }
                       return null;
                     },
                     suffix: IconButton(
@@ -318,7 +319,7 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ),
             const SizedBox(height: 14),
-            Row(children: const [
+            const Row(children: [
               Expanded(child: Divider()),
               Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10),

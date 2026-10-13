@@ -1112,7 +1112,6 @@ abstract class RenderTwoDimensionalViewport extends RenderBox implements RenderA
     switch (allowHorizontal, allowVertical) {
       case true, true:
         // Both allow implicit scrolling.
-        break;
       case false, true:
         // Only the vertical Axis allows implicit scrolling.
         axisDirection = verticalAxisDirection;

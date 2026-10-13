@@ -2567,7 +2567,7 @@ final class _RenderDeferredLayoutBox extends RenderProxyBox
 
   @override
   _RenderTheater get theater => switch (parent) {
-    _RenderTheater parent => parent,
+    final _RenderTheater parent => parent,
     Never _ => throw FlutterError('$parent of $this is not a _RenderTheater'),
   };
 
@@ -2793,7 +2793,7 @@ class _RenderLayoutBuilder extends RenderProxyBox
 
   @override
   _RenderTheater get theater => switch (parent) {
-    _RenderDeferredLayoutBox parent => parent.theater,
+    final _RenderDeferredLayoutBox parent => parent.theater,
     Never _ => throw FlutterError('$parent of $this is not a _RenderDeferredLayoutBox'),
   };
 

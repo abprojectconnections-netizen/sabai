@@ -244,7 +244,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   bool isEnabled(T intent) => isActionEnabled;
 
   bool _isEnabled(T intent, BuildContext? context) => switch (this) {
-    ContextAction<T> action => action.isEnabled(intent, context),
+    final ContextAction<T> action => action.isEnabled(intent, context),
     bool _ => isEnabled(intent),
   };
 
@@ -331,7 +331,7 @@ abstract class Action<T extends Intent> with Diagnosticable {
   Object? invoke(T intent);
 
   Object? _invoke(T intent, BuildContext? context) => switch (this) {
-    ContextAction<T> action => action.invoke(intent, context),
+    final ContextAction<T> action => action.invoke(intent, context),
     Object? _ => invoke(intent),
   };
 

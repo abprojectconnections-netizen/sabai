@@ -68,7 +68,7 @@ class AuthApi {
     String displayName = '',
   }) async {
     try {
-      final response = await _client
+      final http.Response response = await _client
           .post(
             Uri.parse('${_baseUrl.replaceFirst(RegExp(r'/+$'), '')}/auth/$endpoint'),
             headers: const {'Content-Type': 'application/json'},

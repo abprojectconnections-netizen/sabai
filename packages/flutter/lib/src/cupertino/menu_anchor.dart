@@ -907,11 +907,11 @@ class _MenuOverlayState extends State<_MenuOverlay>
     ).platformDispatcher.accessibilityFeatures;
 
     switch (accessibilityFeatures) {
-      case const ui.AccessibilityFeatures(disableAnimations: true):
+      case const const ui.AccessibilityFeatures(disableAnimations: true):
         _scaleAnimation.parent = kAlwaysCompleteAnimation;
         _fadeAnimation.parent = kAlwaysCompleteAnimation;
         _sizeAnimation.parent = kAlwaysCompleteAnimation;
-      case const ui.AccessibilityFeatures(reduceMotion: true):
+      case const const ui.AccessibilityFeatures(reduceMotion: true):
         // Swipe scaling works with reduced motion.
         _scaleAnimation.parent = _swipeAnimationController.view.drive(
           Tween<double>(begin: 0.8, end: 1),

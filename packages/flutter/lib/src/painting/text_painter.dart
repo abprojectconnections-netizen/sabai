@@ -1485,7 +1485,7 @@ class TextPainter {
   // https://github.com/flutter/flutter/blob/230240c56880f2c19bf92d2c32203b064054f173/engine/src/flutter/txt/src/skia/paragraph_builder_skia.cc#L129
   bool get _strutDisabled => switch (strutStyle) {
     null || StrutStyle.disabled => true,
-    bool StrutStyle(:final double? fontSize) => fontSize == 0.0,
+    final bool StrutStyle( =final double? fontSize) => fontSize == 0.0,
   };
 
   /// {@template flutter.painting.textPainter.getFullHeightForCaret}

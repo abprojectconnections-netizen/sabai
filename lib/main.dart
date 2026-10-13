@@ -628,8 +628,6 @@ class _HomeMvpScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(18),
                   gradient: const LinearGradient(
                     colors: [Color(0xFF10403D), Color(0xFF1C5C57)],
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
                   )),
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Row(children: [
@@ -650,7 +648,7 @@ class _HomeMvpScreen extends StatelessWidget {
                 const Text('เชียงใหม่ • ธรรมชาติ • คาเฟ่ • วัฒนธรรม',
                     style: TextStyle(color: Colors.white70, fontSize: 12.5)),
                 const SizedBox(height: 16),
-                Row(children: const [
+                const Row(children: [
                   _MiniStat(label: 'รีวิว', value: '3.2k'),
                   SizedBox(width: 10),
                   _MiniStat(label: 'จุดเด่น', value: '4.9/5'),
@@ -905,7 +903,7 @@ class _SearchMvpScreen extends StatelessWidget {
                                         Text(' ${item['rating']} (${item['reviews']})',
                                             style: const TextStyle(fontSize: 11)),
                                         const Spacer(),
-                                        Text('฿${(item['price'] as int)}',
+                                        Text('฿${item['price'] as int}',
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.w800,
                                                 color: Color(0xFF10403D)))
@@ -1007,7 +1005,7 @@ class _PlannerMvpScreen extends StatelessWidget {
       Row(children: [
         const Expanded(
             child: Text('งบประมาณโดยประมาณ', style: TextStyle(fontWeight: FontWeight.w700))),
-        Text('฿${budget}',
+        Text('฿$budget',
             style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF10403D)))
       ]),
       Slider(
@@ -1172,7 +1170,7 @@ class _TripsMvpScreen extends StatelessWidget {
               final days = trip['days'] as int;
               final budget = trip['budget'] as int;
               final travelers = trip['travelers'] as int;
-              final progress = ((days / 5).clamp(0.25, 1.0)).toDouble();
+              final double progress = (days / 5).clamp(0.25, 1.0);
 
               return TweenAnimationBuilder<double>(
                 tween: Tween<double>(begin: 0.92, end: 1),
@@ -1406,7 +1404,7 @@ class _ProfileMvpScreen extends StatelessWidget {
               )
             ])),
         const SizedBox(height: 18),
-        Row(children: const [
+        const Row(children: [
           Expanded(
               child: _ProfileStatCard(
                   title: 'ทริปที่บันทึก', value: '12', subtitle: 'แผนที่พร้อมเดินทาง')),
@@ -1421,7 +1419,7 @@ class _ProfileMvpScreen extends StatelessWidget {
                 color: const Color(0xFFEEF7F2),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: const Color(0xFFDDEBE5))),
-            child: Row(children: const [
+            child: const Row(children: [
               Icon(Icons.wallet_rounded, color: Color(0xFF10403D)),
               SizedBox(width: 12),
               Expanded(
@@ -1623,8 +1621,8 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
   int get _total => _unitPrice * (_isStay ? _nights : _quantity);
   String get _formattedDates {
     if (_stayDates == null) return 'เลือกวันเดินทาง';
-    final start = _stayDates!.start;
-    final end = _stayDates!.end;
+    final DateTime start = _stayDates!.start;
+    final DateTime end = _stayDates!.end;
     if (!_isStay) return '${start.day}/${start.month}/${start.year}';
     return '${start.day}/${start.month}/${start.year} - ${end.day}/${end.month}/${end.year}';
   }
@@ -1640,7 +1638,7 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
   Future<void> _selectDates() async {
     final today = DateTime.now();
     if (!_isStay) {
-      final picked = await showDatePicker(
+      final DateTime? picked = await showDatePicker(
         context: context,
         firstDate: DateTime(today.year, today.month, today.day),
         lastDate: DateTime(today.year + 2),
@@ -1652,7 +1650,7 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
       }
       return;
     }
-    final picked = await showDateRangePicker(
+    final DateTimeRange<DateTime>? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(today.year, today.month, today.day),
       lastDate: DateTime(today.year + 2),
@@ -1686,7 +1684,7 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
       return;
     }
 
-    final listing = widget.listing;
+    final Map<String, dynamic> listing = widget.listing;
     final booking = <String, dynamic>{
       'title': listing['name'] as String,
       'destination': listing['location'] as String,
@@ -1708,7 +1706,7 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final listing = widget.listing;
+    final Map<String, dynamic> listing = widget.listing;
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.fromLTRB(22, 18, 22, 20 + MediaQuery.viewInsetsOf(context).bottom),
@@ -1803,7 +1801,7 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
               icon: Icons.mail_outline,
               keyboardType: TextInputType.emailAddress,
               validator: (value) {
-                final email = value?.trim() ?? '';
+                final String email = value?.trim() ?? '';
                 return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)
                     ? null
                     : 'กรุณากรอกอีเมลให้ถูกต้อง';
@@ -1815,7 +1813,7 @@ class _CheckoutSheetState extends State<_CheckoutSheet> {
               icon: Icons.phone_outlined,
               keyboardType: TextInputType.phone,
               validator: (value) {
-                final phone = value?.replaceAll(RegExp(r'\D'), '') ?? '';
+                final String phone = value?.replaceAll(RegExp(r'\D'), '') ?? '';
                 return phone.length >= 9 ? null : 'กรุณากรอกเบอร์โทรศัพท์ให้ถูกต้อง';
               }),
           const SizedBox(height: 16),
@@ -2019,7 +2017,7 @@ class _PaymentMethod {
 }
 
 class _BookingDateChip extends StatelessWidget {
-  const _BookingDateChip({required this.label, this.selected = false});
+  const _BookingDateChip({required this.label}) : selected = false;
   final String label;
   final bool selected;
 

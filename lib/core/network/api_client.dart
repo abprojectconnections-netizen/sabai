@@ -41,7 +41,7 @@ class ApiClient {
 
   Future<Map<String, dynamic>> _sendAuthorized(String method, String path, String token, {Map<String, dynamic>? body}) async {
     final Uri uri = Uri.parse('${AppConfig.apiBaseUrl}$path');
-    final Map<String, String> headers = {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'};
+    final headers = <String, String>{'Authorization': 'Bearer $token', 'Content-Type': 'application/json'};
     final http.Response response = switch (method) {
       'GET' => await _client.get(uri, headers: headers),
       'PATCH' => await _client.patch(uri, headers: headers, body: jsonEncode(body)),
