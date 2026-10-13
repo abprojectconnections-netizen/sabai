@@ -6,7 +6,6 @@ import 'features/demo/views/portal_dashboard.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await LocalDatabase.initialize();
   runApp(const TravelApp());
 }
 
@@ -17,19 +16,24 @@ class TravelApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Travel UI',
-      theme: ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: const Color(0xFF0A1628),
-        cardColor: const Color(0xFF162035),
-        colorScheme: const ColorScheme.dark(
-          primary: Color(0xFF00C9A7),
-          secondary: Color(0xFF00A88C),
+      title: 'Sabai Travel',
+      theme: ThemeData(
+        useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFFAFAF8),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF10403D),
+          primary: const Color(0xFF10403D),
+          secondary: const Color(0xFFE3A23C),
+          surface: const Color(0xFFFFFFFF),
         ),
-        iconTheme: const IconThemeData(color: Color(0xFFE8F0FE)),
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Color(0xFFE8F0FE)),
-          bodyMedium: TextStyle(color: Color(0xFFE8F0FE)),
-          bodySmall: TextStyle(color: Color(0xFFB0C4DE)),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFFFAFAF8),
+          foregroundColor: Color(0xFF16241F),
+          elevation: 0,
+        ),
+        navigationBarTheme: const NavigationBarThemeData(
+          backgroundColor: Colors.white,
+          indicatorColor: Color(0xFFE4EDEA),
         ),
       ),
       home: const TravelHomePage(),
@@ -46,16 +50,292 @@ class TravelHomePage extends StatefulWidget {
 
 class _TravelHomePageState extends State<TravelHomePage> {
   int _selectedIndex = 0;
+  bool _showBookings = false;
+  String _searchQuery = '';
+  String _category = 'ทั้งหมด';
+  String _destination = 'เชียงใหม่';
+  int _days = 3;
+  int _travelers = 2;
+  int _budget = 10000;
+  bool _generating = false;
+  Map<String, dynamic>? _itinerary;
+  final Set<String> _styles = {'ธรรมชาติ', 'อาหารท้องถิ่น'};
+  final List<Map<String, dynamic>> _savedTrips = [];
+  final List<Map<String, dynamic>> _bookings = [
+    {
+      'title': 'ล้านนา วิว รีสอร์ท',
+      'destination': 'เชียงใหม่',
+      'date': '14 ธ.ค. – 16 ธ.ค.',
+      'amount': 2980,
+      'status': 'จ่ายแล้ว',
+      'icon': Icons.hotel_rounded,
+      'color': const Color(0xFF10403D),
+    },
+    {
+      'title': 'วัดพระธาตุดอยสุเทพ',
+      'destination': 'เชียงใหม่',
+      'date': '15 ธ.ค.',
+      'amount': 520,
+      'status': 'รอตรวจสอบ',
+      'icon': Icons.temple_buddhist_rounded,
+      'color': const Color(0xFF695083),
+    },
+  ];
   final DemoController _demoController = DemoController();
 
-  static const List<Widget> _screens = [
-    HomeScreen(),
-    FlightsScreen(),
-    ExploreScreen(),
-    CalendarScreen(),
-    AssistScreen(),
-    ProfileScreen(),
+  static const List<Map<String, dynamic>> _destinations = [
+    {
+      'name': 'เชียงใหม่',
+      'subtitle': 'ภูเขา ธรรมชาติ วัฒนธรรมล้านนา',
+      'icon': Icons.landscape_rounded,
+      'colors': [Color(0xFF1C5C57), Color(0xFF89A66B)]
+    },
+    {
+      'name': 'ภูเก็ต',
+      'subtitle': 'ทะเลอันดามัน ชายหาดสวย',
+      'icon': Icons.beach_access_rounded,
+      'colors': [Color(0xFF0B4F6C), Color(0xFF01BAEF)]
+    },
+    {
+      'name': 'กระบี่',
+      'subtitle': 'หน้าผาหินปูน เกาะแก่ง',
+      'icon': Icons.sailing_rounded,
+      'colors': [Color(0xFF123C69), Color(0xFF3E92CC)]
+    },
+    {
+      'name': 'ปาย',
+      'subtitle': 'หมอกยามเช้า คาเฟ่ริมเขา',
+      'icon': Icons.wb_twilight_rounded,
+      'colors': [Color(0xFF7A4B22), Color(0xFFE3A23C)]
+    },
+    {
+      'name': 'กรุงเทพฯ',
+      'subtitle': 'สตรีทฟู้ด ช้อปปิ้ง วัฒนธรรม',
+      'icon': Icons.location_city_rounded,
+      'colors': [Color(0xFF3B2352), Color(0xFFA768C9)]
+    },
+    {
+      'name': 'เกาะสมุย',
+      'subtitle': 'เกาะสวรรค์ ทะเลใส',
+      'icon': Icons.water_rounded,
+      'colors': [Color(0xFF0E6E55), Color(0xFF59C9A5)]
+    },
   ];
+
+  static const List<Map<String, dynamic>> _listings = [
+    {
+      'type': 'ที่พัก',
+      'name': 'ล้านนา วิว รีสอร์ท',
+      'location': 'นิมมานเหมินท์, เชียงใหม่',
+      'rating': '4.8',
+      'reviews': '342',
+      'price': 1490,
+      'icon': Icons.hotel_rounded,
+      'color': Color(0xFF1C5C57)
+    },
+    {
+      'type': 'อาหาร',
+      'name': 'ข้าวซอยแม่สาย',
+      'location': 'เมืองเก่า, เชียงใหม่',
+      'rating': '4.6',
+      'reviews': '891',
+      'price': 120,
+      'icon': Icons.restaurant_rounded,
+      'color': Color(0xFFB5651D)
+    },
+    {
+      'type': 'สถานที่เที่ยว',
+      'name': 'วัดพระธาตุดอยสุเทพ',
+      'location': 'ดอยสุเทพ, เชียงใหม่',
+      'rating': '4.9',
+      'reviews': '5,210',
+      'price': 50,
+      'icon': Icons.temple_buddhist_rounded,
+      'color': Color(0xFF695083)
+    },
+    {
+      'type': 'ที่พัก',
+      'name': 'อันดามัน บีช วิลลา',
+      'location': 'ป่าตอง, ภูเก็ต',
+      'rating': '4.7',
+      'reviews': '206',
+      'price': 2350,
+      'icon': Icons.hotel_rounded,
+      'color': Color(0xFF1C5C57)
+    },
+    {
+      'type': 'เที่ยวบิน',
+      'name': 'กรุงเทพฯ → เชียงใหม่',
+      'location': 'สายการบิน Sabai Air',
+      'rating': '4.4',
+      'reviews': '1,032',
+      'price': 990,
+      'icon': Icons.flight_rounded,
+      'color': Color(0xFF24678A)
+    },
+    {
+      'type': 'อาหาร',
+      'name': 'ครัวทะเลกระบี่',
+      'location': 'อ่าวนาง, กระบี่',
+      'rating': '4.5',
+      'reviews': '410',
+      'price': 250,
+      'icon': Icons.restaurant_rounded,
+      'color': Color(0xFFB5651D)
+    },
+  ];
+
+  static const List<String> _categories = [
+    'ทั้งหมด',
+    'ที่พัก',
+    'อาหาร',
+    'เที่ยวบิน',
+    'สถานที่เที่ยว'
+  ];
+  static const List<String> _styleOptions = [
+    'ธรรมชาติ',
+    'อาหารท้องถิ่น',
+    'วัฒนธรรม',
+    'ผจญภัย',
+    'ช้อปปิ้ง',
+    'พักผ่อนสบายๆ'
+  ];
+
+  List<Map<String, dynamic>> get _filteredListings => _listings.where((item) {
+        final bool matchesCategory = _category == 'ทั้งหมด' || item['type'] == _category;
+        final String query = _searchQuery.trim().toLowerCase();
+        final bool matchesQuery = query.isEmpty ||
+            (item['name'] as String).toLowerCase().contains(query) ||
+            (item['location'] as String).toLowerCase().contains(query);
+        return matchesCategory && matchesQuery;
+      }).toList();
+
+  void _openPlanner() => setState(() {
+        _selectedIndex = 2;
+        _itinerary = null;
+      });
+
+  void _openBookingHistory() => setState(() {
+        _selectedIndex = 3;
+        _showBookings = true;
+      });
+
+  void _showNotifications() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: const Color(0xFFFAFAF8),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.notifications_none_rounded, size: 38, color: Color(0xFF10403D)),
+              const SizedBox(height: 12),
+              const Text('ยังไม่มีการแจ้งเตือนใหม่',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 5),
+              const Text('เราจะแจ้งให้ทราบเมื่อมีอัปเดตเกี่ยวกับทริปของคุณ',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 12, color: Color(0xFF5C6A64))),
+              const SizedBox(height: 14),
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.pop(sheetContext);
+                  _openBookingHistory();
+                },
+                icon: const Icon(Icons.receipt_long_outlined),
+                label: const Text('ดูประวัติการจอง'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _setTripsView(bool showBookings) => setState(() {
+        _selectedIndex = 3;
+        _showBookings = showBookings;
+      });
+
+  void _generateItinerary() {
+    setState(() => _generating = true);
+    Future<void>.delayed(const Duration(milliseconds: 650), () {
+      if (!mounted) return;
+      final schedule = <List<String>>[
+        ['09:00', 'เดินทางถึง$_destination เช็คอินที่พัก'],
+        ['12:00', 'ลิ้มลองอาหารท้องถิ่นและเมนูขึ้นชื่อ'],
+        [
+          '14:00',
+          if (_styles.isEmpty)
+            'เดินเล่นชมเมืองและแวะคาเฟ่'
+          else
+            'กิจกรรมตามสไตล์ ${_styles.join(', ')}'
+        ],
+        ['18:30', 'ชมบรรยากาศยามเย็นและรับประทานอาหาร'],
+      ];
+      final List<Map<String, Object>> budgetItems = [
+        {'label': 'การเดินทาง', 'value': (_budget * .28).round()},
+        {'label': 'ที่พัก', 'value': (_budget * .35).round()},
+        {'label': 'อาหาร', 'value': (_budget * .20).round()},
+        {'label': 'กิจกรรม', 'value': (_budget * .10).round()},
+        {'label': 'เดินทางในพื้นที่', 'value': (_budget * .07).round()},
+      ];
+      setState(() {
+        _itinerary = {
+          'days': List.generate(
+              _days.clamp(1, 7),
+              (index) => {
+                    'title': 'วันที่ ${index + 1} · $_destination',
+                    'items': schedule.map((entry) => {'time': entry[0], 'text': entry[1]}).toList(),
+                  }),
+          'budget': budgetItems,
+        };
+        _generating = false;
+      });
+    });
+  }
+
+  void _saveTrip() {
+    if (_itinerary == null) return;
+    setState(() {
+      _savedTrips.insert(0, {
+        'destination': _destination,
+        'days': _days,
+        'travelers': _travelers,
+        'budget': _budget,
+        'itinerary': _itinerary,
+      });
+    });
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('บันทึกทริปแล้ว')));
+  }
+
+  void _recordBooking(Map<String, dynamic> listing) {
+    final title = listing['name'] as String;
+    final destination = listing['location'] as String;
+    final price = listing['price'] as int;
+
+    setState(() {
+      _bookings.insert(0, {
+        'title': title,
+        'destination': destination,
+        'date': '16 ธ.ค. – 18 ธ.ค.',
+        'amount': price * 2,
+        'status': 'จ่ายแล้ว',
+        'icon': listing['icon'] as IconData,
+        'color': listing['color'] as Color,
+      });
+    });
+
+    setState(() => _selectedIndex = 3);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('ชำระเงินสำเร็จแล้ว • ตรวจสอบประวัติการจอง')),
+    );
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -65,10 +345,91 @@ class _TravelHomePageState extends State<TravelHomePage> {
 
   void _openPortal(DemoPortal portal) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      MaterialPageRoute<void>(
         builder: (_) => PortalDashboard(portal: portal, controller: _demoController),
       ),
     );
+  }
+
+  void _openListing(Map<String, dynamic> listing) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: const Color(0xFFFAFAF8),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      builder: (context) => _ListingSheet(
+        listing: listing,
+        onCompletePayment: _recordBooking,
+      ),
+    );
+  }
+
+  Widget _currentScreen() {
+    switch (_selectedIndex) {
+      case 0:
+        return _HomeMvpScreen(
+          destinations: _destinations,
+          onSearch: () => setState(() => _selectedIndex = 1),
+          onNotificationsTap: _showNotifications,
+          onQuickAction: (category) => setState(() {
+            _category = category;
+            _searchQuery = '';
+            _selectedIndex = 1;
+          }),
+          onPlan: _openPlanner,
+          onDestination: (destination) => setState(() {
+            _searchQuery = destination;
+            _selectedIndex = 1;
+          }),
+        );
+      case 1:
+        return _SearchMvpScreen(
+          query: _searchQuery,
+          category: _category,
+          categories: _categories,
+          listings: _filteredListings,
+          onQuery: (value) => setState(() => _searchQuery = value),
+          onCategory: (value) => setState(() => _category = value),
+          onSelect: _openListing,
+        );
+      case 2:
+        return _PlannerMvpScreen(
+          destination: _destination,
+          destinations: _destinations.map((item) => item['name'] as String).toList(),
+          days: _days,
+          travelers: _travelers,
+          budget: _budget,
+          styles: _styles,
+          styleOptions: _styleOptions,
+          generating: _generating,
+          itinerary: _itinerary,
+          onDestination: (value) => setState(() => _destination = value),
+          onDays: (value) => setState(() => _days = value),
+          onTravelers: (value) => setState(() => _travelers = value),
+          onBudget: (value) => setState(() => _budget = value),
+          onToggleStyle: (value) =>
+              setState(() => _styles.contains(value) ? _styles.remove(value) : _styles.add(value)),
+          onGenerate: _generateItinerary,
+          onReset: () => setState(() => _itinerary = null),
+          onSave: _saveTrip,
+          isSaved: _savedTrips
+              .any((trip) => trip['destination'] == _destination && trip['days'] == _days),
+        );
+      case 3:
+        return _TripsMvpScreen(
+          trips: _savedTrips,
+          bookings: _bookings,
+          showBookings: _showBookings,
+          onPlan: _openPlanner,
+          onViewChanged: _setTripsView,
+        );
+      default:
+        return _ProfileMvpScreen(
+          onOpenDemo: _showDemoSwitcher,
+          onOpenHistory: _openBookingHistory,
+        );
+    }
   }
 
   void _showDemoSwitcher() {
@@ -138,33 +499,1338 @@ class _TravelHomePageState extends State<TravelHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(child: _screens[_selectedIndex]),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showDemoSwitcher,
-        backgroundColor: const Color(0xFF00C9A7),
-        foregroundColor: const Color(0xFF0A1628),
-        icon: const Icon(Icons.grid_view_rounded),
-        label: const Text('Demo', style: TextStyle(fontWeight: FontWeight.w700)),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: const Color(0xFF101F3A),
-        selectedItemColor: const Color(0xFF00C9A7),
-        unselectedItemColor: const Color(0xFF8BA0BC),
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.flight_outlined), label: 'Flights'),
-          BottomNavigationBarItem(icon: Icon(Icons.search_outlined), label: 'Explore'),
-          BottomNavigationBarItem(icon: Icon(Icons.calendar_month_outlined), label: 'Planner'),
-          BottomNavigationBarItem(icon: Icon(Icons.support_outlined), label: 'Assist'),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-        ],
+    final navBar = NavigationBar(
+      height: 72,
+      elevation: 0,
+      selectedIndex: _selectedIndex,
+      onDestinationSelected: _onItemTapped,
+      destinations: const [
+        NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home_rounded),
+            label: 'หน้าแรก'),
+        NavigationDestination(icon: Icon(Icons.search_rounded), label: 'ค้นหา'),
+        NavigationDestination(
+            icon: Icon(Icons.auto_awesome_outlined),
+            selectedIcon: Icon(Icons.auto_awesome),
+            label: 'AI แพลน'),
+        NavigationDestination(
+            icon: Icon(Icons.luggage_outlined), selectedIcon: Icon(Icons.luggage), label: 'ทริป'),
+        NavigationDestination(
+            icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person), label: 'โปรไฟล์'),
+      ],
+    );
+
+    return ColoredBox(
+      color: const Color(0xFFE7F2EE),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 430),
+          child: Scaffold(
+            backgroundColor: const Color(0xFFFAFAF8),
+            body: SafeArea(child: _currentScreen()),
+            bottomNavigationBar: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 12,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: navBar,
+            ),
+          ),
+        ),
       ),
     );
   }
+}
+
+class _HomeMvpScreen extends StatelessWidget {
+  const _HomeMvpScreen(
+      {required this.destinations,
+      required this.onSearch,
+      required this.onNotificationsTap,
+      required this.onQuickAction,
+      required this.onPlan,
+      required this.onDestination});
+  final List<Map<String, dynamic>> destinations;
+  final VoidCallback onSearch;
+  final VoidCallback onNotificationsTap;
+  final ValueChanged<String> onQuickAction;
+  final VoidCallback onPlan;
+  final ValueChanged<String> onDestination;
+
+  @override
+  Widget build(BuildContext context) => ListView(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+        children: [
+          Row(children: [
+            const Icon(Icons.location_on_outlined, size: 17, color: Color(0xFF5C6A64)),
+            const SizedBox(width: 5),
+            const Expanded(
+                child: Text('กรุงเทพฯ, ประเทศไทย',
+                    style: TextStyle(color: Color(0xFF5C6A64), fontWeight: FontWeight.w600))),
+            IconButton(
+                onPressed: onNotificationsTap,
+                tooltip: 'การแจ้งเตือน',
+                icon: const Icon(Icons.notifications_none_rounded, color: Color(0xFF16241F)))
+          ]),
+          const SizedBox(height: 8),
+          const Text('สวัสดี, นักเดินทาง',
+              style:
+                  TextStyle(fontSize: 25, fontWeight: FontWeight.w800, color: Color(0xFF16241F))),
+          const SizedBox(height: 4),
+          const Text('วันนี้อยากไปเที่ยวที่ไหนดี?', style: TextStyle(color: Color(0xFF5C6A64))),
+          const SizedBox(height: 18),
+          Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(18),
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF10403D), Color(0xFF1C5C57)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  )),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  const Expanded(
+                      child: Text('ทริปสุดคุ้มสำหรับวันหยุดนี้',
+                          style: TextStyle(
+                              color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800))),
+                  Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                      decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.14),
+                          borderRadius: BorderRadius.circular(999)),
+                      child: const Text('3 วัน • 2 คน',
+                          style: TextStyle(
+                              color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700))),
+                ]),
+                const SizedBox(height: 12),
+                const Text('เชียงใหม่ • ธรรมชาติ • คาเฟ่ • วัฒนธรรม',
+                    style: TextStyle(color: Colors.white70, fontSize: 12.5)),
+                const SizedBox(height: 16),
+                Row(children: const [
+                  _MiniStat(label: 'รีวิว', value: '3.2k'),
+                  SizedBox(width: 10),
+                  _MiniStat(label: 'จุดเด่น', value: '4.9/5'),
+                  SizedBox(width: 10),
+                  _MiniStat(label: 'ประหยัด', value: '฿8.9k'),
+                ]),
+                const SizedBox(height: 16),
+                SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                        onPressed: onPlan,
+                        icon: const Icon(Icons.arrow_forward_rounded, size: 17),
+                        label: const Text('วางแผนทริปนี้'),
+                        style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFFE3A23C),
+                            foregroundColor: const Color(0xFF3B2A11),
+                            padding: const EdgeInsets.symmetric(vertical: 12))))
+              ])),
+          const SizedBox(height: 22),
+          InkWell(
+              onTap: onSearch,
+              borderRadius: BorderRadius.circular(14),
+              child: Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFE4E1D8))),
+                  child: const Row(children: [
+                    Icon(Icons.search, color: Color(0xFF5C6A64)),
+                    SizedBox(width: 10),
+                    Text('ค้นหาที่พัก ร้านอาหาร สถานที่เที่ยว',
+                        style: TextStyle(color: Color(0xFF5C6A64), fontSize: 13))
+                  ]))),
+          const SizedBox(height: 22),
+          Row(children: [
+            Expanded(
+                child: _QuickAction(
+                    icon: Icons.flight_rounded,
+                    label: 'เที่ยวบิน',
+                    onTap: () => onQuickAction('เที่ยวบิน'))),
+            Expanded(
+                child: _QuickAction(
+                    icon: Icons.hotel_rounded,
+                    label: 'ที่พัก',
+                    onTap: () => onQuickAction('ที่พัก'))),
+            Expanded(
+                child: _QuickAction(
+                    icon: Icons.restaurant_rounded,
+                    label: 'อาหาร',
+                    onTap: () => onQuickAction('อาหาร'))),
+            Expanded(
+                child: _QuickAction(
+                    icon: Icons.temple_buddhist_rounded,
+                    label: 'สถานที่เที่ยว',
+                    onTap: () => onQuickAction('สถานที่เที่ยว')))
+          ]),
+          const SizedBox(height: 22),
+          InkWell(
+              onTap: onPlan,
+              borderRadius: BorderRadius.circular(18),
+              child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      gradient:
+                          const LinearGradient(colors: [Color(0xFF10403D), Color(0xFF1C5C57)])),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Icon(Icons.auto_awesome, color: Color(0xFFE3A23C)),
+                    const SizedBox(height: 12),
+                    const Text('ให้ AI จัดทริปให้คุณ',
+                        style: TextStyle(
+                            color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 5),
+                    const Text(
+                        'เลือกจุดหมาย งบประมาณ และสไตล์ แล้วรับแผนเที่ยวพร้อมประมาณการค่าใช้จ่าย',
+                        style: TextStyle(color: Colors.white70, height: 1.5)),
+                    const SizedBox(height: 15),
+                    FilledButton.icon(
+                        onPressed: onPlan,
+                        icon: const Icon(Icons.arrow_forward_rounded, size: 17),
+                        label: const Text('เริ่มวางแผน'),
+                        style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFFE3A23C),
+                            foregroundColor: const Color(0xFF3B2A11)))
+                  ]))),
+          const SizedBox(height: 24),
+          _SectionTitle(title: 'จุดหมายยอดนิยม', action: 'ดูทั้งหมด', onTap: onSearch),
+          const SizedBox(height: 12),
+          SizedBox(
+              height: 184,
+              child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: destinations.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    final Map<String, dynamic> item = destinations[index];
+                    final colors = item['colors'] as List<Color>;
+                    return InkWell(
+                        onTap: () => onDestination(item['name'] as String),
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                            width: 155,
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: colors)),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  Icon(item['icon'] as IconData, color: Colors.white70, size: 34),
+                                  const Spacer(),
+                                  Text(item['name'] as String,
+                                      style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w800)),
+                                  const SizedBox(height: 3),
+                                  Text(item['subtitle'] as String,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(color: Colors.white70, fontSize: 10.5))
+                                ])));
+                  })),
+          const SizedBox(height: 20),
+          Container(
+              padding: const EdgeInsets.all(15),
+              decoration: BoxDecoration(
+                  color: const Color(0xFFF6E4C1), borderRadius: BorderRadius.circular(14)),
+              child: const Row(children: [
+                Icon(Icons.local_activity_outlined, color: Color(0xFF8A5A17)),
+                SizedBox(width: 12),
+                Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text('ลด 20% ทริปแรกของคุณ',
+                      style: TextStyle(fontWeight: FontWeight.w700, color: Color(0xFF4A2E06))),
+                  Text('ใช้โค้ด SABAI20 ก่อนสิ้นเดือนนี้',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF7A5219)))
+                ]))
+              ])),
+        ],
+      );
+}
+
+class _SearchMvpScreen extends StatelessWidget {
+  const _SearchMvpScreen(
+      {required this.query,
+      required this.category,
+      required this.categories,
+      required this.listings,
+      required this.onQuery,
+      required this.onCategory,
+      required this.onSelect});
+  final String query;
+  final String category;
+  final List<String> categories;
+  final List<Map<String, dynamic>> listings;
+  final ValueChanged<String> onQuery;
+  final ValueChanged<String> onCategory;
+  final ValueChanged<Map<String, dynamic>> onSelect;
+
+  @override
+  Widget build(BuildContext context) => Column(children: [
+        const Padding(
+            padding: EdgeInsets.fromLTRB(20, 20, 20, 12),
+            child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('ค้นหา', style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800)))),
+        Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: TextFormField(
+                initialValue: query,
+                onChanged: onQuery,
+                decoration: InputDecoration(
+                    hintText: 'ค้นหาที่พัก ร้านอาหาร เที่ยวบิน...',
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: Color(0xFFE4E1D8))),
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(14),
+                        borderSide: const BorderSide(color: Color(0xFFE4E1D8))),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12)))),
+        const SizedBox(height: 12),
+        SizedBox(
+            height: 44,
+            child: ListView.separated(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                scrollDirection: Axis.horizontal,
+                itemCount: categories.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final String value = categories[index];
+                  return ChoiceChip(
+                      label: Text(value),
+                      selected: category == value,
+                      onSelected: (_) => onCategory(value),
+                      selectedColor: const Color(0xFF10403D),
+                      labelStyle: TextStyle(
+                          color: category == value ? Colors.white : const Color(0xFF16241F),
+                          fontWeight: FontWeight.w600));
+                })),
+        const SizedBox(height: 8),
+        Expanded(
+            child: listings.isEmpty
+                ? const Center(
+                    child: Text('ไม่พบรายการที่ตรงกัน', style: TextStyle(color: Color(0xFF5C6A64))))
+                : ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                    itemCount: listings.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final Map<String, dynamic> item = listings[index];
+                      return InkWell(
+                          onTap: () => onSelect(item),
+                          borderRadius: BorderRadius.circular(16),
+                          child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: const Color(0xFFE4E1D8))),
+                              child: Row(children: [
+                                Container(
+                                    width: 62,
+                                    height: 62,
+                                    decoration: BoxDecoration(
+                                        color: (item['color'] as Color).withOpacity(.13),
+                                        borderRadius: BorderRadius.circular(13)),
+                                    child: Icon(item['icon'] as IconData,
+                                        color: item['color'] as Color, size: 28)),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                    child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                      Text(item['name'] as String,
+                                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                                      const SizedBox(height: 4),
+                                      Text(item['location'] as String,
+                                          style: const TextStyle(
+                                              color: Color(0xFF5C6A64), fontSize: 12)),
+                                      const SizedBox(height: 7),
+                                      Row(children: [
+                                        const Icon(Icons.star, size: 14, color: Color(0xFFE3A23C)),
+                                        Text(' ${item['rating']} (${item['reviews']})',
+                                            style: const TextStyle(fontSize: 11)),
+                                        const Spacer(),
+                                        Text('฿${(item['price'] as int)}',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w800,
+                                                color: Color(0xFF10403D)))
+                                      ])
+                                    ]))
+                              ])));
+                    })),
+      ]);
+}
+
+class _PlannerMvpScreen extends StatelessWidget {
+  const _PlannerMvpScreen(
+      {required this.destination,
+      required this.destinations,
+      required this.days,
+      required this.travelers,
+      required this.budget,
+      required this.styles,
+      required this.styleOptions,
+      required this.generating,
+      required this.itinerary,
+      required this.onDestination,
+      required this.onDays,
+      required this.onTravelers,
+      required this.onBudget,
+      required this.onToggleStyle,
+      required this.onGenerate,
+      required this.onReset,
+      required this.onSave,
+      required this.isSaved});
+  final String destination;
+  final List<String> destinations;
+  final int days;
+  final int travelers;
+  final int budget;
+  final Set<String> styles;
+  final List<String> styleOptions;
+  final bool generating;
+  final Map<String, dynamic>? itinerary;
+  final ValueChanged<String> onDestination;
+  final ValueChanged<int> onDays;
+  final ValueChanged<int> onTravelers;
+  final ValueChanged<int> onBudget;
+  final ValueChanged<String> onToggleStyle;
+  final VoidCallback onGenerate;
+  final VoidCallback onReset;
+  final VoidCallback onSave;
+  final bool isSaved;
+
+  @override
+  Widget build(BuildContext context) {
+    if (generating) {
+      return const Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+        CircularProgressIndicator(color: Color(0xFF10403D)),
+        SizedBox(height: 16),
+        Text('กำลังจัดทริปให้คุณ...')
+      ]));
+    }
+    if (itinerary != null) {
+      return _ItineraryResult(
+          destination: destination,
+          days: days,
+          travelers: travelers,
+          itinerary: itinerary!,
+          onReset: onReset,
+          onSave: onSave,
+          isSaved: isSaved);
+    }
+    return ListView(padding: const EdgeInsets.fromLTRB(20, 20, 20, 30), children: [
+      const Row(children: [
+        Icon(Icons.auto_awesome, color: Color(0xFFE3A23C)),
+        SizedBox(width: 8),
+        Text('ผู้ช่วยวางแผนทริป',
+            style: TextStyle(color: Color(0xFF10403D), fontWeight: FontWeight.w700))
+      ]),
+      const SizedBox(height: 7),
+      const Text('ให้ AI จัดทริปในฝันของคุณ',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+      const SizedBox(height: 5),
+      const Text('กำหนดความต้องการ แล้วรับแผนเที่ยวพร้อมงบประมาณ',
+          style: TextStyle(color: Color(0xFF5C6A64), fontSize: 12.5)),
+      const SizedBox(height: 24),
+      const Text('อยากไปที่ไหน?', style: TextStyle(fontWeight: FontWeight.w700)),
+      const SizedBox(height: 10),
+      Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: destinations
+              .map((item) => _SelectChip(
+                  label: item, selected: destination == item, onTap: () => onDestination(item)))
+              .toList()),
+      const SizedBox(height: 22),
+      _StepperRow(label: 'กี่วัน?', value: days, min: 1, max: 14, onChanged: onDays),
+      const SizedBox(height: 20),
+      _StepperRow(
+          label: 'จำนวนผู้เดินทาง', value: travelers, min: 1, max: 10, onChanged: onTravelers),
+      const SizedBox(height: 22),
+      Row(children: [
+        const Expanded(
+            child: Text('งบประมาณโดยประมาณ', style: TextStyle(fontWeight: FontWeight.w700))),
+        Text('฿${budget}',
+            style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF10403D)))
+      ]),
+      Slider(
+          value: budget.toDouble(),
+          min: 3000,
+          max: 50000,
+          divisions: 94,
+          onChanged: (value) => onBudget((value / 500).round() * 500),
+          activeColor: const Color(0xFF10403D)),
+      const Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+        Text('฿3,000', style: TextStyle(fontSize: 11, color: Color(0xFF5C6A64))),
+        Text('฿50,000', style: TextStyle(fontSize: 11, color: Color(0xFF5C6A64)))
+      ]),
+      const SizedBox(height: 20),
+      const Text('สไตล์การเที่ยว', style: TextStyle(fontWeight: FontWeight.w700)),
+      const SizedBox(height: 10),
+      Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: styleOptions
+              .map((item) => _SelectChip(
+                  label: item, selected: styles.contains(item), onTap: () => onToggleStyle(item)))
+              .toList()),
+      const SizedBox(height: 26),
+      FilledButton.icon(
+          onPressed: onGenerate,
+          icon: const Icon(Icons.auto_awesome),
+          label: const Text('ให้ AI จัดแผนให้'),
+          style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF10403D),
+              padding: const EdgeInsets.symmetric(vertical: 15))),
+    ]);
+  }
+}
+
+class _ItineraryResult extends StatelessWidget {
+  const _ItineraryResult(
+      {required this.destination,
+      required this.days,
+      required this.travelers,
+      required this.itinerary,
+      required this.onReset,
+      required this.onSave,
+      required this.isSaved});
+  final String destination;
+  final int days;
+  final int travelers;
+  final Map<String, dynamic> itinerary;
+  final VoidCallback onReset;
+  final VoidCallback onSave;
+  final bool isSaved;
+
+  @override
+  Widget build(BuildContext context) {
+    final daysList = itinerary['days'] as List<Map<String, dynamic>>;
+    final budgetList = itinerary['budget'] as List<Map<String, dynamic>>;
+    final int total = budgetList.fold<int>(0, (sum, item) => sum + (item['value'] as int));
+    return Column(children: [
+      Padding(
+          padding: const EdgeInsets.fromLTRB(20, 15, 20, 12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            TextButton.icon(
+                onPressed: onReset,
+                icon: const Icon(Icons.arrow_back, size: 17),
+                label: const Text('วางแผนใหม่'),
+                style: TextButton.styleFrom(foregroundColor: const Color(0xFF10403D))),
+            Text('$destination · $days วัน',
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+            Text('$travelers ผู้เดินทาง · แผนเที่ยวของคุณ',
+                style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 12))
+          ])),
+      Expanded(
+          child: ListView(padding: const EdgeInsets.fromLTRB(20, 8, 20, 20), children: [
+        for (final day in daysList) _ItineraryDay(day: day),
+        const SizedBox(height: 8),
+        const Text('ประมาณการค่าใช้จ่าย',
+            style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 12),
+        for (final item in budgetList)
+          _BudgetLine(label: item['label'] as String, value: item['value'] as int, total: total),
+        const Divider(height: 24),
+        Row(children: [
+          const Expanded(child: Text('รวมทั้งหมด', style: TextStyle(fontWeight: FontWeight.w800))),
+          Text('฿$total',
+              style: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF10403D)))
+        ])
+      ])),
+      SafeArea(
+          top: false,
+          child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 10, 20, 12),
+              child: OutlinedButton.icon(
+                  onPressed: isSaved ? null : onSave,
+                  icon: Icon(isSaved ? Icons.check_circle_outline : Icons.bookmark_border),
+                  label: Text(isSaved ? 'บันทึกแล้ว' : 'บันทึกทริป'),
+                  style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF10403D),
+                      padding: const EdgeInsets.symmetric(vertical: 13)))))
+    ]);
+  }
+}
+
+class _TripsMvpScreen extends StatelessWidget {
+  const _TripsMvpScreen({
+    required this.trips,
+    required this.bookings,
+    required this.showBookings,
+    required this.onPlan,
+    required this.onViewChanged,
+  });
+  final List<Map<String, dynamic>> trips;
+  final List<Map<String, dynamic>> bookings;
+  final bool showBookings;
+  final VoidCallback onPlan;
+  final ValueChanged<bool> onViewChanged;
+
+  @override
+  Widget build(BuildContext context) => ListView(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+        children: [
+          const Text('ทริปของฉัน', style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 16),
+          SegmentedButton<bool>(
+            segments: const [
+              ButtonSegment<bool>(
+                value: false,
+                icon: Icon(Icons.map_outlined),
+                label: Text('ทริปที่บันทึก'),
+              ),
+              ButtonSegment<bool>(
+                value: true,
+                icon: Icon(Icons.receipt_long_outlined),
+                label: Text('การจอง'),
+              ),
+            ],
+            selected: {showBookings},
+            onSelectionChanged: (selection) => onViewChanged(selection.first),
+          ),
+          const SizedBox(height: 16),
+          if (!showBookings && trips.isEmpty)
+            Container(
+                padding: const EdgeInsets.symmetric(vertical: 54, horizontal: 24),
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFFE4E1D8))),
+                child: Column(children: [
+                  const Icon(Icons.luggage_outlined, size: 42, color: Color(0xFF10403D)),
+                  const SizedBox(height: 14),
+                  const Text('ยังไม่มีทริปที่บันทึกไว้',
+                      style: TextStyle(fontWeight: FontWeight.w700)),
+                  const SizedBox(height: 6),
+                  const Text('เริ่มวางแผนทริปแรกของคุณได้เลย',
+                      style: TextStyle(color: Color(0xFF5C6A64))),
+                  const SizedBox(height: 18),
+                  FilledButton(onPressed: onPlan, child: const Text('เริ่มวางแผน'))
+                ]))
+          else if (!showBookings)
+            ...trips.map((trip) {
+              final destination = trip['destination'] as String;
+              final days = trip['days'] as int;
+              final budget = trip['budget'] as int;
+              final travelers = trip['travelers'] as int;
+              final progress = ((days / 5).clamp(0.25, 1.0)).toDouble();
+
+              return TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0.92, end: 1),
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOutCubic,
+                builder: (context, value, child) => Transform.scale(
+                  scale: value,
+                  child: child,
+                ),
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE4E1D8))),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Row(children: [
+                      const CircleAvatar(
+                          radius: 18,
+                          backgroundColor: Color(0xFFE4EDEA),
+                          child: Icon(Icons.place_outlined, size: 18, color: Color(0xFF10403D))),
+                      const SizedBox(width: 12),
+                      Expanded(
+                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Text(destination, style: const TextStyle(fontWeight: FontWeight.w800)),
+                        const SizedBox(height: 3),
+                        Text('$days วัน • $travelers คน • ฿$budget',
+                            style: const TextStyle(fontSize: 12, color: Color(0xFF5C6A64)))
+                      ])),
+                      const Icon(Icons.chevron_right, color: Color(0xFF5C6A64))
+                    ]),
+                    const SizedBox(height: 14),
+                    Row(children: [
+                      const Expanded(
+                          child: Text('ความพร้อมแผนทริป',
+                              style: TextStyle(fontSize: 11, color: Color(0xFF5C6A64)))),
+                      Text('${(progress * 100).round()}%',
+                          style: const TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.w700, color: Color(0xFF10403D)))
+                    ]),
+                    const SizedBox(height: 7),
+                    ClipRRect(
+                        borderRadius: BorderRadius.circular(999),
+                        child: LinearProgressIndicator(
+                            value: progress,
+                            minHeight: 8,
+                            backgroundColor: const Color(0xFFE4EDEA),
+                            color: const Color(0xFF10403D))),
+                  ]),
+                ),
+              );
+            }),
+          if (showBookings) ...[
+            Row(children: [
+              const Expanded(
+                child: Text('ประวัติการจอง',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              ),
+              Text('${bookings.length} รายการ',
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF5C6A64))),
+            ]),
+            const SizedBox(height: 8),
+            if (bookings.isEmpty)
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 42, horizontal: 24),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: const Color(0xFFE4E1D8)),
+                ),
+                child: const Column(children: [
+                  Icon(Icons.receipt_long_outlined, size: 40, color: Color(0xFF10403D)),
+                  SizedBox(height: 12),
+                  Text('ยังไม่มีรายการจอง', style: TextStyle(fontWeight: FontWeight.w700)),
+                  SizedBox(height: 5),
+                  Text('รายการจองและการชำระเงินจะแสดงที่นี่',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 12, color: Color(0xFF5C6A64))),
+                ]),
+              )
+            else
+              ...bookings.map((booking) {
+                final title = booking['title'] as String;
+                final destination = booking['destination'] as String;
+                final date = booking['date'] as String;
+                final amount = booking['amount'] as int;
+                final status = booking['status'] as String;
+                final icon = booking['icon'] as IconData;
+                final color = booking['color'] as Color;
+
+                return TweenAnimationBuilder<double>(
+                  tween: Tween<double>(begin: 0.96, end: 1),
+                  duration: const Duration(milliseconds: 280),
+                  curve: Curves.easeOut,
+                  builder: (context, value, child) => Transform.scale(
+                    scale: value,
+                    child: child,
+                  ),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: 10),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE4E1D8)),
+                    ),
+                    child: Row(children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(.12),
+                          borderRadius: BorderRadius.circular(13),
+                        ),
+                        child: Icon(icon, color: color),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
+                            const SizedBox(height: 4),
+                            Text(destination,
+                                style: const TextStyle(fontSize: 12, color: Color(0xFF5C6A64))),
+                            const SizedBox(height: 4),
+                            Text(date,
+                                style: const TextStyle(fontSize: 11, color: Color(0xFF5C6A64))),
+                          ],
+                        ),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text('฿$amount',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w800, color: Color(0xFF10403D))),
+                          const SizedBox(height: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: status == 'จ่ายแล้ว'
+                                  ? const Color(0xFFE4F8EE)
+                                  : const Color(0xFFF8F0D6),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              status,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: status == 'จ่ายแล้ว'
+                                    ? const Color(0xFF1D7A4B)
+                                    : const Color(0xFF8A5A17),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ]),
+                  ),
+                );
+              }),
+          ],
+        ],
+      );
+}
+
+class _ProfileMvpScreen extends StatelessWidget {
+  const _ProfileMvpScreen({required this.onOpenDemo, required this.onOpenHistory});
+  final VoidCallback onOpenDemo;
+  final VoidCallback onOpenHistory;
+
+  @override
+  Widget build(BuildContext context) => ListView(padding: const EdgeInsets.all(20), children: [
+        const Text('โปรไฟล์', style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800)),
+        const SizedBox(height: 18),
+        Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+                color: const Color(0xFF10403D), borderRadius: BorderRadius.circular(16)),
+            child: const Row(children: [
+              CircleAvatar(
+                  backgroundColor: Color(0xFFF6E4C1),
+                  child: Text('น',
+                      style: TextStyle(color: Color(0xFF10403D), fontWeight: FontWeight.w800))),
+              SizedBox(width: 12),
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('นักเดินทาง Sabai',
+                    style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                Text('สมาชิกผู้เยี่ยมชม', style: TextStyle(color: Colors.white70, fontSize: 12))
+              ])
+            ])),
+        const SizedBox(height: 18),
+        Row(children: const [
+          Expanded(
+              child: _ProfileStatCard(
+                  title: 'ทริปที่บันทึก', value: '12', subtitle: 'แผนที่พร้อมเดินทาง')),
+          SizedBox(width: 10),
+          Expanded(
+              child: _ProfileStatCard(title: 'คะแนนสะสม', value: '920', subtitle: 'Sabai Points')),
+        ]),
+        const SizedBox(height: 18),
+        Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+                color: const Color(0xFFEEF7F2),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFDDEBE5))),
+            child: Row(children: const [
+              Icon(Icons.wallet_rounded, color: Color(0xFF10403D)),
+              SizedBox(width: 12),
+              Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('กระเป๋า Sabai', style: TextStyle(fontWeight: FontWeight.w800)),
+                Text('ยอดคงเหลือ ฿2,450', style: TextStyle(fontSize: 12, color: Color(0xFF5C6A64)))
+              ])),
+              Icon(Icons.chevron_right, color: Color(0xFF5C6A64))
+            ])),
+        const SizedBox(height: 18),
+        _ProfileMenu(
+            icon: Icons.bookmark_border,
+            title: 'ทริปที่บันทึกไว้',
+            subtitle: 'จัดการแผนการเดินทางของคุณ',
+            onTap: onOpenHistory),
+        _ProfileMenu(
+            icon: Icons.confirmation_number_outlined,
+            title: 'การจองของฉัน',
+            subtitle: 'รายการจองและการชำระเงิน',
+            onTap: onOpenHistory),
+        _ProfileMenu(
+            icon: Icons.settings_outlined,
+            title: 'การตั้งค่า',
+            subtitle: 'ภาษา สกุลเงิน และการแจ้งเตือน',
+            onTap: () {}),
+        const SizedBox(height: 10),
+        OutlinedButton.icon(
+            onPressed: onOpenDemo,
+            icon: const Icon(Icons.grid_view_rounded),
+            label: const Text('เปิดพอร์ทัลเดโม'),
+            style: OutlinedButton.styleFrom(
+                foregroundColor: const Color(0xFF10403D),
+                padding: const EdgeInsets.symmetric(vertical: 13)))
+      ]);
+}
+
+class _ListingSheet extends StatelessWidget {
+  const _ListingSheet({required this.listing, required this.onCompletePayment});
+  final Map<String, dynamic> listing;
+  final ValueChanged<Map<String, dynamic>> onCompletePayment;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = listing['color'] as Color;
+    final features = <String>[
+      'ที่จอดรถ',
+      'Wi‑Fi ฟรี',
+      'เช็คอิน 14:00',
+      'อาหารเช้า',
+    ];
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 24, 22, 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              height: 150,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                  color: color.withOpacity(.13), borderRadius: BorderRadius.circular(16)),
+              child: Icon(listing['icon'] as IconData, size: 56, color: color),
+            ),
+            const SizedBox(height: 18),
+            Text(listing['type'] as String,
+                style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 12)),
+            const SizedBox(height: 5),
+            Text(listing['name'] as String,
+                style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 5),
+            Text(listing['location'] as String, style: const TextStyle(color: Color(0xFF5C6A64))),
+            const SizedBox(height: 12),
+            Row(children: [
+              const Icon(Icons.star, color: Color(0xFFE3A23C), size: 17),
+              Text(' ${listing['rating']} · ${listing['reviews']} รีวิว'),
+              const Spacer(),
+              Text('เริ่มต้น ฿${listing['price']}',
+                  style: const TextStyle(
+                      fontSize: 17, fontWeight: FontWeight.w800, color: Color(0xFF10403D))),
+            ]),
+            const SizedBox(height: 14),
+            const Text('สิ่งอำนวยความสะดวก', style: TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 10),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: features
+                  .map((feature) => Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                        decoration: BoxDecoration(
+                            color: const Color(0xFFE4EDEA),
+                            borderRadius: BorderRadius.circular(999)),
+                        child: Text(feature,
+                            style: const TextStyle(fontSize: 11, color: Color(0xFF10403D))),
+                      ))
+                  .toList(),
+            ),
+            const SizedBox(height: 18),
+            Row(children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context)
+                        .showSnackBar(const SnackBar(content: Text('บันทึกตัวเลือกแล้ว')));
+                  },
+                  icon: const Icon(Icons.bookmark_border),
+                  label: const Text('บันทึก'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF10403D),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    showModalBottomSheet<void>(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: const Color(0xFFFAFAF8),
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                      ),
+                      builder: (_) => _BookingSheet(
+                        listing: listing,
+                        onCompletePayment: onCompletePayment,
+                      ),
+                    );
+                  },
+                  style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF10403D),
+                      padding: const EdgeInsets.symmetric(vertical: 14)),
+                  child: const Text('จองเลย'),
+                ),
+              ),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BookingSheet extends StatelessWidget {
+  const _BookingSheet({required this.listing, required this.onCompletePayment});
+  final Map<String, dynamic> listing;
+  final ValueChanged<Map<String, dynamic>> onCompletePayment;
+
+  @override
+  Widget build(BuildContext context) {
+    final price = listing['price'] as int;
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 20, 22, 28),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 42,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFCBD5D1),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            const Text('ยืนยันการจอง', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE4E1D8)),
+              ),
+              child: Row(children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: (listing['color'] as Color).withOpacity(.13),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(listing['icon'] as IconData, color: listing['color'] as Color),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(listing['name'] as String,
+                          style: const TextStyle(fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 4),
+                      Text(listing['location'] as String,
+                          style: const TextStyle(fontSize: 12, color: Color(0xFF5C6A64))),
+                    ],
+                  ),
+                ),
+              ]),
+            ),
+            const SizedBox(height: 18),
+            const Text('วันเดินทาง', style: TextStyle(fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Row(children: const [
+              _BookingDateChip(label: '14 ธ.ค.'),
+              SizedBox(width: 8),
+              _BookingDateChip(label: '15 ธ.ค.'),
+              SizedBox(width: 8),
+              _BookingDateChip(label: '16 ธ.ค.', selected: true),
+            ]),
+            const SizedBox(height: 18),
+            Row(children: [
+              const Expanded(
+                  child: Text('รวมประมาณ', style: TextStyle(fontWeight: FontWeight.w700))),
+              Text('฿${price * 2}',
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.w800, color: Color(0xFF10403D))),
+            ]),
+            const SizedBox(height: 12),
+            const Text('รวมค่าที่พัก 2 คืน • พร้อมส่วนลดสำหรับสมาชิก',
+                style: TextStyle(fontSize: 12, color: Color(0xFF5C6A64))),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  onCompletePayment(listing);
+                },
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF10403D),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                ),
+                child: const Text('ยืนยันการจอง'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _BookingDateChip extends StatelessWidget {
+  const _BookingDateChip({required this.label, this.selected = false});
+  final String label;
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) => Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: selected ? const Color(0xFF10403D) : Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0xFFE4E1D8)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: selected ? Colors.white : const Color(0xFF16241F),
+        ),
+      ));
+}
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat({required this.label, required this.value});
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) => Expanded(
+      child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(label, style: const TextStyle(color: Colors.white70, fontSize: 10.5)),
+            const SizedBox(height: 4),
+            Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800))
+          ])));
+}
+
+class _QuickAction extends StatelessWidget {
+  const _QuickAction({required this.icon, required this.label, required this.onTap});
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => InkWell(
+      onTap: onTap,
+      child: Column(children: [
+        Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+                color: const Color(0xFFE4EDEA), borderRadius: BorderRadius.circular(15)),
+            child: Icon(icon, color: const Color(0xFF10403D))),
+        const SizedBox(height: 6),
+        Text(label,
+            style: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.center)
+      ]));
+}
+
+class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title, required this.action, required this.onTap});
+  final String title;
+  final String action;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        Expanded(
+            child: Text(title, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800))),
+        TextButton(
+            onPressed: onTap,
+            style: TextButton.styleFrom(foregroundColor: const Color(0xFF10403D)),
+            child: Text(action, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)))
+      ]);
+}
+
+class _SelectChip extends StatelessWidget {
+  const _SelectChip({required this.label, required this.selected, required this.onTap});
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+      selectedColor: const Color(0xFF10403D),
+      labelStyle: TextStyle(
+          color: selected ? Colors.white : const Color(0xFF16241F), fontWeight: FontWeight.w600));
+}
+
+class _StepperRow extends StatelessWidget {
+  const _StepperRow(
+      {required this.label,
+      required this.value,
+      required this.min,
+      required this.max,
+      required this.onChanged});
+  final String label;
+  final int value;
+  final int min;
+  final int max;
+  final ValueChanged<int> onChanged;
+  @override
+  Widget build(BuildContext context) => Row(children: [
+        Expanded(child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700))),
+        IconButton(
+            onPressed: value > min ? () => onChanged(value - 1) : null,
+            icon: const Icon(Icons.remove_circle_outline)),
+        SizedBox(
+            width: 28,
+            child: Text('$value',
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800))),
+        IconButton(
+            onPressed: value < max ? () => onChanged(value + 1) : null,
+            icon: const Icon(Icons.add_circle_outline))
+      ]);
+}
+
+class _ItineraryDay extends StatelessWidget {
+  const _ItineraryDay({required this.day});
+  final Map<String, dynamic> day;
+  @override
+  Widget build(BuildContext context) {
+    final items = day['items'] as List<Map<String, String>>;
+    return Padding(
+        padding: const EdgeInsets.only(bottom: 19),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(day['title'] as String,
+              style: const TextStyle(color: Color(0xFF10403D), fontWeight: FontWeight.w800)),
+          const SizedBox(height: 11),
+          for (final item in items)
+            Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  const Padding(
+                      padding: EdgeInsets.only(top: 4, right: 11),
+                      child: Icon(Icons.circle, size: 8, color: Color(0xFFE3A23C))),
+                  SizedBox(
+                      width: 42,
+                      child: Text(item['time']!,
+                          style: const TextStyle(
+                              color: Color(0xFF5C6A64),
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12))),
+                  Expanded(
+                      child: Text(item['text']!, style: const TextStyle(fontSize: 13, height: 1.4)))
+                ]))
+        ]));
+  }
+}
+
+class _BudgetLine extends StatelessWidget {
+  const _BudgetLine({required this.label, required this.value, required this.total});
+  final String label;
+  final int value;
+  final int total;
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: 11),
+        child: Column(
+          children: [
+            Row(children: [
+              Expanded(child: Text(label, style: const TextStyle(fontSize: 12))),
+              Text('฿$value', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+            ]),
+            const SizedBox(height: 5),
+            LinearProgressIndicator(
+              value: total == 0 ? 0 : value / total,
+              minHeight: 5,
+              borderRadius: BorderRadius.circular(5),
+              backgroundColor: const Color(0xFFE4EDEA),
+              color: const Color(0xFFE3A23C),
+            ),
+          ],
+        ),
+      );
+}
+
+class _ProfileStatCard extends StatelessWidget {
+  const _ProfileStatCard({required this.title, required this.value, required this.subtitle});
+  final String title;
+  final String value;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE4E1D8))),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text(title, style: const TextStyle(fontSize: 12, color: Color(0xFF5C6A64))),
+          const SizedBox(height: 8),
+          Text(value,
+              style: const TextStyle(
+                  fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF10403D))),
+          const SizedBox(height: 3),
+          Text(subtitle, style: const TextStyle(fontSize: 11, color: Color(0xFF5C6A64))),
+        ]),
+      );
+}
+
+class _ProfileMenu extends StatelessWidget {
+  const _ProfileMenu({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => ListTile(
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 4),
+      leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+              color: const Color(0xFFE4EDEA), borderRadius: BorderRadius.circular(12)),
+          child: Icon(icon, color: const Color(0xFF10403D))),
+      title: Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700)),
+      subtitle: Text(subtitle, style: const TextStyle(fontSize: 11, color: Color(0xFF5C6A64))),
+      trailing: const Icon(Icons.chevron_right, color: Color(0xFF5C6A64)));
 }
 
 class _PortalSelector extends StatelessWidget {
@@ -1005,7 +2671,8 @@ class _RouteSelector extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Expanded(child: _RouteField(label: 'FROM', code: 'BKK', city: 'Bangkok, Thailand')),
+              const Expanded(
+                  child: _RouteField(label: 'FROM', code: 'BKK', city: 'Bangkok, Thailand')),
               Container(
                 width: 32,
                 height: 32,
