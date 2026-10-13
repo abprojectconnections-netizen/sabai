@@ -1,6 +1,13 @@
 import '../../../core/network/api_client.dart';
 
 class PortalQueue {
+  const PortalQueue({
+    required this.pendingBookings,
+    required this.pendingPayments,
+    required this.pendingPartners,
+    required this.openTickets,
+    required this.openDisputes,
+  });
 
   factory PortalQueue.fromJson(Map<String, dynamic> json) => PortalQueue(
         pendingBookings: json['pending_bookings'] as int? ?? 0,
@@ -9,13 +16,6 @@ class PortalQueue {
         openTickets: json['open_tickets'] as int? ?? 0,
         openDisputes: json['open_disputes'] as int? ?? 0,
       );
-  const PortalQueue({
-    required this.pendingBookings,
-    required this.pendingPayments,
-    required this.pendingPartners,
-    required this.openTickets,
-    required this.openDisputes,
-  });
 
   final int pendingBookings;
   final int pendingPayments;

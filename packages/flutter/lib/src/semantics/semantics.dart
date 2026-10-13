@@ -194,9 +194,7 @@ sealed class _DebugSemanticsRoleChecks {
       SemanticsRole.hotKey => _unimplemented,
     }node;
 
-    if (error != null) {
-      return error;
-    }
+    return error;
 
     return _semanticsGeneral(node);
   }
