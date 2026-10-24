@@ -29,7 +29,7 @@ class AuthApi {
   AuthApi({http.Client? client}) : _client = client ?? http.Client();
 
   static const _configuredBaseUrl = String.fromEnvironment('API_BASE_URL');
-  static const _defaultBaseUrl = 'http://localhost:8080/api/v1';
+  static const _defaultBaseUrl = 'http://localhost:8082/api/v1';
 
   final http.Client _client;
 

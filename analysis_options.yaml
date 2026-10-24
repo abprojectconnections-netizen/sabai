@@ -29,6 +29,8 @@ analyzer:
       # Ignore protoc generated files
     - "dev/conductor/lib/proto/*"
     - "engine/**"
+    - build/**
+    - web/**
 
 formatter:
   page_width: 100
