@@ -1,0 +1,20 @@
+name: web-prototype
+on:
+  push:
+    paths: ['apps/web-prototype/**', '.github/workflows/web-prototype.yml']
+  pull_request:
+    paths: ['apps/web-prototype/**']
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: apps/web-prototype } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: apps/web-prototype/package-lock.json }
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npm run build:beta
+        env: { VITE_API_BASE_URL: 'https://beta.example.invalid/api/v1' }

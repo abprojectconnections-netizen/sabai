@@ -1,0 +1,44 @@
+{
+  "name": "sabai-web-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Sabai Travel — interactive React prototype of the User App (DEV/BETA/PROD aware, repository boundary for mock and REST backends)",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "scripts": {
+    "dev": "vite",
+    "dev:beta": "vite --mode beta",
+    "build": "vite build",
+    "build:beta": "vite build --mode beta",
+    "build:prod": "vite build --mode production",
+    "preview": "vite preview",
+    "lint": "eslint src tests",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check": "npm run lint && npm run test && npm run build"
+  },
+  "dependencies": {
+    "lucide-react": "^1.59.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@vitejs/plugin-react": "^6.1.2",
+    "@vitest/coverage-v8": "^5.0.5",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "jsdom": "^29.1.1",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}

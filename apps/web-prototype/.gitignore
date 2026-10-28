@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.vite/
+*.log
+# environment files that may contain real endpoints — only *.example and .env.development are committed
+.env.local
+.env.*.local
+.env.beta
+.env.production
