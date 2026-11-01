@@ -154,3 +154,66 @@ describe('repository factory and helpers', () => {
     expect(describeApiErrorTh(undefined)).toContain('ไม่คาดคิด');
   });
 });
+
+describe('trips: full lifecycle against the backend contract', () => {
+  const tripJson = { id: 'uuid-1', name: 'ทริป', destination_id: 'chiangmai', start_date: '2026-10-25', end_date: '2026-10-27', status: 'PLANNED', created_at: '2026-10-28T00:00:00.000000Z' };
+  const loggedIn = (...responses) => {
+    const f = fakeFetch(json(200, { data: { access_token: 'tok' }, request_id: 'r' }), ...responses);
+    const repo = http(f);
+    return repo.auth.login({ email: 'a@b.co', password: 'password1' }).then(() => ({ repo, f }));
+  };
+
+  it('gets a trip with its itinerary mapped to camelCase', async () => {
+    const { repo, f } = await loggedIn(json(200, { data: { ...tripJson, days: [{ id: 'd1', date: '2026-10-25', day_number: 1, activities: [{ id: 'a1', title: 'วัด', destination_id: '', starts_at: '2026-10-25T09:00:00.000000Z', ends_at: '' }] }] }, request_id: 'r' }));
+    const trip = await repo.trips.get('uuid-1');
+    expect(f.calls[1].url).toBe('https://api.test/api/v1/trips/uuid-1');
+    expect(trip.days).toEqual([{ id: 'd1', date: '2026-10-25', dayNumber: 1, activities: [{ id: 'a1', title: 'วัด', destinationId: '', startsAt: '2026-10-25T09:00:00.000000Z', endsAt: '' }] }]);
+  });
+  it('sends only the fields that changed when updating', async () => {
+    const { repo, f } = await loggedIn(json(200, { data: tripJson, request_id: 'r' }));
+    await repo.trips.update('uuid-1', { name: 'ใหม่', startDate: '' });
+    expect(f.calls[1].init.method).toBe('PATCH');
+    expect(JSON.parse(f.calls[1].init.body)).toEqual({ name: 'ใหม่', start_date: '' });
+  });
+  it('treats 204 No Content as success for deletes and encodes ids', async () => {
+    const { repo, f } = await loggedIn(new Response(null, { status: 204 }), new Response(null, { status: 204 }));
+    await expect(repo.trips.remove('a/b')).resolves.toBeUndefined();
+    await expect(repo.trips.removeActivity('t1', 'a1')).resolves.toBeUndefined();
+    expect(f.calls[1].url).toBe('https://api.test/api/v1/trips/a%2Fb');
+    expect(f.calls[2].url).toBe('https://api.test/api/v1/trips/t1/activities/a1');
+    expect(f.calls[2].init.method).toBe('DELETE');
+  });
+  it('adds an activity with snake_case fields', async () => {
+    const { repo, f } = await loggedIn(json(201, { data: { id: 'a9', title: 'ดอยสุเทพ', destination_id: '', starts_at: '2026-10-26T09:30:00.000000Z', ends_at: '' }, request_id: 'r' }));
+    const a = await repo.trips.addActivity('t1', { title: 'ดอยสุเทพ', date: '2026-10-26', startTime: '09:30' });
+    expect(JSON.parse(f.calls[1].init.body)).toEqual({ title: 'ดอยสุเทพ', date: '2026-10-26', start_time: '09:30', end_time: '', destination_id: '' });
+    expect(a).toMatchObject({ id: 'a9', startsAt: '2026-10-26T09:30:00.000000Z' });
+  });
+  it('maps 404 and 400 from the trips endpoints', async () => {
+    const { repo } = await loggedIn(json(404, { error: { code: 'NOT_FOUND', message: 'trip not found' }, request_id: 'r' }), json(400, { error: { code: 'VALIDATION_ERROR', message: 'date is outside the trip dates' }, request_id: 'r' }));
+    await expect(repo.trips.get('x')).rejects.toMatchObject({ code: 'NOT_FOUND', status: 404 });
+    await expect(repo.trips.addActivity('t', { title: 'x', date: '2030-01-01' })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+  });
+});
+
+describe('mock trips behave like the backend', () => {
+  it('supports the whole lifecycle with the same validation rules', async () => {
+    const { trips } = createMockRepository();
+    const t = await trips.create({ name: ' ทริป ', destinationId: 'chiangmai', startDate: '2026-10-25', endDate: '2026-10-27' });
+    expect(t.name).toBe('ทริป');
+    await expect(trips.create({ name: '' })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    await expect(trips.create({ name: 'x', startDate: '2026-10-27', endDate: '2026-10-25' })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    await expect(trips.addActivity(t.id, { title: 'x', date: '2026-11-30' })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    const a = await trips.addActivity(t.id, { title: 'ดอยสุเทพ', date: '2026-10-26', startTime: '09:30' });
+    const full = await trips.get(t.id);
+    expect(full.days).toHaveLength(1);
+    expect(full.days[0]).toMatchObject({ date: '2026-10-26', dayNumber: 2 });
+    expect((await trips.list())[0].days).toBeUndefined();
+    await trips.removeActivity(t.id, a.id);
+    expect((await trips.get(t.id)).days[0].activities).toHaveLength(0);
+    expect(await trips.update(t.id, { status: 'PLANNED', startDate: '' })).toMatchObject({ status: 'PLANNED', startDate: '' });
+    await expect(trips.update(t.id, { status: 'NOPE' })).rejects.toMatchObject({ code: 'VALIDATION_ERROR' });
+    await trips.remove(t.id);
+    await expect(trips.get(t.id)).rejects.toMatchObject({ code: 'NOT_FOUND', status: 404 });
+  });
+});

@@ -4,4 +4,5 @@
 - Added env policy (DEV/BETA/PRODUCTION), repository layer (mock + HTTP), BootGate, EnvBadge.
 - Register: 8-character password rule. Login/register show server errors.
 - Fixed: `.ics` text escaping did not escape `;`.
-- Added 83 tests (unit + UI), ESLint 9 config, CI workflow.
+- Added tests (unit + UI), ESLint 9 config, CI workflow.
+- Trips repository methods (get/update/remove/addActivity/removeActivity) for the new backend endpoints.

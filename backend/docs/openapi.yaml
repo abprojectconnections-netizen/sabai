@@ -31,12 +31,14 @@ paths:
         '200': { description: Session token returned }
   /trips:
     get:
-      summary: List trips for the authenticated user
+      summary: List the authenticated user's trips (newest first)
       security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Limit' }, { $ref: '#/components/parameters/Offset' }]
       responses:
-        '200': { description: Trip list }
+        '200': { description: "Array of trips (data is always an array, possibly empty)" }
+        '401': { $ref: '#/components/responses/Unauthorized' }
     post:
-      summary: Create a trip
+      summary: Create a trip (status DRAFT). Empty start_date/end_date mean "not set".
       security: [{ bearerAuth: [] }]
       requestBody:
         required: true
@@ -46,6 +48,121 @@ paths:
               $ref: '#/components/schemas/CreateTripRequest'
       responses:
         '201': { description: Trip created }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /trips/{id}:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    get:
+      summary: Get one trip with its day-by-day itinerary
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: "Trip including days[].activities[]" }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      summary: Partially update a trip; omitted fields are unchanged, empty dates clear the date
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTripRequest'
+      responses:
+        '200': { description: Updated trip }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      summary: Soft-delete a trip
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /trips/{id}/activities:
+    parameters: [{ $ref: '#/components/parameters/Id' }]
+    post:
+      summary: Add an itinerary item; the trip day is created on first use. Times are wall-clock at the destination (no time zone conversion).
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateActivityRequest'
+      responses:
+        '201': { description: Activity created }
+        '400': { description: Invalid input, or date outside the trip's dates }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /trips/{id}/activities/{activityId}:
+    parameters: [{ $ref: '#/components/parameters/Id' }, { name: activityId, in: path, required: true, schema: { type: string } }]
+    delete:
+      summary: Remove an itinerary item
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /notifications:
+    get:
+      summary: List the caller's notifications (newest first) with the total unread count
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: unread, in: query, schema: { type: boolean }, description: "true = only unread" }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: Notification[], unread_count: integer }" }
+  /notifications/read-all:
+    post:
+      summary: Mark all of the caller's notifications as read
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: "data: { updated: integer }" }
+  /notifications/{id}/read:
+    patch:
+      summary: Mark one notification as read (idempotent)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: Marked read }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /reviews:
+    get:
+      summary: List reviews of one subject with count and average
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: subject_type, in: query, required: true, schema: { $ref: '#/components/schemas/ReviewSubjectType' } }
+        - { name: subject_id, in: query, required: true, schema: { type: string, maxLength: 36 } }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: Review[], summary: { count, average } }" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+    post:
+      summary: Review a subject. One review per user per subject; the subject's existence is not verified by the API.
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReviewRequest'
+      responses:
+        '201': { description: Review created }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '409': { description: The caller already reviewed this subject }
+  /reviews/mine:
+    get:
+      summary: List the caller's own reviews
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Limit' }, { $ref: '#/components/parameters/Offset' }]
+      responses:
+        '200': { description: "data: { items: Review[] }" }
+  /reviews/{id}:
+    delete:
+      summary: Delete one of the caller's own reviews
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
   /portal/queue:
     get:
       summary: Get operational queue counts for Staff or Admin
@@ -80,8 +197,14 @@ paths:
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Id: { name: id, in: path, required: true, schema: { type: string } }
+    Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 50 } }
+    Offset: { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
   responses:
-    ValidationError: { description: Invalid request }
+    ValidationError: { description: "Invalid request (error.code VALIDATION_ERROR)" }
+    Unauthorized: { description: "Missing, invalid or expired token (error.code UNAUTHORIZED)" }
+    NotFound: { description: "Not found, or owned by another user (error.code NOT_FOUND)" }
   schemas:
     RegisterRequest:
       type: object
@@ -101,6 +224,32 @@ components:
       required: [name]
       properties:
         name: { type: string }
-        destination_id: { type: string, format: uuid }
-        start_date: { type: string, format: date }
-        end_date: { type: string, format: date }
+        destination_id: { type: string, maxLength: 36, description: "catalog id or UUID; not verified against destinations" }
+        start_date: { type: string, description: "YYYY-MM-DD or empty" }
+        end_date: { type: string, description: "YYYY-MM-DD or empty" }
+    UpdateTripRequest:
+      type: object
+      properties:
+        name: { type: string, maxLength: 200 }
+        destination_id: { type: string, maxLength: 36 }
+        start_date: { type: string, description: "YYYY-MM-DD or empty to clear" }
+        end_date: { type: string, description: "YYYY-MM-DD or empty to clear; at most 60 days after start_date" }
+        status: { type: string, enum: [DRAFT, PLANNED, ONGOING, COMPLETED, CANCELLED] }
+    CreateActivityRequest:
+      type: object
+      required: [title, date]
+      properties:
+        title: { type: string, maxLength: 200 }
+        date: { type: string, format: date }
+        start_time: { type: string, example: "09:30" }
+        end_time: { type: string, example: "11:00", description: "requires start_time; not before it" }
+        destination_id: { type: string, maxLength: 36 }
+    ReviewSubjectType: { type: string, enum: [DESTINATION, HOTEL, RESTAURANT, TOUR, BOOKING] }
+    CreateReviewRequest:
+      type: object
+      required: [subject_type, subject_id, rating]
+      properties:
+        subject_type: { $ref: '#/components/schemas/ReviewSubjectType' }
+        subject_id: { type: string, maxLength: 36 }
+        rating: { type: number, minimum: 1, maximum: 5, multipleOf: 0.5 }
+        body: { type: string, maxLength: 2000 }

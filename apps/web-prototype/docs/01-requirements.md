@@ -17,6 +17,7 @@ Legend: PASS = verified by automated test run in this workspace · PARTIAL · NO
 | R-FLT-1 | Multi-airline simulated flights | PASS (simulated, deterministic) | flights.test.js |
 | R-BOOK-1 | Booking cancel + refund rule | PASS (rule) | bookings.test.js |
 | R-UI-1 | Remaining screens (community, wallet, maps, checkout…) | PARTIAL — render and build; no UI flow tests | — |
-| R-API-1 | Real trips/bookings/payments backend | NOT IMPLEMENTED (backend stub) | — |
-| R-BE-1 | Backend builds and runs | NOT VERIFIED | module proxy unreachable |
+| R-API-1 | Trips + itinerary, notifications, reviews on the server | PASS in Go tests with sqlmock · NOT VERIFIED on real MySQL · web UI not wired to them | `backend/internal/*/_test.go` |
+| R-API-2 | Bookings, payments, wallet, coupons on the server | NOT IMPLEMENTED (schema tables are skeletons; needs migration design) | — |
+| R-BE-1 | Backend builds | PASS (`go build`, `go vet`, `go test` with a GitHub-mirror workaround for the unreachable module proxy) · runs against MySQL: NOT VERIFIED | — |
 | R-SEC-1 | Token storage / production hardening | PARTIAL — token in memory only; a client flag is not a security boundary | — |

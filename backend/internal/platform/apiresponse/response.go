@@ -2,6 +2,7 @@ package apiresponse
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -36,4 +37,30 @@ func NotFound(c *gin.Context, message string) {
 }
 func Internal(c *gin.Context) {
 	c.JSON(http.StatusInternalServerError, envelope{Error: &errorBody{Code: "INTERNAL_ERROR", Message: "an unexpected error occurred"}, RequestID: c.GetString("request_id")})
+}
+func Conflict(c *gin.Context, message string) {
+	c.JSON(http.StatusConflict, envelope{Error: &errorBody{Code: "CONFLICT", Message: message}, RequestID: c.GetString("request_id")})
+}
+func NoContent(c *gin.Context) { c.Status(http.StatusNoContent) }
+
+// Page reads ?limit (1..100, default 50) and ?offset (>=0, default 0); on invalid input it writes a 400 and returns ok=false.
+func Page(c *gin.Context) (limit, offset int, ok bool) {
+	limit, offset = 50, 0
+	if v := c.Query("limit"); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil || n < 1 || n > 100 {
+			BadRequest(c, "limit must be between 1 and 100")
+			return 0, 0, false
+		}
+		limit = n
+	}
+	if v := c.Query("offset"); v != "" {
+		n, err := strconv.Atoi(v)
+		if err != nil || n < 0 {
+			BadRequest(c, "offset must be 0 or greater")
+			return 0, 0, false
+		}
+		offset = n
+	}
+	return limit, offset, true
 }

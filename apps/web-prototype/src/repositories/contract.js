@@ -25,7 +25,13 @@
  * @property {{ login(input: { email: string, password: string }): Promise<Session>,
  *             register(input: { email: string, password: string, displayName: string }): Promise<Session>,
  *             logout(): void }} auth
- * @property {{ list(): Promise<Trip[]>, create(input: { name: string, destinationId: string, startDate?: string, endDate?: string }): Promise<Trip> }} trips
+ * @property {{ list(): Promise<Trip[]>,
+ *             create(input: { name: string, destinationId?: string, startDate?: string, endDate?: string }): Promise<Trip>,
+ *             get(id: string): Promise<Trip>,
+ *             update(id: string, patch: { name?: string, destinationId?: string, startDate?: string, endDate?: string, status?: string }): Promise<Trip>,
+ *             remove(id: string): Promise<void>,
+ *             addActivity(tripId: string, input: { title: string, date: string, startTime?: string, endTime?: string, destinationId?: string }): Promise<object>,
+ *             removeActivity(tripId: string, activityId: string): Promise<void> }} trips
  */
 
 export const SNAPSHOT_KEYS = ['coupons', 'bookings', 'walletBalance', 'walletTransactions', 'notifications', 'reviews', 'supportTickets', 'events', 'community'];
@@ -59,7 +65,7 @@ export function assertRepository(repo) {
   const missing = [];
   if (!repo || typeof repo.loadAccountSnapshot !== 'function') missing.push('loadAccountSnapshot');
   ['login', 'register', 'logout'].forEach((m) => { if (!repo || !repo.auth || typeof repo.auth[m] !== 'function') missing.push(`auth.${m}`); });
-  ['list', 'create'].forEach((m) => { if (!repo || !repo.trips || typeof repo.trips[m] !== 'function') missing.push(`trips.${m}`); });
+  ['list', 'create', 'get', 'update', 'remove', 'addActivity', 'removeActivity'].forEach((m) => { if (!repo || !repo.trips || typeof repo.trips[m] !== 'function') missing.push(`trips.${m}`); });
   if (missing.length) throw new Error(`Repository is missing: ${missing.join(', ')}`);
   return repo;
 }

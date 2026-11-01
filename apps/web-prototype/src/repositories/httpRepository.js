@@ -5,7 +5,9 @@ const newRequestId = () => (globalThis.crypto && typeof globalThis.crypto.random
 
 /**
  * REST repository for BETA and PRODUCTION. Implements the endpoints that exist in backend/docs/openapi.yaml:
- *   POST /auth/register, POST /auth/login, GET /trips, POST /trips
+ *   POST /auth/register, POST /auth/login,
+ *   GET/POST /trips, GET/PATCH/DELETE /trips/{id}, POST /trips/{id}/activities, DELETE /trips/{id}/activities/{activityId}
+ * Notifications and reviews endpoints exist on the server but are not wired into the UI yet.
  * Response envelope: { data?, error?: { code, message }, request_id }.
  *
  * The access token is kept in memory only (never localStorage). Authorization is enforced by the server.
@@ -34,6 +36,7 @@ export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 100
     } finally {
       clearTimeout(timer);
     }
+    if (response.ok && response.status === 204) return null;
     let payload = null;
     try { payload = await response.json(); } catch { payload = null; }
     const rid = (payload && payload.request_id) || response.headers?.get?.('X-Request-ID') || requestId;
@@ -52,9 +55,16 @@ export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 100
     const u = data.user;
     return { accessToken, tokenType: data.token_type || 'Bearer', ...(u ? { user: { id: u.id, email: u.email, displayName: u.display_name } } : {}) };
   };
+  const tripPath = (id) => `/trips/${encodeURIComponent(id)}`;
   const toTrip = (t) => {
     const trip = { id: t.id, name: t.name, destinationId: t.destination_id || '', startDate: t.start_date || '', endDate: t.end_date || '', status: t.status || 'DRAFT', createdAt: t.created_at || '' };
     if (!validateTrip(trip)) throw new ApiError({ code: 'BAD_RESPONSE', message: 'trip payload is invalid' });
+    if (Array.isArray(t.days)) {
+      trip.days = t.days.map((d) => ({
+        id: d.id, date: d.date, dayNumber: d.day_number,
+        activities: (d.activities || []).map((a) => ({ id: a.id, title: a.title, destinationId: a.destination_id || '', startsAt: a.starts_at || '', endsAt: a.ends_at || '' })),
+      }));
+    }
     return trip;
   };
 
@@ -76,6 +86,24 @@ export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 100
       async create({ name, destinationId = '', startDate = '', endDate = '' }) {
         return toTrip(await request('/trips', { method: 'POST', auth: true, body: { name, destination_id: destinationId, start_date: startDate, end_date: endDate } }));
       },
+      async get(id) { return toTrip(await request(tripPath(id), { auth: true })); },
+      /** Only the fields present in `patch` are changed; empty start/end date clears the date. */
+      async update(id, patch) {
+        const body = {};
+        if (patch.name !== undefined) body.name = patch.name;
+        if (patch.destinationId !== undefined) body.destination_id = patch.destinationId;
+        if (patch.startDate !== undefined) body.start_date = patch.startDate;
+        if (patch.endDate !== undefined) body.end_date = patch.endDate;
+        if (patch.status !== undefined) body.status = patch.status;
+        return toTrip(await request(tripPath(id), { method: 'PATCH', auth: true, body }));
+      },
+      async remove(id) { await request(tripPath(id), { method: 'DELETE', auth: true }); },
+      async addActivity(tripId, { title, date, startTime = '', endTime = '', destinationId = '' }) {
+        const a = await request(`${tripPath(tripId)}/activities`, { method: 'POST', auth: true, body: { title, date, start_time: startTime, end_time: endTime, destination_id: destinationId } });
+        if (!a || typeof a.id !== 'string') throw new ApiError({ code: 'BAD_RESPONSE', message: 'activity payload is invalid' });
+        return { id: a.id, title: a.title, destinationId: a.destination_id || '', startsAt: a.starts_at || '', endsAt: a.ends_at || '' };
+      },
+      async removeActivity(tripId, activityId) { await request(`${tripPath(tripId)}/activities/${encodeURIComponent(activityId)}`, { method: 'DELETE', auth: true }); },
     },
   };
 }

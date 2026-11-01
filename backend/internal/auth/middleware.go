@@ -103,3 +103,7 @@ func CurrentPrincipal(c *gin.Context) (Principal, bool) {
 	principal, valid := raw.(Principal)
 	return principal, ok && valid
 }
+
+// SetPrincipal stores an already-authenticated principal on the request context.
+// Authenticate uses it; tests use it to exercise handlers without a database-backed login.
+func SetPrincipal(c *gin.Context, p Principal) { c.Set(principalKey, p) }
