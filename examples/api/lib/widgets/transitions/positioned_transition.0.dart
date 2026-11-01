@@ -73,7 +73,7 @@ class _PositionedTransitionExampleState
                       curve: Curves.elasticInOut,
                     ),
                   ),
-              child: const Padding(padding: .all(8), child: FlutterLogo()),
+              child: const Padding(padding: EdgeInsetsGeometry.all(8), child: FlutterLogo()),
             ),
           ],
         );

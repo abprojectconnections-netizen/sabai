@@ -30,7 +30,7 @@ void main() {
     expect(defaultCard.elevation, 1.0);
     expect(
       defaultCard.shape,
-      const RoundedRectangleBorder(borderRadius: .all(Radius.circular(12.0))),
+      const RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.all(Radius.circular(12.0))),
     );
     expect(defaultCard.color, const Color(0xfff7f2fa));
     expect(defaultCard.shadowColor, const Color(0xff000000));
@@ -41,7 +41,7 @@ void main() {
     expect(filledCard.elevation, 0.0);
     expect(
       filledCard.shape,
-      const RoundedRectangleBorder(borderRadius: .all(Radius.circular(12.0))),
+      const RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.all(Radius.circular(12.0))),
     );
     expect(filledCard.color, const Color(0xffe6e0e9));
     expect(filledCard.shadowColor, const Color(0xff000000));
@@ -54,7 +54,7 @@ void main() {
       outlinedCard.shape,
       const RoundedRectangleBorder(
         side: BorderSide(color: Color(0xffcac4d0)),
-        borderRadius: .all(Radius.circular(12.0)),
+        borderRadius: BorderRadiusGeometry.all(Radius.circular(12.0)),
       ),
     );
     expect(outlinedCard.color, const Color(0xfffef7ff));

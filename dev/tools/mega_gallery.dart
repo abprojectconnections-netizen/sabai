@@ -154,10 +154,10 @@ void _copy(Directory source, Directory target) {
     final String name = path.basename(entity.path);
 
     switch (entity) {
-      case const const Directory() when name != 'build' && !name.startsWith('.'):
+      case const Directory() when name != 'build' && !name.startsWith('.'):
         _copy(entity, Directory(path.join(target.path, name)));
 
-      case const const File() when name != '.packages' && name != 'pubspec.lock':
+      case const File() when name != '.packages' && name != 'pubspec.lock':
         final dest = File(path.join(target.path, name));
         dest.writeAsBytesSync(entity.readAsBytesSync());
     }

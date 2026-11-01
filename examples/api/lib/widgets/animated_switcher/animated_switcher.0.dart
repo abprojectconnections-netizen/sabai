@@ -33,7 +33,7 @@ class _AnimatedSwitcherExampleState extends State<AnimatedSwitcherExample> {
     return ColoredBox(
       color: Colors.white,
       child: Column(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 500),

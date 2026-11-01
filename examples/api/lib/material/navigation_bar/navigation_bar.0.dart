@@ -59,7 +59,7 @@ class _NavigationExampleState extends State<NavigationExample> {
         /// Home page
         Card(
           shadowColor: Colors.transparent,
-          margin: const .all(8.0),
+          margin: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
           child: SizedBox.expand(
             child: Center(
               child: Text('Home page', style: theme.textTheme.titleLarge),
@@ -69,7 +69,7 @@ class _NavigationExampleState extends State<NavigationExample> {
 
         /// Notifications page
         const Padding(
-          padding: .all(8.0),
+          padding: EdgeInsetsGeometry.all(8.0),
           child: Column(
             children: <Widget>[
               Card(
@@ -97,13 +97,13 @@ class _NavigationExampleState extends State<NavigationExample> {
           itemBuilder: (BuildContext context, int index) {
             if (index == 0) {
               return Align(
-                alignment: .centerRight,
+                alignment: AlignmentGeometry.centerRight,
                 child: Container(
-                  margin: const .all(8.0),
-                  padding: const .all(8.0),
+                  margin: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
+                  padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.primary,
-                    borderRadius: .circular(8.0),
+                    borderRadius: BorderRadiusGeometry.circular(8.0),
                   ),
                   child: Text(
                     'Hello',
@@ -115,13 +115,13 @@ class _NavigationExampleState extends State<NavigationExample> {
               );
             }
             return Align(
-              alignment: .centerLeft,
+              alignment: AlignmentGeometry.centerLeft,
               child: Container(
-                margin: const .all(8.0),
-                padding: const .all(8.0),
+                margin: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
+                padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.primary,
-                  borderRadius: .circular(8.0),
+                  borderRadius: BorderRadiusGeometry.circular(8.0),
                 ),
                 child: Text(
                   'Hi!',

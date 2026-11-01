@@ -74,7 +74,7 @@ class GlowingOverscrollIndicatorExample extends StatelessWidget {
               style: TextStyle(
                 color: Colors.amberAccent,
                 fontSize: 24,
-                fontWeight: .w600,
+                fontWeight: FontWeight.w600,
               ),
               child: ColoredBox(
                 color: Colors.grey,

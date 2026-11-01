@@ -32,21 +32,21 @@ class SingleChildScrollViewExample extends StatelessWidget {
                 minHeight: viewportConstraints.maxHeight,
               ),
               child: Column(
-                mainAxisSize: .min,
-                mainAxisAlignment: .spaceAround,
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   Container(
                     // A fixed-height child.
                     color: const Color(0xffeeee00), // Yellow
                     height: 120.0,
-                    alignment: .center,
+                    alignment: AlignmentGeometry.center,
                     child: const Text('Fixed Height Content'),
                   ),
                   Container(
                     // Another fixed-height child.
                     color: const Color(0xff008000), // Green
                     height: 120.0,
-                    alignment: .center,
+                    alignment: AlignmentGeometry.center,
                     child: const Text('Fixed Height Content'),
                   ),
                 ],

@@ -61,7 +61,7 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
                 color: index.isOdd ? Colors.white : Colors.black12,
                 height: 100.0,
                 child: Center(
-                  child: Text('$index', textScaler: const .linear(5)),
+                  child: Text('$index', textScaler: TextScalerTextScalerconst .linear(5)),
                 ),
               );
             },
@@ -70,12 +70,12 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
       ),
       bottomNavigationBar: BottomAppBar(
         child: Padding(
-          padding: const .all(8),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8),
           child: OverflowBar(
-            overflowAlignment: .center,
+            overflowAlignment: OverflowBarAlignment.center,
             children: <Widget>[
               Row(
-                mainAxisSize: .min,
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Text('pinned'),
                   Switch(
@@ -89,7 +89,7 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
                 ],
               ),
               Row(
-                mainAxisSize: .min,
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Text('snap'),
                   Switch(
@@ -105,7 +105,7 @@ class _SliverAppBarExampleState extends State<SliverAppBarExample> {
                 ],
               ),
               Row(
-                mainAxisSize: .min,
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Text('floating'),
                   Switch(

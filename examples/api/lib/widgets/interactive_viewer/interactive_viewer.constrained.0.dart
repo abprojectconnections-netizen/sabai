@@ -31,7 +31,7 @@ class ConstrainedExample extends StatelessWidget {
     const int columnCount = 6;
 
     return InteractiveViewer(
-      panAxis: .aligned,
+      panAxis: PanAxis.aligned,
       constrained: false,
       scaleEnabled: false,
       child: Table(
@@ -50,7 +50,7 @@ class ConstrainedExample extends StatelessWidget {
                         ? Colors.white
                         : Colors.grey.withValues(alpha: 0.1),
                     child: Align(
-                      alignment: .centerLeft,
+                      alignment: AlignmentGeometry.centerLeft,
                       child: Text('$row x $column'),
                     ),
                   ),

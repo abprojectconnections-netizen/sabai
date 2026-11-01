@@ -78,8 +78,8 @@ class _HomeState extends State<Home> {
       // An AnimatedContainer makes the decoration changes entertaining.
       body: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
-        margin: const .all(32),
-        alignment: .center,
+        margin: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(32),
+        alignment: AlignmentGeometry.center,
         decoration: ShapeDecoration(
           color: colorScheme.tertiaryContainer,
           shape: StarBorder(

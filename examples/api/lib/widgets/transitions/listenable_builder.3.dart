@@ -59,7 +59,7 @@ class ListBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        crossAxisAlignment: .stretch,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           const Text('Current values:'),
           Expanded(

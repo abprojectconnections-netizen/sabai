@@ -14,7 +14,7 @@ class CupertinoFormRowApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: .light),
+      theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoFormRowExample(),
     );
   }
@@ -65,7 +65,7 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
               ),
               error: Text('Home network unavailable'),
               child: Row(
-                mainAxisAlignment: .end,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   Text('Not connected'),
                   SizedBox(width: 5),
@@ -80,14 +80,14 @@ class _CupertinoFormRowExampleState extends State<CupertinoFormRowExample> {
                 color: CupertinoColors.activeBlue,
               ),
               helper: Padding(
-                padding: .symmetric(vertical: 4.0),
+                padding: EdgeInsetsGeometry.symmetric(vertical: 4.0),
                 child: Row(
-                  mainAxisAlignment: .spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[Text('Headphone'), Text('Connected')],
                 ),
               ),
               child: Row(
-                mainAxisAlignment: .end,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   Text('On'),
                   SizedBox(width: 5),
@@ -127,8 +127,8 @@ class PrefixWidget extends StatelessWidget {
     return Row(
       children: <Widget>[
         Container(
-          padding: const .all(4.0),
-          decoration: BoxDecoration(color: color, borderRadius: .circular(4.0)),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(4.0),
+          decoration: BoxDecoration(color: color, borderRadius: BorderRadiusGeometry.circular(4.0)),
           child: Icon(icon, color: CupertinoColors.white),
         ),
         const SizedBox(width: 15),

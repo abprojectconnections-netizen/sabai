@@ -35,20 +35,20 @@ class _ArticleDescription extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: .start,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           title,
           maxLines: 2,
-          overflow: .ellipsis,
-          style: const TextStyle(fontWeight: .bold),
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontWeight: FontWeight.bold),
         ),
-        const Padding(padding: .only(bottom: 2.0)),
+        const Padding(padding: EdgeInsetsGeometry.only(bottom: 2.0)),
         Expanded(
           child: Text(
             subtitle,
             maxLines: 2,
-            overflow: .ellipsis,
+            overflow: TextOverflow.ellipsis,
             style: const TextStyle(fontSize: 12.0, color: Colors.black54),
           ),
         ),
@@ -86,16 +86,16 @@ class CustomListItemTwo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const .symmetric(vertical: 10.0),
+      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(vertical: 10.0),
       child: SizedBox(
         height: 100,
         child: Row(
-          crossAxisAlignment: .start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             AspectRatio(aspectRatio: 1.0, child: thumbnail),
             Expanded(
               child: Padding(
-                padding: const .fromLTRB(20.0, 0.0, 2.0, 0.0),
+                padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .fromLTRB(20.0, 0.0, 2.0, 0.0),
                 child: _ArticleDescription(
                   title: title,
                   subtitle: subtitle,
@@ -120,7 +120,7 @@ class CustomListItemExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Custom List Item Sample')),
       body: ListView(
-        padding: const .all(10.0),
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(10.0),
         children: <Widget>[
           CustomListItemTwo(
             thumbnail: Container(

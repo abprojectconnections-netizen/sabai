@@ -14,7 +14,7 @@ class SearchTextFieldApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: .light),
+      theme: CupertinoThemeData(brightness: Brightness.light),
       home: SearchTextFieldExample(),
     );
   }
@@ -50,7 +50,7 @@ class _SearchTextFieldExampleState extends State<SearchTextFieldExample> {
       ),
       child: Center(
         child: Padding(
-          padding: const .all(16.0),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(16.0),
           child: CupertinoSearchTextField(
             controller: textController,
             placeholder: 'Search',

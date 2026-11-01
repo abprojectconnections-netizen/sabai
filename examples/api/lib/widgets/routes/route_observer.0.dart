@@ -66,7 +66,7 @@ class _RouteObserverExampleState extends State<RouteObserverExample>
       body: SingleChildScrollView(
         child: Center(
           child: Column(
-            mainAxisSize: .min,
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
                 'RouteObserver log:',
@@ -80,7 +80,7 @@ class _RouteObserverExampleState extends State<RouteObserverExample>
                     if (log.isEmpty) {
                       return const SizedBox.shrink();
                     }
-                    return Text(log[index], textAlign: .center);
+                    return Text(log[index], textAlign: TextAlign.center);
                   },
                 ),
               ),

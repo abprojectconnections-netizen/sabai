@@ -99,7 +99,7 @@ class _IsScrollingListenerExampleState
           controller: scrollController,
           thumbVisibility: true,
           child: Padding(
-            padding: const .symmetric(horizontal: 8),
+            padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(horizontal: 8),
             child: CustomScrollView(
               controller: scrollController,
               slivers: <Widget>[

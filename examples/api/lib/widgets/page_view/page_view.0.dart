@@ -55,7 +55,7 @@ class _PageViewExampleState extends State<PageViewExample>
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Stack(
-      alignment: .bottomCenter,
+      alignment: AlignmentGeometry.bottomCenter,
       children: <Widget>[
         PageView(
           /// [PageView.scrollDirection] defaults to [Axis.horizontal].
@@ -100,8 +100,8 @@ class _PageViewExampleState extends State<PageViewExample>
   bool get _isOnDesktopAndWeb =>
       kIsWeb ||
       switch (defaultTargetPlatform) {
-        .macOS || .linux || .windows => true,
-        .android || .iOS || .fuchsia => false,
+        TargetPlatform.macOS || TargetPlatform.linux || TargetPlatform.windows => true,
+        TargetPlatform.android || TargetPlatform.iOS || TargetPlatform.fuchsia => false,
       };
 }
 
@@ -135,13 +135,13 @@ class PageIndicator extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
 
     return Padding(
-      padding: const .all(8.0),
+      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
       child: Row(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           IconButton(
             splashRadius: 16.0,
-            padding: .zero,
+            padding: EdgeInsetsGeometry.zero,
             onPressed: () {
               if (currentPageIndex == 0) {
                 return;
@@ -157,7 +157,7 @@ class PageIndicator extends StatelessWidget {
           ),
           IconButton(
             splashRadius: 16.0,
-            padding: .zero,
+            padding: EdgeInsetsGeometry.zero,
             onPressed: () {
               if (currentPageIndex == 2) {
                 return;

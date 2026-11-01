@@ -37,7 +37,7 @@ class RawTooltipSample extends StatelessWidget {
           // the rawTooltip manually when trigger mode is set to manual.
           key: rawTooltipKey,
           semanticsTooltip: 'I am a RawTooltip message',
-          triggerMode: .manual,
+          triggerMode: TooltipTriggerMode.manual,
           positionDelegate: (TooltipPositionContext context) {
             // Use the context information to position the rawTooltip to the right of
             // the target.
@@ -56,12 +56,12 @@ class RawTooltipSample extends StatelessWidget {
             height: 100,
             width: 200,
             color: Colors.blue,
-            padding: const .all(8),
-            alignment: .center,
+            padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8),
+            alignment: AlignmentGeometry.center,
             child: const Text(
               'Hover over this box or\n'
               'tap on the FAB to show the tooltip',
-              textAlign: .center,
+              textAlign: TextAlign.center,
               style: TextStyle(color: Colors.white),
             ),
           ),

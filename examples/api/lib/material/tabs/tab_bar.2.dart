@@ -90,11 +90,11 @@ class _NestedTabBarState extends State<NestedTabBar>
             controller: _tabController,
             children: <Widget>[
               Card(
-                margin: const .all(16.0),
+                margin: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(16.0),
                 child: Center(child: Text('${widget.outerTab}: Overview tab')),
               ),
               Card(
-                margin: const .all(16.0),
+                margin: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(16.0),
                 child: Center(
                   child: Text('${widget.outerTab}: Specifications tab'),
                 ),

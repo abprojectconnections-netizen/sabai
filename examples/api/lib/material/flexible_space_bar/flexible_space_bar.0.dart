@@ -33,24 +33,24 @@ class FlexibleSpaceBarExampleApp extends StatelessWidget {
               expandedHeight: 300.0,
               flexibleSpace: FlexibleSpaceBar(
                 stretchModes: const <StretchMode>[
-                  .zoomBackground,
-                  .blurBackground,
-                  .fadeTitle,
+                  StretchMode.zoomBackground,
+                  StretchMode.blurBackground,
+                  StretchMode.fadeTitle,
                 ],
                 centerTitle: true,
                 title: const Text('Flight Report'),
                 background: Stack(
-                  fit: .expand,
+                  fit: StackFit.expand,
                   children: <Widget>[
                     Image.network(
                       'https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg',
-                      fit: .cover,
+                      fit: BoxFit.cover,
                     ),
                     const DecoratedBox(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment(0.0, 0.5),
-                          end: .center,
+                          end: AlignmentGeometry.center,
                           colors: <Color>[Color(0x60000000), Color(0x00000000)],
                         ),
                       ),

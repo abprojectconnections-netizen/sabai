@@ -78,7 +78,7 @@ class _FadeTransitionExampleState extends State<FadeTransitionExample>
       color: Colors.white,
       child: FadeTransition(
         opacity: _animation,
-        child: const Padding(padding: .all(8), child: FlutterLogo()),
+        child: const Padding(padding: EdgeInsetsGeometry.all(8), child: FlutterLogo()),
       ),
     );
   }

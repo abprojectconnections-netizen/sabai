@@ -32,14 +32,14 @@ class _SnackBarExampleState extends State<SnackBarExample> {
     return Scaffold(
       appBar: AppBar(title: const Text('SnackBar Sample')),
       body: Padding(
-        padding: const .all(8.0),
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
         child: Column(
           children: <Widget>[
             ElevatedButton(
               onPressed: () {
                 const SnackBar snackBar = SnackBar(
                   content: Text('A SnackBar has been shown.'),
-                  behavior: .floating,
+                  behavior: SnackBarBehavior.floating,
                 );
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
               },
@@ -65,7 +65,7 @@ class _SnackBarExampleState extends State<SnackBarExample> {
         ),
         decoration: const BoxDecoration(
           color: Colors.blueGrey,
-          borderRadius: .all(Radius.circular(20)),
+          borderRadius: BorderRadiusGeometry.all(Radius.circular(20)),
         ),
         child: const FlutterLogo(),
       ),

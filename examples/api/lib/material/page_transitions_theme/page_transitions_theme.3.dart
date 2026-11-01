@@ -50,9 +50,9 @@ class HomePage extends StatelessWidget {
           Text('Messages', style: Theme.of(context).textTheme.headlineLarge),
           Expanded(
             child: Padding(
-              padding: const .all(20.0),
+              padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(20.0),
               child: Card(
-                clipBehavior: .antiAlias,
+                clipBehavior: Clip.antiAlias,
                 elevation: 0,
                 color: Theme.of(context).colorScheme.surfaceContainerLowest,
                 child: ListView(
@@ -118,7 +118,7 @@ class SecondPage extends StatelessWidget {
         ],
       ),
       body: Padding(
-        padding: const .all(20.0),
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(20.0),
         child: IntrinsicHeight(
           child: Row(
             children: <Widget>[
@@ -128,7 +128,7 @@ class SecondPage extends StatelessWidget {
                 child: Card(
                   elevation: 0.0,
                   shape: const RoundedRectangleBorder(
-                    borderRadius: .only(
+                    borderRadius: BorderRadiusGeometry.only(
                       topLeft: Radius.circular(20),
                       topRight: Radius.circular(20),
                       bottomLeft: Radius.circular(5),
@@ -138,7 +138,7 @@ class SecondPage extends StatelessWidget {
                   color: Theme.of(context).colorScheme.surfaceContainerLowest,
                   child: Center(
                     child: Padding(
-                      padding: const .symmetric(horizontal: 15.0),
+                      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(horizontal: 15.0),
                       child: Text(message),
                     ),
                   ),

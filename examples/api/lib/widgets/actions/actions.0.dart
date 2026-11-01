@@ -143,11 +143,11 @@ class _ActionsExampleState extends State<ActionsExample> {
       child: Builder(
         builder: (BuildContext context) {
           return Row(
-            mainAxisAlignment: .spaceAround,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: <Widget>[
               const Spacer(),
               Column(
-                mainAxisAlignment: .center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   IconButton(
                     icon: const Icon(Icons.exposure_plus_1),
@@ -159,7 +159,7 @@ class _ActionsExampleState extends State<ActionsExample> {
                     listenable: _model.data,
                     builder: (BuildContext context, Widget? child) {
                       return Padding(
-                        padding: const .all(8.0),
+                        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
                         child: Text(
                           'Value: ${_model.data.value}',
                           style: Theme.of(context).textTheme.headlineMedium,

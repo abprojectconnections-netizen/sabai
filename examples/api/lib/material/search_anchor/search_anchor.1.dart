@@ -27,7 +27,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
           child: CustomScrollView(
             slivers: <Widget>[
               SliverAppBar(
-                clipBehavior: .none,
+                clipBehavior: Clip.none,
                 shape: const StadiumBorder(),
                 scrolledUnderElevation: 0.0,
                 titleSpacing: 0.0,
@@ -39,7 +39,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
                       (BuildContext context, SearchController controller) {
                         return List<Widget>.generate(5, (int index) {
                           return ListTile(
-                            titleAlignment: .center,
+                            titleAlignment: ListTileTitleAlignment.center,
                             title: Text('Initial list item $index'),
                           );
                         });
@@ -50,7 +50,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
               // so we can see the scrolling effect.
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const .all(20),
+                  padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(20),
                   child: SizedBox(
                     height: 100.0,
                     child: ListView.builder(
@@ -70,7 +70,7 @@ class _PinnedSearchBarAppState extends State<PinnedSearchBarApp> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const .symmetric(horizontal: 20),
+                  padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(horizontal: 20),
                   child: Container(
                     height: 1000,
                     color: Colors.deepPurple.withValues(alpha: 0.5),

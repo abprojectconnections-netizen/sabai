@@ -27,7 +27,7 @@ class RadioListTileExample extends StatefulWidget {
 }
 
 class _RadioListTileExampleState extends State<RadioListTileExample> {
-  Groceries? _groceryItem = .pickles;
+  Groceries? _groceryItem = Groceries.pickles;
 
   @override
   Widget build(BuildContext context) {

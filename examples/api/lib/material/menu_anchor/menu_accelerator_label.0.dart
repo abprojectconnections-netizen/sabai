@@ -17,7 +17,7 @@ class MyMenuBar extends StatelessWidget {
     return Column(
       children: <Widget>[
         Row(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Expanded(
               child: MenuBar(

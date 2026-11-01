@@ -28,7 +28,7 @@ class OverflowBoxExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: .center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         const Text('Cover Me'),
         // This parent container has fixed width and

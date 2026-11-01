@@ -19,7 +19,7 @@ class SegmentedButtonApp extends StatelessWidget {
       home: Scaffold(
         body: Center(
           child: Column(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Spacer(),
               Text('Single choice'),
@@ -46,7 +46,7 @@ class SingleChoice extends StatefulWidget {
 }
 
 class _SingleChoiceState extends State<SingleChoice> {
-  Calendar calendarView = .day;
+  Calendar calendarView = Calendar.day;
 
   @override
   Widget build(BuildContext context) {

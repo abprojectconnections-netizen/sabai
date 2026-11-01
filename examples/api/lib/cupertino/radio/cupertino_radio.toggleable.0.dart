@@ -34,7 +34,7 @@ class CupertinoRadioExample extends StatefulWidget {
 }
 
 class _CupertinoRadioExampleState extends State<CupertinoRadioExample> {
-  SingingCharacter? _character = .mulligan;
+  SingingCharacter? _character = SingingCharacter.mulligan;
 
   @override
   Widget build(BuildContext context) {

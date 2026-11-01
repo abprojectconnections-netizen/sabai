@@ -39,10 +39,10 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: .spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         Row(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             IconButton(
               isSelected: standardSelected,
@@ -64,7 +64,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
           ],
         ),
         Row(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             IconButton.filled(
               isSelected: filledSelected,
@@ -86,7 +86,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
           ],
         ),
         Row(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             IconButton.filledTonal(
               isSelected: tonalSelected,
@@ -108,7 +108,7 @@ class _DemoIconToggleButtonsState extends State<DemoIconToggleButtons> {
           ],
         ),
         Row(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             IconButton.outlined(
               isSelected: outlinedSelected,

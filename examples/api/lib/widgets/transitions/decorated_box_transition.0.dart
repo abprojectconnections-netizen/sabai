@@ -33,8 +33,8 @@ class _DecoratedBoxTransitionExampleState
   final DecorationTween decorationTween = DecorationTween(
     begin: BoxDecoration(
       color: const Color(0xFFFFFFFF),
-      border: .all(style: .none),
-      borderRadius: .circular(60.0),
+      border: BoxBorder.all(style: BorderStyle.none),
+      borderRadius: BorderRadiusGeometry.circular(60.0),
       boxShadow: const <BoxShadow>[
         BoxShadow(
           color: Color(0x66666666),
@@ -46,8 +46,8 @@ class _DecoratedBoxTransitionExampleState
     ),
     end: BoxDecoration(
       color: const Color(0xFFFFFFFF),
-      border: .all(style: .none),
-      borderRadius: .zero,
+      border: BoxBorder.all(style: BorderStyle.none),
+      borderRadius: BorderRadiusGeometry.zero,
       // No shadow.
     ),
   );
@@ -73,7 +73,7 @@ class _DecoratedBoxTransitionExampleState
           child: Container(
             width: 200,
             height: 200,
-            padding: const .all(10),
+            padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(10),
             child: const FlutterLogo(),
           ),
         ),

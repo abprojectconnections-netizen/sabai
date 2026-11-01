@@ -49,7 +49,7 @@ class CopyableText extends StatelessWidget {
         child: Focus(
           autofocus: true,
           child: DefaultTextStyle.merge(
-            style: const TextStyle(fontSize: 20, fontWeight: .bold),
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             child: Text(text),
           ),
         ),
@@ -73,12 +73,12 @@ class VerificationCodeGenerator extends StatelessWidget {
         CopyTextIntent: CallbackAction<CopyTextIntent>(onInvoke: _copy),
       },
       child: const Column(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text('Press Ctrl-C to Copy'),
           SizedBox(height: 10),
           Row(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               CopyableText(text: '111'),
               SizedBox(width: 5),

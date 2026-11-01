@@ -73,8 +73,8 @@ class _MyAppState extends State<MyApp> {
               parent: WindowScope.of(context),
               anchorRect: _getAnchorRect()!,
               positioner: const WindowPositioner(
-                parentAnchor: .right,
-                childAnchor: .left,
+                parentAnchor: WindowPositionerAnchor.right,
+                childAnchor: WindowPositionerAnchor.left,
               ),
               delegate: _CallbackPopupDelegate(
                 onDestroyCallback: () {
@@ -95,10 +95,10 @@ class _MyAppState extends State<MyApp> {
         PopupWindow(
           controller: _popupController!,
           child: Container(
-            padding: const .all(8),
+            padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8),
             color: Colors.black,
             child: Column(
-              mainAxisSize: .min,
+              mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 const Text(
                   'This is a popup',
@@ -122,7 +122,7 @@ class _MyAppState extends State<MyApp> {
 
     return Scaffold(
       body: Center(
-        child: Row(mainAxisSize: .min, children: children),
+        child: Row(mainAxisSize: MainAxisSize.min, children: children),
       ),
     );
   }

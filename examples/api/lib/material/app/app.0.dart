@@ -14,9 +14,9 @@ enum AnimationStyles { defaultStyle, custom, none }
 
 const List<(AnimationStyles, String)> animationStyleSegments =
     <(AnimationStyles, String)>[
-      (.defaultStyle, 'Default'),
-      (.custom, 'Custom'),
-      (.none, 'None'),
+      (AnimationStyles.defaultStyle, 'Default'),
+      (AnimationStyles.custom, 'Custom'),
+      (AnimationStyles.none, 'None'),
     ];
 
 class MaterialAppExample extends StatefulWidget {
@@ -28,7 +28,7 @@ class MaterialAppExample extends StatefulWidget {
 
 class _MaterialAppExampleState extends State<MaterialAppExample> {
   Set<AnimationStyles> _animationStyleSelection = <AnimationStyles>{
-    .defaultStyle,
+    AnimationStyles.defaultStyle,
   };
   AnimationStyle? _animationStyle;
   bool isDarkTheme = false;
@@ -37,13 +37,13 @@ class _MaterialAppExampleState extends State<MaterialAppExample> {
   Widget build(BuildContext context) {
     return MaterialApp(
       themeAnimationStyle: _animationStyle,
-      themeMode: isDarkTheme ? .dark : .light,
+      themeMode: isDarkTheme ? ThemeMode.dark : ThemeMode.light,
       theme: ThemeData(colorSchemeSeed: Colors.green),
-      darkTheme: ThemeData(colorSchemeSeed: Colors.green, brightness: .dark),
+      darkTheme: ThemeData(colorSchemeSeed: Colors.green, brightness: Brightness.dark),
       home: Scaffold(
         body: Center(
           child: Column(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               SegmentedButton<AnimationStyles>(
                 selected: _animationStyleSelection,
@@ -59,7 +59,7 @@ class _MaterialAppExampleState extends State<MaterialAppExample> {
                           duration: Duration(seconds: 1),
                         );
                       case AnimationStyles.none:
-                        _animationStyle = .noAnimation;
+                        _animationStyle = AnimationStyle.noAnimation;
                     }
                   });
                 },

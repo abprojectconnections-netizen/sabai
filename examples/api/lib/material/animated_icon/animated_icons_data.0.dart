@@ -80,7 +80,7 @@ class _AnimatedIconExampleState extends State<AnimatedIconExample>
           return Card(
             child: Center(
               child: Column(
-                mainAxisAlignment: .center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   AnimatedIcon(
                     icon: entry.value,

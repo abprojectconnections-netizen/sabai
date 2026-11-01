@@ -24,7 +24,7 @@ class CupertinoPickerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: .light),
+      theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoPickerExample(),
     );
   }
@@ -46,9 +46,9 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
       context: context,
       builder: (BuildContext context) => Container(
         height: 216,
-        padding: const .only(top: 6.0),
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .only(top: 6.0),
         // The Bottom margin is provided to align the popup above the system navigation bar.
-        margin: .only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        margin: EdgeInsetsGeometry.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         // Provide a background color for the popup.
         color: CupertinoColors.systemBackground.resolveFrom(context),
         // Use a SafeArea widget to avoid system overlaps.
@@ -70,11 +70,11 @@ class _CupertinoPickerExampleState extends State<CupertinoPickerExample> {
         ),
         child: Center(
           child: Row(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text('Selected fruit: '),
               CupertinoButton(
-                padding: .zero,
+                padding: EdgeInsetsGeometry.zero,
                 // Display a CupertinoPicker with list of fruits.
                 onPressed: () => _showDialog(
                   CupertinoPicker(

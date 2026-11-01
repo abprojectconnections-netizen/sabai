@@ -43,13 +43,13 @@ class _IgnorePointerExampleState extends State<IgnorePointerExample> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: .spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         Text('Ignoring: $ignoring'),
         IgnorePointer(
           ignoring: ignoring,
           child: ElevatedButton(
-            style: ElevatedButton.styleFrom(padding: const .all(24.0)),
+            style: ElevatedButton.styleFrom(padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(24.0)),
             onPressed: () {},
             child: const Text('Click me!'),
           ),

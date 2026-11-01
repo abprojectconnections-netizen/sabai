@@ -67,7 +67,7 @@ class _ListenerExampleState extends State<ListenerExample> {
         child: ColoredBox(
           color: Colors.lightBlueAccent,
           child: Column(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text(
                 'You have pressed or released in this area this many times:',

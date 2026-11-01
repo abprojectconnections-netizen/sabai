@@ -14,7 +14,7 @@ class SliverNavBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: .light),
+      theme: CupertinoThemeData(brightness: Brightness.light),
       home: SliverNavBarExample(),
     );
   }
@@ -35,11 +35,11 @@ class SliverNavBarExample extends StatelessWidget {
           ),
           SliverFillRemaining(
             child: Padding(
-              padding: const .symmetric(horizontal: 10.0),
+              padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(horizontal: 10.0),
               child: Column(
-                mainAxisAlignment: .spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  const Text('Drag me up', textAlign: .center),
+                  const Text('Drag me up', textAlign: TextAlign.center),
                   CupertinoButton.filled(
                     onPressed: () {
                       Navigator.push(
@@ -105,7 +105,7 @@ class _NextPageState extends State<NextPage> {
             backgroundColor: CupertinoColors.systemYellow,
             border: Border(
               bottom: BorderSide(
-                color: brightness == .light
+                color: brightness == Brightness.light
                     ? CupertinoColors.black
                     : CupertinoColors.white,
               ),
@@ -137,17 +137,17 @@ class _NextPageState extends State<NextPage> {
             child: searchIsActive
                 ? ColoredBox(
                     color: CupertinoColors.extraLightBackgroundGray,
-                    child: Center(child: Text(text, textAlign: .center)),
+                    child: Center(child: Text(text, textAlign: TextAlign.center)),
                   )
                 : const Padding(
-                    padding: .symmetric(horizontal: 16.0),
+                    padding: EdgeInsetsGeometry.symmetric(horizontal: 16.0),
                     child: Column(
-                      mainAxisAlignment: .spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
-                        Text('Drag me up', textAlign: .center),
+                        Text('Drag me up', textAlign: TextAlign.center),
                         Text(
                           'Tap on the search field to open the search view',
-                          textAlign: .center,
+                          textAlign: TextAlign.center,
                         ),
                       ],
                     ),

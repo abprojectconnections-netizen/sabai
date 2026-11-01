@@ -45,9 +45,9 @@ class _EditableTextTapUpOutsideIntentExampleState
     // on non-web mobile platforms to calculate the distance between the pointer
     // down and pointer up events later.
     switch (defaultTargetPlatform) {
-      case .android:
-      case .iOS:
-      case .fuchsia:
+      case TargetPlatform.android:
+      case TargetPlatform.iOS:
+      case TargetPlatform.fuchsia:
         // On mobile platforms, we don't unfocus on touch events unless they're
         // in the web browser, but we do unfocus for all other kinds of events.
         switch (intent.pointerDownEvent.kind) {
@@ -69,9 +69,9 @@ class _EditableTextTapUpOutsideIntentExampleState
               'Unexpected pointer down event for trackpad',
             );
         }
-      case .linux:
-      case .macOS:
-      case .windows:
+      case TargetPlatform.linux:
+      case TargetPlatform.macOS:
+      case TargetPlatform.windows:
         intent.focusNode.unfocus();
     }
   }
@@ -97,7 +97,7 @@ class _EditableTextTapUpOutsideIntentExampleState
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: const .all(20),
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(20),
         child: Actions(
           actions: <Type, Action<Intent>>{
             EditableTextTapOutsideIntent:

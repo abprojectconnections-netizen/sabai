@@ -27,7 +27,7 @@ void main() {
       isA<DefaultTextStyleTransition>().having(
         (DefaultTextStyleTransition transition) => transition.style.value,
         'style',
-        const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: .w900),
+        const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
       ),
     );
 
@@ -39,7 +39,7 @@ void main() {
       isA<DefaultTextStyleTransition>().having(
         (DefaultTextStyleTransition transition) => transition.style.value,
         'style',
-        const TextStyle(fontSize: 50, color: Colors.red, fontWeight: .w100),
+        const TextStyle(fontSize: 50, color: Colors.red, fontWeight: FontWeight.w100),
       ),
     );
 
@@ -51,7 +51,7 @@ void main() {
       isA<DefaultTextStyleTransition>().having(
         (DefaultTextStyleTransition transition) => transition.style.value,
         'style',
-        const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: .w900),
+        const TextStyle(fontSize: 50, color: Colors.blue, fontWeight: FontWeight.w900),
       ),
     );
   });

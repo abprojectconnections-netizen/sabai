@@ -24,7 +24,7 @@ class TestServiceExtensionsBinding extends BindingBase
         RendererBinding,
         WidgetsBinding,
         TestDefaultBinaryMessengerBinding {
-  final Map<String, ServiceExtensionCallback> extensions = .new();
+  final Map<String, ServiceExtensionCallback> extensions = Map.new();
 
   final Map<String, List<Map<String, dynamic>>> eventsDispatched =
       <String, List<Map<String, dynamic>>>{};

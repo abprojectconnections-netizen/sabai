@@ -1373,13 +1373,13 @@ class RenderParagraph extends RenderBox
             attributes: info.stringAttributes,
           );
         switch (info.recognizer) {
-          case const const TapGestureRecognizer(onTap: final VoidCallback? handler):
-          case const const DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
+          case const TapGestureRecognizer(onTap: final VoidCallback? handler):
+          case const DoubleTapGestureRecognizer(onDoubleTap: final VoidCallback? handler):
             if (handler != null) {
               configuration.onTap = handler;
               configuration.isLink = true;
             }
-          case const const LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
+          case const LongPressGestureRecognizer(onLongPress: final GestureLongPressCallback? onLongPress):
             if (onLongPress != null) {
               configuration.onLongPress = onLongPress;
             }
@@ -3499,7 +3499,7 @@ class _SelectableFragment
     if (_cachedBoundingBoxes == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: range.start, extentOffset: range.end),
-        boxHeightStyle: .max,
+        boxHeightStyle: ui.BoxHeightStyle.max,
       );
       if (boxes.isNotEmpty) {
         _cachedBoundingBoxes = <Rect>[];
@@ -3524,7 +3524,7 @@ class _SelectableFragment
     if (_cachedRect == null) {
       final List<TextBox> boxes = paragraph.getBoxesForSelection(
         TextSelection(baseOffset: range.start, extentOffset: range.end),
-        boxHeightStyle: .max,
+        boxHeightStyle: ui.BoxHeightStyle.max,
       );
       if (boxes.isNotEmpty) {
         Rect result = boxes.first.toRect();

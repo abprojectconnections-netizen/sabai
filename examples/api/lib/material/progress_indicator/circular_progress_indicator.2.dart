@@ -60,12 +60,12 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
               : null,
         ),
         child: Padding(
-          padding: const .all(20.0),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(20.0),
           child: Column(
             spacing: 8.0,
             children: <Widget>[
               Row(
-                mainAxisAlignment: .center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   TextButton(
                     onPressed: () {
@@ -86,7 +86,7 @@ class _ProgressIndicatorExampleState extends State<ProgressIndicatorExample>
                 ],
               ),
               Row(
-                mainAxisAlignment: .center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text(
                     'Theme controller? ${hasThemeController ? 'Yes' : 'No'}',
@@ -118,14 +118,14 @@ class ManyProgressIndicators extends StatelessWidget {
 
   Widget _nestIndicator({required Widget child}) {
     return Container(
-      padding: const .all(5),
-      margin: const .all(5),
+      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(5),
+      margin: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(5),
       decoration: BoxDecoration(
         color: const Color.fromARGB(100, 240, 240, 0),
-        border: .all(),
+        border: BoxBorder.all(),
       ),
       child: Column(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[const CircularProgressIndicator(), child],
       ),
     );

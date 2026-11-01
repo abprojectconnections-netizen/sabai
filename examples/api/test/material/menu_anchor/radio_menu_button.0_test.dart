@@ -117,7 +117,7 @@ void main() {
     const double safeAreaPadding = 100.0;
     await tester.pumpWidget(
       const MediaQuery(
-        data: MediaQueryData(padding: .symmetric(vertical: safeAreaPadding)),
+        data: MediaQueryData(padding: EdgeInsets.symmetric(vertical: safeAreaPadding)),
         child: example.MenuApp(),
       ),
     );

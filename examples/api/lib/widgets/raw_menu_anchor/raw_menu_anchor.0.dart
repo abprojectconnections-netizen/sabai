@@ -43,9 +43,9 @@ class _RawMenuAnchorExampleState extends State<RawMenuAnchorExample> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return UnconstrainedBox(
-      clipBehavior: .hardEdge,
+      clipBehavior: Clip.hardEdge,
       child: Row(
-        mainAxisSize: .min,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text('Favorite Animal:', style: theme.textTheme.titleMedium),
           const SizedBox(width: 8),
@@ -63,7 +63,7 @@ class _RawMenuAnchorExampleState extends State<RawMenuAnchorExample> {
                 }
               },
               child: Row(
-                mainAxisAlignment: .spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   Expanded(
                     flex: 3,
@@ -143,12 +143,12 @@ class CustomMenu extends StatelessWidget {
               child: FocusScope(
                 child: IntrinsicWidth(
                   child: Container(
-                    clipBehavior: .antiAlias,
+                    clipBehavior: Clip.antiAlias,
                     constraints: const BoxConstraints(minWidth: 168),
-                    padding: const .symmetric(vertical: 6),
+                    padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(vertical: 6),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
-                      borderRadius: .circular(6),
+                      borderRadius: BorderRadiusGeometry.circular(6),
                       boxShadow: kElevationToShadow[4],
                     ),
                     child: Shortcuts(

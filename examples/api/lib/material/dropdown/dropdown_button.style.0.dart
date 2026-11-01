@@ -36,7 +36,7 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: .center,
+      alignment: AlignmentGeometry.center,
       color: Colors.blue,
       child: DropdownButton<String>(
         value: dropdownValue,
@@ -53,7 +53,7 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
           // to selected item string.
           return options.map((String value) {
             return Align(
-              alignment: .centerLeft,
+              alignment: AlignmentGeometry.centerLeft,
               child: Text(
                 dropdownValue,
                 style: const TextStyle(color: Colors.white),

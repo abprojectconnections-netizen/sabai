@@ -15,7 +15,7 @@ class NavBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: .light),
+      theme: CupertinoThemeData(brightness: Brightness.light),
       home: NavBarExample(),
     );
   }
@@ -59,7 +59,7 @@ class _NavigationBarSearchField extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: .symmetric(horizontal: padding, vertical: padding),
+      padding: EdgeInsetsGeometry.symmetric(horizontal: padding, vertical: padding),
       child: SizedBox(
         height: searchFieldHeight,
         child: CupertinoSearchTextField(),

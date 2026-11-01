@@ -48,8 +48,8 @@ class _SizeTransitionExampleState extends State<SizeTransitionExample>
     return Scaffold(
       body: SizeTransition(
         sizeFactor: _animation,
-        axis: .horizontal,
-        alignment: .topLeft,
+        axis: Axis.horizontal,
+        alignment: AlignmentGeometry.topLeft,
         child: const Center(child: FlutterLogo(size: 200.0)),
       ),
     );

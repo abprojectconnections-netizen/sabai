@@ -44,11 +44,11 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
   Widget build(BuildContext context) {
     return Center(
       child: Row(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text('Select a city:', style: Theme.of(context).textTheme.bodyLarge),
           Padding(
-            padding: const .symmetric(horizontal: 8.0),
+            padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(horizontal: 8.0),
             child: DropdownButton<String>(
               value: selectedItem,
               onChanged: (String? value) {
@@ -61,13 +61,13 @@ class _DropdownButtonExampleState extends State<DropdownButtonExample> {
                   // Here custom text style, alignment and layout size can be applied
                   // to selected item string.
                   return Container(
-                    alignment: .centerLeft,
+                    alignment: AlignmentGeometry.centerLeft,
                     constraints: const BoxConstraints(minWidth: 100),
                     child: Text(
                       item,
                       style: const TextStyle(
                         color: Colors.blue,
-                        fontWeight: .w600,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   );

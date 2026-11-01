@@ -16,15 +16,15 @@ class DragBoundaryExampleApp extends StatefulWidget {
 }
 
 class DragBoundaryExampleAppState extends State<DragBoundaryExampleApp> {
-  Offset _currentPosition = .zero;
-  Offset _initialPosition = .zero;
+  Offset _currentPosition = Offset.zero;
+  Offset _initialPosition = Offset.zero;
   final Size _boxSize = const Size(100, 100);
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         body: Padding(
-          padding: const .all(100),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(100),
           child: DragBoundary(
             child: Builder(
               builder: (BuildContext context) {

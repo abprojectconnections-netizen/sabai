@@ -65,7 +65,7 @@ class _MouseRegionExampleState extends State<MouseRegionExample> {
         child: ColoredBox(
           color: Colors.lightBlueAccent,
           child: Column(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text(
                 'You have entered or exited this box this many times:',

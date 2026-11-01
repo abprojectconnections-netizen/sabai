@@ -3699,7 +3699,7 @@ void main() {
       return finder.tryEvaluate() ? tester.element(finder).dirty : null;
     }
 
-    final fabLocation = ValueNotifier<FloatingActionButtonLocation>(.centerDocked);
+    final fabLocation = ValueNotifier<FloatingActionButtonLocation>(FloatingActionButtonLocation.centerDocked);
     const builderKey = Key('Builder');
     await tester.pumpWidget(
       MaterialApp(
@@ -3720,7 +3720,7 @@ void main() {
     );
 
     // Switch the FAB location to trigger the animation.
-    fabLocation.value = .endFloat;
+    fabLocation.value = FloatingActionButtonLocation.endFloat;
     await tester.pump(Durations.short1);
 
     // Trigger a rebuild to update the "dirty" value.

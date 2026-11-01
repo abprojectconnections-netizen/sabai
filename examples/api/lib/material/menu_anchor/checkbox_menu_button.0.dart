@@ -47,7 +47,7 @@ class _MyCheckboxMenuState extends State<MyCheckboxMenu> {
         },
       },
       child: Column(
-        crossAxisAlignment: .start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           MenuAnchor(
             childFocusNode: _buttonFocusNode,
@@ -81,12 +81,12 @@ class _MyCheckboxMenuState extends State<MyCheckboxMenu> {
           ),
           Expanded(
             child: Container(
-              alignment: .center,
+              alignment: AlignmentGeometry.center,
               child: Column(
-                mainAxisAlignment: .center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Padding(
-                    padding: const .all(12.0),
+                    padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(12.0),
                     child: Text(
                       _showingMessage ? widget.message : '',
                       style: Theme.of(context).textTheme.headlineSmall,

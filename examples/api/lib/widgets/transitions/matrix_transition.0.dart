@@ -57,7 +57,7 @@ class _MatrixTransitionExampleState extends State<MatrixTransitionExample>
         child: MatrixTransition(
           animation: _animation,
           child: const Padding(
-            padding: .all(8.0),
+            padding: EdgeInsetsGeometry.all(8.0),
             child: FlutterLogo(size: 150.0),
           ),
           onTransform: (double value) {

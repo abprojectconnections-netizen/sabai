@@ -72,22 +72,22 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
 
     final ThemeData lightTheme = ThemeData(
       colorSchemeSeed: selectedColor,
-      brightness: .light,
+      brightness: Brightness.light,
       useMaterial3: false,
     );
     final ThemeData darkTheme = ThemeData(
       colorSchemeSeed: selectedColor,
-      brightness: .dark,
+      brightness: Brightness.dark,
       useMaterial3: false,
     );
 
     Widget schemeLabel(String brightness, ColorScheme colorScheme) {
       return Padding(
-        padding: const .symmetric(vertical: 15),
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(vertical: 15),
         child: Text(
           brightness,
           style: TextStyle(
-            fontWeight: .bold,
+            fontWeight: FontWeight.bold,
             color: colorScheme.onSecondaryContainer,
           ),
         ),
@@ -96,7 +96,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
 
     Widget schemeView(ThemeData theme) {
       return Padding(
-        padding: const .symmetric(horizontal: 15),
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(horizontal: 15),
         child: ColorSchemeView(colorScheme: theme.colorScheme),
       );
     }
@@ -173,7 +173,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                                     } else {
                                       return SingleChildScrollView(
                                         child: Padding(
-                                          padding: const .only(top: 5),
+                                          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .only(top: 5),
                                           child: Column(
                                             children: <Widget>[
                                               Row(
@@ -225,12 +225,12 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     if (widget.loadColorScheme != null) {
       newColorScheme = await widget.loadColorScheme!(
         provider,
-        isLight ? .light : .dark,
+        isLight ? Brightness.light : Brightness.dark,
       );
     } else {
       newColorScheme = await ColorScheme.fromImageProvider(
         provider: provider,
-        brightness: isLight ? .light : .dark,
+        brightness: isLight ? Brightness.light : Brightness.dark,
       );
     }
     if (!mounted) {
@@ -252,7 +252,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     final double windowHeight = MediaQuery.heightOf(context);
     final double windowWidth = MediaQuery.widthOf(context);
     return Padding(
-      padding: const .all(8.0),
+      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           if (constraints.maxWidth > 800) {
@@ -284,7 +284,7 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
     double windowWidth,
   ) {
     return Row(
-      mainAxisAlignment: .center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: images
           .map(
             (ImageProvider image) => Flexible(
@@ -297,11 +297,11 @@ class _DynamicColorExampleState extends State<DynamicColorExample> {
                       ? colorScheme.primaryContainer
                       : colorScheme.surface,
                   child: Padding(
-                    padding: const .all(5.0),
+                    padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(5.0),
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: windowWidth * .25),
                       child: ClipRRect(
-                        borderRadius: .circular(8.0),
+                        borderRadius: BorderRadiusGeometry.circular(8.0),
                         child: Image(image: image),
                       ),
                     ),
@@ -479,7 +479,7 @@ class ColorGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     return RepaintBoundary(
       child: Card(
-        clipBehavior: .antiAlias,
+        clipBehavior: Clip.antiAlias,
         child: Column(children: children),
       ),
     );
@@ -501,8 +501,8 @@ class ColorChip extends StatelessWidget {
   static Color contrastColor(Color color) {
     final Brightness brightness = ThemeData.estimateBrightnessForColor(color);
     return switch (brightness) {
-      .dark => Colors.white,
-      .light => Colors.black,
+      Brightness.dark => Colors.white,
+      Brightness.light => Colors.black,
     };
   }
 
@@ -512,7 +512,7 @@ class ColorChip extends StatelessWidget {
     return ColoredBox(
       color: color,
       child: Padding(
-        padding: const .all(16),
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(16),
         child: Row(
           children: <Expanded>[
             Expanded(

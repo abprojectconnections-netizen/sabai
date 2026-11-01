@@ -37,7 +37,7 @@ class _FormExampleState extends State<FormExample> {
     return Form(
       key: _formKey,
       child: Column(
-        crossAxisAlignment: .start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           TextFormField(
             decoration: const InputDecoration(hintText: 'Enter your email'),
@@ -49,7 +49,7 @@ class _FormExampleState extends State<FormExample> {
             },
           ),
           Padding(
-            padding: const .symmetric(vertical: 16.0),
+            padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(vertical: 16.0),
             child: ElevatedButton(
               onPressed: () {
                 // Validate will return true if the form is valid, or false if

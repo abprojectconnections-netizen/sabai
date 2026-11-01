@@ -66,7 +66,7 @@ class _AnimatedFractionallySizedBoxExampleState
             child: AnimatedFractionallySizedBox(
               widthFactor: selected ? 0.25 : 0.75,
               heightFactor: selected ? 0.75 : 0.25,
-              alignment: selected ? .topLeft : .bottomRight,
+              alignment: selected ? AlignmentGeometry.topLeft : AlignmentGeometry.bottomRight,
               duration: widget.duration,
               curve: widget.curve,
               child: const ColoredBox(

@@ -125,7 +125,7 @@ class _TableBuilder extends StatelessWidget {
       width: 1,
       height: 1,
       child: Stack(
-        clipBehavior: .none,
+        clipBehavior: Clip.none,
         children: <Widget>[
           for (int row = firstRow; row < lastRow; row++)
             for (int col = firstCol; col < lastCol; col++)

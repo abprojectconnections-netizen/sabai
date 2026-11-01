@@ -49,7 +49,7 @@ class _EndDrawerExampleState extends State<EndDrawerExample> {
       endDrawer: Drawer(
         child: Center(
           child: Column(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text('This is the Drawer'),
               ElevatedButton(

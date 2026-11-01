@@ -14,7 +14,7 @@ class CupertinoSliderApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: .light),
+      theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoSliderExample(),
     );
   }
@@ -39,7 +39,7 @@ class _CupertinoSliderExampleState extends State<CupertinoSliderExample> {
       ),
       child: Center(
         child: Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             // Display the current slider value.
             Text('$_currentSliderValue'),

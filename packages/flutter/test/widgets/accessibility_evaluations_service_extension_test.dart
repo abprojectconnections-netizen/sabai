@@ -17,7 +17,7 @@ class AccessibilityEvaluationTestBinding extends AutomatedTestWidgetsFlutterBind
     return _instance ??= AccessibilityEvaluationTestBinding();
   }
 
-  final Map<String, ServiceExtensionCallback> extensions = .new();
+  final Map<String, ServiceExtensionCallback> extensions = Map.new();
 
   @override
   @protected

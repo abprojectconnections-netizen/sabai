@@ -51,10 +51,10 @@ Future<void> postProcess() async {
   await runProcessWithValidations(<String>['flutter', '--version'], docsPath);
   final String version;
   switch (await Version.resolveIn(const LocalFileSystem().directory(checkoutPath))) {
-    case const const VersionError(:final String error):
+    case const VersionError(:final String error):
       print('Could not read flutter version: $error');
       exit(1);
-    case const const VersionOk(version: final String parsedVersion):
+    case const VersionOk(version: final String parsedVersion):
       version = parsedVersion;
   }
 

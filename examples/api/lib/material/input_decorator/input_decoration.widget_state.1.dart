@@ -37,7 +37,7 @@ class MaterialStateExample extends StatelessWidget {
       child: TextFormField(
         initialValue: 'example.com',
         decoration: const InputDecoration(prefixIcon: Icon(Icons.web)),
-        autovalidateMode: .always,
+        autovalidateMode: AutovalidateMode.always,
         validator: (String? text) {
           if (text?.endsWith('.com') ?? false) {
             return null;

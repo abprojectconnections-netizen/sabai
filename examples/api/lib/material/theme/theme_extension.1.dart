@@ -75,7 +75,7 @@ class _ThemeExtensionExampleAppState extends State<ThemeExtensionExampleApp> {
           ),
         ],
       ),
-      themeMode: isLightTheme ? .light : .dark,
+      themeMode: isLightTheme ? ThemeMode.light : ThemeMode.dark,
       home: Home(isLightTheme: isLightTheme, toggleTheme: toggleTheme),
     );
   }
@@ -97,7 +97,7 @@ class Home extends StatelessWidget {
     return Material(
       child: Center(
         child: Row(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Container(width: 100, height: 100, color: myColors.brandColor),
             const SizedBox(width: 10),

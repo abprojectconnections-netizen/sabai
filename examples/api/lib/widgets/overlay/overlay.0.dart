@@ -67,11 +67,11 @@ class _OverlayExampleState extends State<OverlayExample> {
             child: DefaultTextStyle(
               style: const TextStyle(
                 color: Colors.blue,
-                fontWeight: .bold,
+                fontWeight: FontWeight.bold,
                 fontSize: 14.0,
               ),
               child: Column(
-                mainAxisSize: .min,
+                mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   const Text('Tap here for'),
                   Builder(builder: builder),
@@ -81,7 +81,7 @@ class _OverlayExampleState extends State<OverlayExample> {
                     child: Center(
                       child: Container(
                         decoration: BoxDecoration(
-                          border: .all(color: borderColor, width: 4.0),
+                          border: BoxBorder.all(color: borderColor, width: 4.0),
                         ),
                       ),
                     ),
@@ -130,10 +130,10 @@ class _OverlayExampleState extends State<OverlayExample> {
       ),
       body: Center(
         child: Padding(
-          padding: const .all(8.0),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
           child: Column(
             spacing: 10.0,
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
                 'Use Overlay to highlight a NavigationBar destination',
@@ -142,8 +142,8 @@ class _OverlayExampleState extends State<OverlayExample> {
               Wrap(
                 spacing: 10.0,
                 runSpacing: 10.0,
-                alignment: .center,
-                runAlignment: .center,
+                alignment: WrapAlignment.center,
+                runAlignment: WrapAlignment.center,
                 children: <Widget>[
                   // This creates a highlight Overlay for
                   // the Explore item.
@@ -153,7 +153,7 @@ class _OverlayExampleState extends State<OverlayExample> {
                         currentPageIndex = 0;
                       });
                       createHighlightOverlay(
-                        alignment: .bottomStart,
+                        alignment: AlignmentDirectional.bottomStart,
                         borderColor: Colors.red,
                       );
                     },
@@ -167,7 +167,7 @@ class _OverlayExampleState extends State<OverlayExample> {
                         currentPageIndex = 1;
                       });
                       createHighlightOverlay(
-                        alignment: .bottomCenter,
+                        alignment: AlignmentDirectional.bottomCenter,
                         borderColor: Colors.green,
                       );
                     },
@@ -181,7 +181,7 @@ class _OverlayExampleState extends State<OverlayExample> {
                         currentPageIndex = 2;
                       });
                       createHighlightOverlay(
-                        alignment: .bottomEnd,
+                        alignment: AlignmentDirectional.bottomEnd,
                         borderColor: Colors.orange,
                       );
                     },

@@ -46,7 +46,7 @@ class _AnimatedContainerExampleState extends State<AnimatedContainerExample> {
           width: selected ? 200.0 : 100.0,
           height: selected ? 100.0 : 200.0,
           color: selected ? Colors.red : Colors.blue,
-          alignment: selected ? .center : .topCenter,
+          alignment: selected ? AlignmentGeometry.center : AlignmentGeometry.topCenter,
           duration: const Duration(seconds: 2),
           curve: Curves.fastOutSlowIn,
           child: const FlutterLogo(size: 75),

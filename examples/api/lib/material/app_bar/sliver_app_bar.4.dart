@@ -51,7 +51,7 @@ class _StretchableSliverAppBarState extends State<StretchableSliverAppBar> {
                   color: index.isOdd ? Colors.white : Colors.black12,
                   height: 100.0,
                   child: Center(
-                    child: Text('$index', textScaler: const .linear(5.0)),
+                    child: Text('$index', textScaler: TextScalerTextScalerconst .linear(5.0)),
                   ),
                 );
               },
@@ -60,13 +60,13 @@ class _StretchableSliverAppBarState extends State<StretchableSliverAppBar> {
         ),
         bottomNavigationBar: BottomAppBar(
           child: Padding(
-            padding: const .all(8),
+            padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8),
             child: OverflowBar(
-              overflowAlignment: .center,
-              alignment: .center,
+              overflowAlignment: OverflowBarAlignment.center,
+              alignment: MainAxisAlignment.center,
               children: <Widget>[
                 Row(
-                  mainAxisSize: .min,
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     const Text('stretch'),
                     Switch(

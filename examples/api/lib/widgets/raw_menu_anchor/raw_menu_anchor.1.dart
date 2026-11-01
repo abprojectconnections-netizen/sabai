@@ -85,12 +85,12 @@ class _RawMenuAnchorGroupExampleState extends State<RawMenuAnchorGroupExample> {
     final TextStyle titleStyle = theme.textTheme.titleMedium!;
     return Center(
       child: Column(
-        mainAxisSize: .min,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           if (_selected != null)
             Text('Selected: ${_selected!.label}', style: titleStyle),
           UnconstrainedBox(
-            clipBehavior: .hardEdge,
+            clipBehavior: Clip.hardEdge,
             child: RawMenuAnchorGroup(
               controller: controller,
               child: Row(
@@ -219,19 +219,19 @@ class _CustomSubmenuState extends State<CustomSubmenu> {
               child: FocusScope(
                 child: IntrinsicWidth(
                   child: Container(
-                    clipBehavior: .antiAlias,
+                    clipBehavior: Clip.antiAlias,
                     constraints: const BoxConstraints(minWidth: 160),
-                    padding: const .symmetric(vertical: 6),
+                    padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(vertical: 6),
                     decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.surface,
-                      borderRadius: .circular(6),
+                      borderRadius: BorderRadiusGeometry.circular(6),
                       boxShadow: kElevationToShadow[4],
                     ),
                     child: Shortcuts(
                       shortcuts: CustomSubmenu._shortcuts,
                       child: Column(
-                        mainAxisSize: .min,
-                        crossAxisAlignment: .stretch,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: widget.children,
                       ),
                     ),

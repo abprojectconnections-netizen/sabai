@@ -123,7 +123,7 @@ class _PlatformMenuBarExampleState extends State<PlatformMenuBarExample> {
             if (PlatformProvidedMenuItem.hasMenu(
               PlatformProvidedMenuItemType.quit,
             ))
-              const PlatformProvidedMenuItem(type: .quit),
+              const PlatformProvidedMenuItem(type: PlatformProvidedMenuItemType.quit),
           ],
         ),
       ],

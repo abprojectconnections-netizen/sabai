@@ -32,7 +32,7 @@ class RadioExample extends StatefulWidget {
 }
 
 class _RadioExampleState extends State<RadioExample> {
-  RadioType? _radioType = .fillColor;
+  RadioType? _radioType = RadioType.fillColor;
 
   @override
   Widget build(BuildContext context) {

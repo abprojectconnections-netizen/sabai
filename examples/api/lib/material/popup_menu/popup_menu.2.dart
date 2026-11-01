@@ -46,12 +46,12 @@ class _PopupMenuExampleState extends State<PopupMenuExample> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const .only(top: 50),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .only(top: 50),
           child: Align(
-            alignment: .topCenter,
+            alignment: AlignmentGeometry.topCenter,
             child: Column(
-              mainAxisSize: .min,
-              mainAxisAlignment: .center,
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 SegmentedButton<AnimationStyles>(
                   selected: _animationStyleSelection,

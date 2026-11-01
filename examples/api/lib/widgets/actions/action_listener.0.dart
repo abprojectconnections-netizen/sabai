@@ -48,10 +48,10 @@ class _ActionListenerExampleState extends State<ActionListenerExample> {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: .center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Padding(
-          padding: const .all(8.0),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
           child: OutlinedButton(
             onPressed: _toggleState,
             child: Text(_on ? 'Disable' : 'Enable'),
@@ -59,7 +59,7 @@ class _ActionListenerExampleState extends State<ActionListenerExample> {
         ),
         if (_on)
           Padding(
-            padding: const .all(8.0),
+            padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
             child: ActionListener(
               listener: (Action<Intent> action) {
                 if (action.intentType == MyIntent) {

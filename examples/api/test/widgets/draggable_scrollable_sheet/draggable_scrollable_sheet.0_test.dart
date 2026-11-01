@@ -168,7 +168,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       Directionality(
-        textDirection: .ltr,
+        textDirection: TextDirection.ltr,
         child: Center(
           child: SizedBox.shrink(
             child: DraggableScrollableSheet(builder: (_, _) => Text('X')),

@@ -14,7 +14,7 @@ class TabScaffoldApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: .light),
+      theme: CupertinoThemeData(brightness: Brightness.light),
       home: TabScaffoldExample(),
     );
   }

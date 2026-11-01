@@ -36,12 +36,12 @@ class MyScaffoldBody extends StatelessWidget {
         onPressed: () {
           Scaffold.of(context).showBottomSheet((BuildContext context) {
             return Container(
-              alignment: .center,
+              alignment: AlignmentGeometry.center,
               height: 200,
               color: Colors.amber,
               child: Center(
                 child: Column(
-                  mainAxisSize: .min,
+                  mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     const Text('BottomSheet'),
                     ElevatedButton(

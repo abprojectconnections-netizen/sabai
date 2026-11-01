@@ -89,7 +89,7 @@ class _HomeState extends State<Home> with TickerProviderStateMixin<Home> {
         body: SafeArea(
           top: false,
           child: Stack(
-            fit: .expand,
+            fit: StackFit.expand,
             children: allDestinations.map((Destination destination) {
               final int index = destination.index;
               final Widget view = destinationViews[index];
@@ -160,8 +160,8 @@ class RootPage extends StatelessWidget {
     final ButtonStyle buttonStyle = ElevatedButton.styleFrom(
       backgroundColor: destination.color,
       foregroundColor: Colors.white,
-      visualDensity: .comfortable,
-      padding: const .symmetric(vertical: 12, horizontal: 16),
+      visualDensity: VisualDensity.comfortable,
+      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(vertical: 12, horizontal: 16),
       textStyle: headlineSmall,
     );
 
@@ -174,7 +174,7 @@ class RootPage extends StatelessWidget {
       backgroundColor: destination.color[50],
       body: Center(
         child: Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             ElevatedButton(
               style: buttonStyle,
@@ -218,14 +218,14 @@ class RootPage extends StatelessWidget {
                       context: context,
                       builder: (BuildContext context) {
                         return Container(
-                          padding: const .all(16),
+                          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(16),
                           width: double.infinity,
                           child: Text(
                             '${destination.title} BottomSheet\n'
                             'Tap the back button to dismiss',
                             style: headlineSmall,
                             softWrap: true,
-                            textAlign: .center,
+                            textAlign: TextAlign.center,
                           ),
                         );
                       },
@@ -253,7 +253,7 @@ class ListPage extends StatelessWidget {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final ButtonStyle buttonStyle = OutlinedButton.styleFrom(
       shape: RoundedRectangleBorder(
-        borderRadius: .circular(8),
+        borderRadius: BorderRadiusGeometry.circular(8),
         side: BorderSide(color: colorScheme.onSurface.withValues(alpha: 0.12)),
       ),
       foregroundColor: destination.color,
@@ -272,7 +272,7 @@ class ListPage extends StatelessWidget {
           itemCount: itemCount,
           itemBuilder: (BuildContext context, int index) {
             return Padding(
-              padding: const .symmetric(vertical: 4, horizontal: 8),
+              padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(vertical: 4, horizontal: 8),
               child: OutlinedButton(
                 style: buttonStyle.copyWith(
                   backgroundColor: WidgetStatePropertyAll<Color>(
@@ -331,8 +331,8 @@ class _TextPageState extends State<TextPage> {
       ),
       backgroundColor: widget.destination.color[50],
       body: Container(
-        padding: const .all(32.0),
-        alignment: .center,
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(32.0),
+        alignment: AlignmentGeometry.center,
         child: TextField(
           controller: textController,
           style: theme.primaryTextTheme.headlineMedium?.copyWith(

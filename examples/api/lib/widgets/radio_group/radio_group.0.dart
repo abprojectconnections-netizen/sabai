@@ -47,7 +47,7 @@ class SingingCharacterRadioGroup extends StatefulWidget {
 
 class SingingCharacterRadioGroupState
     extends State<SingingCharacterRadioGroup> {
-  SingingCharacter? _character = .lafayette;
+  SingingCharacter? _character = SingingCharacter.lafayette;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +59,7 @@ class SingingCharacterRadioGroupState
         });
       },
       child: Column(
-        crossAxisAlignment: .start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text('Selected: $_character'),
           const ListTile(
@@ -96,7 +96,7 @@ class GenreRadioGroupState extends State<GenreRadioGroup> {
         });
       },
       child: Column(
-        crossAxisAlignment: .start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Text('Selected: $_genre'),
           const ListTile(

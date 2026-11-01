@@ -39,7 +39,7 @@ class _SharedAppDataExampleState extends State<SharedAppDataExample> {
       appBar: AppBar(title: const Text('SharedAppData Sample')),
       body: Center(
         child: Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             const ShowSharedValue(appDataKey: 'foo'),
             const SizedBox(height: 16),

@@ -14,7 +14,7 @@ class SliverNavBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: .light),
+      theme: CupertinoThemeData(brightness: Brightness.light),
       home: SliverNavBarExample(),
     );
   }
@@ -49,9 +49,9 @@ class SliverNavBarExample extends StatelessWidget {
           // Drag the scrollable area to collapse the CupertinoSliverNavigationBar.
           SliverFillRemaining(
             child: Column(
-              mainAxisAlignment: .spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                const Text('Drag me up', textAlign: .center),
+                const Text('Drag me up', textAlign: TextAlign.center),
                 CupertinoButton.filled(
                   onPressed: () {
                     Navigator.push(
@@ -87,7 +87,7 @@ class NextPage extends StatelessWidget {
             backgroundColor: CupertinoColors.systemYellow,
             border: Border(
               bottom: BorderSide(
-                color: brightness == .light
+                color: brightness == Brightness.light
                     ? CupertinoColors.black
                     : CupertinoColors.white,
               ),
@@ -100,14 +100,14 @@ class NextPage extends StatelessWidget {
           ),
           const SliverFillRemaining(
             child: Column(
-              mainAxisAlignment: .spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: <Widget>[
-                Text('Drag me up', textAlign: .center),
+                Text('Drag me up', textAlign: TextAlign.center),
                 // When the "leading" parameter is omitted on a route that has a previous page,
                 // the back button is automatically added to the leading position.
                 Text(
                   'Tap on the leading button to navigate back',
-                  textAlign: .center,
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),

@@ -213,7 +213,7 @@ class CardItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const .only(left: 2.0, right: 2.0, top: 2.0),
+      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .only(left: 2.0, right: 2.0, top: 2.0),
       child: SizeTransition(
         sizeFactor: animation,
         child: GestureDetector(

@@ -48,8 +48,8 @@ class FallbackDemoState extends State<FallbackDemo> {
     return FallbackFocus(
       node: _node,
       child: Container(
-        decoration: BoxDecoration(border: .all(color: Colors.red)),
-        padding: const .all(10),
+        decoration: BoxDecoration(border: BoxBorder.all(color: Colors.red)),
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(10),
         constraints: const BoxConstraints(maxWidth: 500, maxHeight: 400),
         child: Column(
           children: <Widget>[

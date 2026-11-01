@@ -26,8 +26,8 @@ class FrameBuilderExample extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: .all(),
-        borderRadius: .circular(20),
+        border: BoxBorder.all(),
+        borderRadius: BorderRadiusGeometry.circular(20),
       ),
       child: Image.network(
         'https://flutter.github.io/assets-for-api-docs/assets/widgets/puffin.jpg',

@@ -23,10 +23,10 @@ class AppBarContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: .end,
+      mainAxisAlignment: MainAxisAlignment.end,
       children: <Widget>[
         Padding(
-          padding: const .symmetric(horizontal: 10),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(horizontal: 10),
           child: Row(
             children: <Widget>[
               const Text(

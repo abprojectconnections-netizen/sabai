@@ -92,7 +92,7 @@ void main() {
         }),
       );
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{.macOS}),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.macOS}),
   );
 }
 

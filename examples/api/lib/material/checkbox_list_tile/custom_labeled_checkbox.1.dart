@@ -72,7 +72,7 @@ class _LabeledCheckboxExampleState extends State<LabeledCheckboxExample> {
       body: Center(
         child: LabeledCheckbox(
           label: 'This is the label text',
-          padding: const .symmetric(horizontal: 20.0),
+          padding: EdgeInsetsEdgeInsetsconst .symmetric(horizontal: 20.0),
           value: _isSelected,
           onChanged: (bool newValue) {
             setState(() {

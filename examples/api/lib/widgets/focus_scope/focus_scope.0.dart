@@ -41,11 +41,11 @@ class Pane extends StatelessWidget {
     return Material(
       color: backgroundColor,
       child: Stack(
-        fit: .expand,
+        fit: StackFit.expand,
         children: <Widget>[
           Center(child: child),
           Align(
-            alignment: .topLeft,
+            alignment: AlignmentGeometry.topLeft,
             child: IconButton(
               autofocus: true,
               focusNode: focusNode,
@@ -81,7 +81,7 @@ class _FocusScopeExampleState extends State<FocusScopeExample> {
   Widget _buildStack(BuildContext context, BoxConstraints constraints) {
     final Size stackSize = constraints.biggest;
     return Stack(
-      fit: .expand,
+      fit: StackFit.expand,
       // The backdrop is behind the front widget in the Stack, but the widgets
       // would still be active and traversable without the FocusScope.
       children: <Widget>[
@@ -103,7 +103,7 @@ class _FocusScopeExampleState extends State<FocusScopeExample> {
             backgroundColor: Colors.lightBlue,
             onPressed: () => setState(() => backdropIsVisible = false),
             child: Column(
-              mainAxisAlignment: .center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 // This button would be not visible, but still focusable from
                 // the foreground pane without the FocusScope.

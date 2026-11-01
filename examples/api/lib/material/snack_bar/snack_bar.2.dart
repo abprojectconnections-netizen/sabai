@@ -27,7 +27,7 @@ class SnackBarExample extends StatefulWidget {
 }
 
 class _SnackBarExampleState extends State<SnackBarExample> {
-  SnackBarBehavior? _snackBarBehavior = .floating;
+  SnackBarBehavior? _snackBarBehavior = SnackBarBehavior.floating;
   bool _withIcon = true;
   bool _withAction = true;
   bool _multiLine = false;

@@ -89,12 +89,12 @@ class _TextFormFieldExampleState extends State<TextFormFieldExample> {
   Widget build(BuildContext context) {
     return Material(
       child: Padding(
-        padding: const .symmetric(horizontal: 24.0),
+        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(horizontal: 24.0),
         child: Center(
           child: Form(
             key: formKey,
             child: Column(
-              mainAxisAlignment: .center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 TextFormField(
                   forceErrorText: forceErrorText,

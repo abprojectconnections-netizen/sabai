@@ -55,7 +55,7 @@ class _WidgetStateMouseCursorExampleState
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: .center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         ListTile(
           title: const Text('ListTile'),
@@ -65,7 +65,7 @@ class _WidgetStateMouseCursorExampleState
         ),
         const SizedBox(height: 10),
         Row(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text('Enabled: ', style: Theme.of(context).textTheme.titleSmall),
             Switch(

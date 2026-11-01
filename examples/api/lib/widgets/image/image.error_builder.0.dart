@@ -27,8 +27,8 @@ class ErrorBuilderExample extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
-        border: .all(),
-        borderRadius: .circular(20),
+        border: BoxBorder.all(),
+        borderRadius: BorderRadiusGeometry.circular(20),
       ),
       child: Image.network(
         'https://example.does.not.exist/image.jpg',

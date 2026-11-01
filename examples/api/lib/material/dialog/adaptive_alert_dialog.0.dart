@@ -16,7 +16,7 @@ class AdaptiveAlertDialogApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       // Try this: set the platform to .android and see the difference
-      theme: ThemeData(platform: .iOS),
+      theme: ThemeData(platform: TargetPlatform.iOS),
       home: Scaffold(
         appBar: AppBar(title: const Text('AlertDialog Sample')),
         body: const Center(child: AdaptiveDialogExample()),
@@ -35,13 +35,13 @@ class AdaptiveDialogExample extends StatelessWidget {
   }) {
     final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
-      case .android:
-      case .fuchsia:
-      case .linux:
-      case .windows:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         return TextButton(onPressed: onPressed, child: child);
-      case .iOS:
-      case .macOS:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return CupertinoDialogAction(onPressed: onPressed, child: child);
     }
   }

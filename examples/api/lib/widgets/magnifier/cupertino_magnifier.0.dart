@@ -14,7 +14,7 @@ class CupertinoMagnifierApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const CupertinoApp(
-      theme: CupertinoThemeData(brightness: .light),
+      theme: CupertinoThemeData(brightness: Brightness.light),
       home: CupertinoMagnifierExample(),
     );
   }
@@ -30,7 +30,7 @@ class CupertinoMagnifierExample extends StatefulWidget {
 
 class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
   static const double magnifierRadius = 50.0;
-  Offset dragGesturePosition = .zero;
+  Offset dragGesturePosition = Offset.zero;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
       ),
       child: Center(
         child: Column(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text('Drag on the logo!'),
             RepaintBoundary(
@@ -64,7 +64,7 @@ class _CupertinoMagnifierExampleState extends State<CupertinoMagnifierExample> {
                     top: dragGesturePosition.dy - magnifierRadius,
                     child: const CupertinoMagnifier(
                       magnificationScale: 1.5,
-                      borderRadius: .all(Radius.circular(magnifierRadius)),
+                      borderRadius: BorderRadius.all(Radius.circular(magnifierRadius)),
                       additionalFocalPointOffset: Offset(0, -magnifierRadius),
                     ),
                   ),

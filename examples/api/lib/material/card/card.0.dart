@@ -30,7 +30,7 @@ class CardExample extends StatelessWidget {
     return Center(
       child: Card(
         child: Column(
-          mainAxisSize: .min,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             const ListTile(
               leading: Icon(Icons.album),
@@ -38,7 +38,7 @@ class CardExample extends StatelessWidget {
               subtitle: Text('Music by Julie Gable. Lyrics by Sidney Stein.'),
             ),
             Row(
-              mainAxisAlignment: .end,
+              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 TextButton(
                   child: const Text('BUY TICKETS'),

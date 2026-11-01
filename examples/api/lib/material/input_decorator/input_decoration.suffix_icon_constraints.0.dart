@@ -28,9 +28,9 @@ class SuffixIconConstraintsExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Padding(
-      padding: .symmetric(horizontal: 8.0),
+      padding: EdgeInsetsGeometry.symmetric(horizontal: 8.0),
       child: Column(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           TextField(
             decoration: InputDecoration(

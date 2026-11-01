@@ -61,7 +61,7 @@ class _ExpansionTileExampleState extends State<ExpansionTileExample> {
         const ExpansionTile(
           title: Text('ExpansionTile 3'),
           subtitle: Text('Leading expansion arrow icon'),
-          controlAffinity: .leading,
+          controlAffinity: ListTileControlAffinity.leading,
           children: <Widget>[ListTile(title: Text('This is tile number 3'))],
         ),
       ],

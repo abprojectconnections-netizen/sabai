@@ -26,7 +26,7 @@ class NavRailExample extends StatefulWidget {
 
 class _NavRailExampleState extends State<NavRailExample> {
   int _selectedIndex = 0;
-  NavigationRailLabelType labelType = .all;
+  NavigationRailLabelType labelType = NavigationRailLabelType.all;
   bool showLeading = false;
   bool showTrailing = false;
   double groupAlignment = -1.0;
@@ -90,7 +90,7 @@ class _NavRailExampleState extends State<NavRailExample> {
             // This is the main content.
             Expanded(
               child: Column(
-                mainAxisAlignment: .center,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Text('selectedIndex: $_selectedIndex'),
                   const SizedBox(height: 20),

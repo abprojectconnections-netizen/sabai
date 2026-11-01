@@ -122,7 +122,7 @@ void main() {
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
       Directionality(
-        textDirection: .ltr,
+        textDirection: TextDirection.ltr,
         child: Center(
           child: Overlay(
             initialEntries: <OverlayEntry>[
@@ -145,7 +145,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       Directionality(
-        textDirection: .ltr,
+        textDirection: TextDirection.ltr,
         child: Center(
           child: SizedBox.shrink(
             child: Overlay(
@@ -168,7 +168,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       Directionality(
-        textDirection: .ltr,
+        textDirection: TextDirection.ltr,
         child: Center(
           child: SizedBox.shrink(
             child: DragTarget<bool>(builder: (_, _, _) => Text('X')),

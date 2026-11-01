@@ -26,7 +26,7 @@ class NavigationExample extends StatefulWidget {
 
 class _NavigationExampleState extends State<NavigationExample> {
   int currentPageIndex = 0;
-  NavigationDestinationLabelBehavior labelBehavior = .alwaysShow;
+  NavigationDestinationLabelBehavior labelBehavior = NavigationDestinationLabelBehavior.alwaysShow;
 
   @override
   Widget build(BuildContext context) {
@@ -51,13 +51,13 @@ class _NavigationExampleState extends State<NavigationExample> {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text('Label behavior: ${labelBehavior.name}'),
             const SizedBox(height: 10),
             OverflowBar(
               spacing: 10.0,
-              overflowAlignment: .center,
+              overflowAlignment: OverflowBarAlignment.center,
               overflowSpacing: 10.0,
               children: <Widget>[
                 ElevatedButton(

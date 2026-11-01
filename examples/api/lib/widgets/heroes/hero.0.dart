@@ -30,7 +30,7 @@ class HeroExample extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Hero Sample')),
       body: Column(
-        crossAxisAlignment: .start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const SizedBox(height: 20.0),
           ListTile(

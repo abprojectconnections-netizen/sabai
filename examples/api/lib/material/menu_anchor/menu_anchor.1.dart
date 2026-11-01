@@ -137,7 +137,7 @@ class _MyContextMenuState extends State<MyContextMenu> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const .all(50),
+      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(50),
       child: GestureDetector(
         onTapDown: _handleTapDown,
         onSecondaryTapDown: _handleSecondaryTapDown,
@@ -184,19 +184,19 @@ class _MyContextMenuState extends State<MyContextMenu> {
             ),
           ],
           child: Container(
-            alignment: .center,
+            alignment: AlignmentGeometry.center,
             color: backgroundColor,
             child: Column(
-              mainAxisAlignment: .center,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
                 const Padding(
-                  padding: .all(8.0),
+                  padding: EdgeInsetsGeometry.all(8.0),
                   child: Text(
                     'Right-click anywhere on the background to show the menu.',
                   ),
                 ),
                 Padding(
-                  padding: const .all(12.0),
+                  padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(12.0),
                   child: Text(
                     showingMessage ? widget.message : '',
                     style: Theme.of(context).textTheme.headlineSmall,
@@ -250,15 +250,15 @@ class _MyContextMenuState extends State<MyContextMenu> {
       return;
     }
     switch (defaultTargetPlatform) {
-      case .android:
-      case .fuchsia:
-      case .linux:
-      case .windows:
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
         // Don't open the menu on these platforms with a Ctrl-tap (or a
         // tap).
         break;
-      case .iOS:
-      case .macOS:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         // Only open the menu on these platforms if the control button is down
         // when the tap occurs.
         if (HardwareKeyboard.instance.logicalKeysPressed.contains(

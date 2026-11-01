@@ -50,7 +50,7 @@ class _ReorderableExampleState extends State<ReorderableExample> {
                 Container(
                   width: 64,
                   height: 64,
-                  padding: const .all(8),
+                  padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8),
                   child: ReorderableDragStartListener(
                     index: index,
                     child: Card(color: colorScheme.primary, elevation: 2),

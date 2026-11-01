@@ -49,7 +49,7 @@ class _ModalBottomSheetExampleState extends State<ModalBottomSheetExample> {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           SegmentedButton<AnimationStyles>(
             selected: _animationStyleSelection,
@@ -88,8 +88,8 @@ class _ModalBottomSheetExampleState extends State<ModalBottomSheetExample> {
                   return SizedBox.expand(
                     child: Center(
                       child: Column(
-                        mainAxisAlignment: .center,
-                        mainAxisSize: .min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           const Text('Modal bottom sheet'),
                           ElevatedButton(

@@ -51,7 +51,7 @@ class _MyHomePage extends StatelessWidget {
       ),
       body: Center(
         child: Column(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             TextButton(
               onPressed: () {
@@ -218,7 +218,7 @@ class _VerticalPageTransition extends StatelessWidget {
         position: _primaryPositionAnimation,
         textDirection: textDirection,
         child: ClipRRect(
-          borderRadius: const .vertical(top: Radius.circular(12)),
+          borderRadius: BorderRadiusGeometryBorderRadiusGeometryconst .vertical(top: Radius.circular(12)),
           child: child,
         ),
       ),

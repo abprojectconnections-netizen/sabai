@@ -42,7 +42,7 @@ class _OffstageExampleState extends State<OffstageExample> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: .center,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
         Offstage(
           offstage: _offstage,

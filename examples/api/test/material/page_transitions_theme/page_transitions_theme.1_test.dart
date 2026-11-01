@@ -24,16 +24,16 @@ void main() {
     // Check defined page transitions builder for each platform.
     for (final TargetPlatform platform in TargetPlatform.values) {
       switch (platform) {
-        case .android:
+        case TargetPlatform.android:
           expect(theme.builders[platform], isA<ZoomPageTransitionsBuilder>());
           final ZoomPageTransitionsBuilder builder =
               theme.builders[platform]! as ZoomPageTransitionsBuilder;
           expect(builder.allowSnapshotting, isFalse);
-        case .iOS:
-        case .macOS:
-        case .linux:
-        case .fuchsia:
-        case .windows:
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+        case TargetPlatform.linux:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.windows:
           expect(theme.builders[platform], isNull);
       }
     }

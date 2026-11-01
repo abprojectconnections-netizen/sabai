@@ -37,8 +37,8 @@ class _ExpansionTileControllerAppState
               title: const Text('ExpansionTile with explicit controller.'),
               children: <Widget>[
                 Container(
-                  alignment: .center,
-                  padding: const .all(24),
+                  alignment: AlignmentGeometry.center,
+                  padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(24),
                   child: const Text('ExpansionTile Contents'),
                 ),
               ],
@@ -63,8 +63,8 @@ class _ExpansionTileControllerAppState
                 Builder(
                   builder: (BuildContext context) {
                     return Container(
-                      padding: const .all(24),
-                      alignment: .center,
+                      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(24),
+                      alignment: AlignmentGeometry.center,
                       child: ElevatedButton(
                         child: const Text('Collapse This Tile'),
                         onPressed: () {

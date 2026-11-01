@@ -31,32 +31,32 @@ class ClipRRectExample extends StatelessWidget {
 
     return Center(
       child: Column(
-        mainAxisAlignment: .spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
           Container(
-            alignment: .center,
+            alignment: AlignmentGeometry.center,
             constraints: const BoxConstraints(maxWidth: 300, maxHeight: 100),
             color: Colors.blue,
             child: const Text('No ClipRRect', style: style),
           ),
           ClipRRect(
-            borderRadius: .circular(30.0),
+            borderRadius: BorderRadiusGeometry.circular(30.0),
             child: Container(
-              alignment: .center,
+              alignment: AlignmentGeometry.center,
               constraints: const BoxConstraints(maxWidth: 300, maxHeight: 100),
               color: Colors.green,
               child: const Text('ClipRRect', style: style),
             ),
           ),
           ClipRRect(
-            borderRadius: const .only(
+            borderRadius: BorderRadiusGeometryBorderRadiusGeometryconst .only(
               topLeft: Radius.circular(10.0),
               topRight: Radius.circular(20.0),
               bottomRight: Radius.circular(30.0),
               bottomLeft: Radius.circular(40.0),
             ),
             child: Container(
-              alignment: .center,
+              alignment: AlignmentGeometry.center,
               constraints: const BoxConstraints(maxWidth: 300, maxHeight: 100),
               color: Colors.purple,
               child: const Text('ClipRRect', style: style),

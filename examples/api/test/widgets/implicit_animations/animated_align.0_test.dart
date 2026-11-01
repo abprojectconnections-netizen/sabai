@@ -16,8 +16,8 @@ void main() {
       matching: find.byType(Align),
     );
 
-    const Alignment beginAlignment = .bottomLeft;
-    const Alignment endAlignment = .topRight;
+    const Alignment beginAlignment = Alignment.bottomLeft;
+    const Alignment endAlignment = Alignment.topRight;
 
     Align align = tester.widget(alignFinder);
     expect(align.alignment, beginAlignment);

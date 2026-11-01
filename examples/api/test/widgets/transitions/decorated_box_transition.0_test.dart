@@ -35,8 +35,8 @@ void main() {
         'decoration',
         BoxDecoration(
           color: const Color(0xFFFFFFFF),
-          border: .all(style: .none),
-          borderRadius: .circular(60.0),
+          border: BoxBorder.all(style: BorderStyle.none),
+          borderRadius: BorderRadiusGeometry.circular(60.0),
           boxShadow: const <BoxShadow>[
             BoxShadow(
               color: Color(0x66666666),
@@ -59,8 +59,8 @@ void main() {
         'decoration',
         BoxDecoration(
           color: const Color(0xFFFFFFFF),
-          border: .all(style: .none),
-          borderRadius: .zero,
+          border: BoxBorder.all(style: BorderStyle.none),
+          borderRadius: BorderRadiusGeometry.zero,
           // No shadow.
         ),
       ),

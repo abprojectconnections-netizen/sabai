@@ -25,24 +25,24 @@ void main() {
     // Check defined page transitions builder for each platform.
     for (final TargetPlatform platform in TargetPlatform.values) {
       switch (platform) {
-        case .iOS:
+        case TargetPlatform.iOS:
           expect(
             theme.builders[platform],
             isA<CupertinoPageTransitionsBuilder>(),
           );
-        case .linux:
+        case TargetPlatform.linux:
           expect(
             theme.builders[platform],
             isA<OpenUpwardsPageTransitionsBuilder>(),
           );
-        case .macOS:
+        case TargetPlatform.macOS:
           expect(
             theme.builders[platform],
             isA<FadeUpwardsPageTransitionsBuilder>(),
           );
-        case .android:
-        case .fuchsia:
-        case .windows:
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+        case TargetPlatform.windows:
           expect(theme.builders[platform], isNull);
       }
     }

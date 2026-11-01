@@ -28,28 +28,28 @@ class OverflowBarExample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: .center,
-      padding: const .all(16),
+      alignment: AlignmentGeometry.center,
+      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(16),
       color: Colors.black.withValues(alpha: 0.15),
       child: Material(
         color: Colors.white,
         elevation: 24,
         shape: const RoundedRectangleBorder(
-          borderRadius: .all(Radius.circular(4)),
+          borderRadius: BorderRadiusGeometry.all(Radius.circular(4)),
         ),
         child: Padding(
-          padding: const .all(8),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8),
           child: SingleChildScrollView(
             child: Column(
-              mainAxisSize: .min,
-              crossAxisAlignment: .stretch,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 const SizedBox(height: 128, child: Placeholder()),
                 Align(
-                  alignment: .centerEnd,
+                  alignment: AlignmentGeometry.centerEnd,
                   child: OverflowBar(
                     spacing: 8,
-                    overflowAlignment: .end,
+                    overflowAlignment: OverflowBarAlignment.end,
                     children: <Widget>[
                       TextButton(child: const Text('Cancel'), onPressed: () {}),
                       TextButton(

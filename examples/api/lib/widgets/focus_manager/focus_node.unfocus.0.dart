@@ -25,7 +25,7 @@ class UnfocusExample extends StatefulWidget {
 }
 
 class _UnfocusExampleState extends State<UnfocusExample> {
-  UnfocusDisposition disposition = .scope;
+  UnfocusDisposition disposition = UnfocusDisposition.scope;
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +33,14 @@ class _UnfocusExampleState extends State<UnfocusExample> {
       child: ColoredBox(
         color: Colors.white,
         child: Column(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Wrap(
               children: List<Widget>.generate(4, (int index) {
                 return const SizedBox(
                   width: 200,
                   child: Padding(
-                    padding: .all(8.0),
+                    padding: EdgeInsetsGeometry.all(8.0),
                     child: TextField(
                       decoration: InputDecoration(border: OutlineInputBorder()),
                     ),
@@ -49,13 +49,13 @@ class _UnfocusExampleState extends State<UnfocusExample> {
               }),
             ),
             Row(
-              mainAxisAlignment: .spaceAround,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 ...List<Widget>.generate(UnfocusDisposition.values.length, (
                   int index,
                 ) {
                   return Row(
-                    mainAxisSize: .min,
+                    mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Radio<UnfocusDisposition>(
                         // TODO(loic-sharma): Migrate to RadioGroup.

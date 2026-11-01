@@ -22,7 +22,7 @@ class TextMagnifierExampleApp extends StatelessWidget {
     return MaterialApp(
       home: Scaffold(
         body: Padding(
-          padding: const .symmetric(horizontal: 48.0),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(horizontal: 48.0),
           child: Center(
             child: TextField(
               textDirection: textDirection,

@@ -69,7 +69,7 @@ class _DropdownMenuEntryLabelWidgetExampleState
                   labelWidget: Text(
                     labelText,
                     maxLines: 1,
-                    overflow: .ellipsis,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 );
               })

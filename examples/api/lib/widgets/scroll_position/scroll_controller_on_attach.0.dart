@@ -73,7 +73,7 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
               itemCount: 50,
               itemBuilder: (_, int index) {
                 return Padding(
-                  padding: const .all(8.0),
+                  padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
                   child: Center(
                     child: DecoratedBox(
                       decoration: BoxDecoration(
@@ -85,10 +85,10 @@ class _ScrollControllerDemoState extends State<ScrollControllerDemo> {
                             blurRadius: 5,
                           ),
                         ],
-                        borderRadius: const .all(Radius.circular(10)),
+                        borderRadius: BorderRadiusGeometryBorderRadiusGeometryconst .all(Radius.circular(10)),
                       ),
                       child: Padding(
-                        padding: const .symmetric(
+                        padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(
                           vertical: 12.0,
                           horizontal: 20.0,
                         ),

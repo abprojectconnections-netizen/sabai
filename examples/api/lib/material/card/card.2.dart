@@ -20,7 +20,7 @@ class CardExamplesApp extends StatelessWidget {
         appBar: AppBar(title: const Text('Card Examples')),
         body: const Center(
           child: Column(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Card(child: _SampleCard(cardName: 'Elevated Card')),
               Card.filled(child: _SampleCard(cardName: 'Filled Card')),

@@ -37,7 +37,7 @@ void main() {
             final MediaQueryData mediaQueryData = MediaQuery.of(context);
             return MediaQuery(
               data: mediaQueryData.copyWith(
-                supportsShowingSystemContextMenu: defaultTargetPlatform == .iOS,
+                supportsShowingSystemContextMenu: defaultTargetPlatform == TargetPlatform.iOS,
               ),
               child: const example.SystemContextMenuExampleApp(),
             );
@@ -50,7 +50,7 @@ void main() {
       tester.state<EditableTextState>(textFinder).showToolbar();
       await tester.pumpAndSettle();
 
-      if (defaultTargetPlatform == .iOS) {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
         expect(find.byType(SystemContextMenu), findsOneWidget);
         expect(find.byType(AdaptiveTextSelectionToolbar), findsNothing);
         expect(itemsReceived.length, greaterThanOrEqualTo(3));
@@ -127,7 +127,7 @@ void main() {
 
       expect(find.byType(SystemContextMenu), findsNothing);
     },
-    variant: TargetPlatformVariant.only(.iOS),
+    variant: TargetPlatformVariant.only(TargetPlatform.iOS),
     skip: kIsWeb, // [intended]
   );
 }

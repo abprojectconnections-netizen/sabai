@@ -31,7 +31,7 @@ class HomePage extends StatelessWidget {
       ),
       child: Center(
         child: Column(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             CupertinoButton.filled(
               onPressed: () {
@@ -72,7 +72,7 @@ class _SheetBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Text(title),
           CupertinoButton.filled(

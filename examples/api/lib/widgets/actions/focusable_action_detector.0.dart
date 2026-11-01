@@ -95,14 +95,14 @@ class _FadButtonState extends State<FadButton> {
         child: Row(
           children: <Widget>[
             Container(
-              padding: const .all(10.0),
+              padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(10.0),
               color: color,
               child: widget.child,
             ),
             Container(
               width: 30,
               height: 30,
-              margin: const .all(10.0),
+              margin: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(10.0),
               color: _on ? Colors.red : Colors.transparent,
             ),
           ],
@@ -128,17 +128,17 @@ class _FocusableActionDetectorExampleState
       appBar: AppBar(title: const Text('FocusableActionDetector Example')),
       body: Center(
         child: Row(
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Padding(
-              padding: const .all(8.0),
+              padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
               child: TextButton(
                 onPressed: () {},
                 child: const Text('Press Me'),
               ),
             ),
             Padding(
-              padding: const .all(8.0),
+              padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(8.0),
               child: FadButton(onPressed: () {}, child: const Text('And Me')),
             ),
           ],

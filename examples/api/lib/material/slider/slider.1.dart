@@ -33,7 +33,7 @@ class _SliderExampleState extends State<SliderExample> {
     return Scaffold(
       appBar: AppBar(title: const Text('Slider')),
       body: Column(
-        mainAxisAlignment: .center,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           Slider(
             value: _currentSliderPrimaryValue,

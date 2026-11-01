@@ -31,7 +31,7 @@ void main() {
     );
     expect(
       getRawMaterialButtonWidget(smallFabMaterialButton).shape,
-      RoundedRectangleBorder(borderRadius: .circular(12.0)),
+      RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12.0)),
     );
 
     final Finder regularFABMaterialButton = find
@@ -47,7 +47,7 @@ void main() {
     );
     expect(
       getRawMaterialButtonWidget(regularFABMaterialButton).shape,
-      RoundedRectangleBorder(borderRadius: .circular(16.0)),
+      RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(16.0)),
     );
 
     final Finder largeFABMaterialButton = find.byType(RawMaterialButton).at(2);
@@ -61,7 +61,7 @@ void main() {
     );
     expect(
       getRawMaterialButtonWidget(largeFABMaterialButton).shape,
-      RoundedRectangleBorder(borderRadius: .circular(28.0)),
+      RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(28.0)),
     );
 
     final Finder extendedFABMaterialButton = find
@@ -80,7 +80,7 @@ void main() {
     );
     expect(
       getRawMaterialButtonWidget(extendedFABMaterialButton).shape,
-      RoundedRectangleBorder(borderRadius: .circular(16.0)),
+      RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(16.0)),
     );
   });
 }

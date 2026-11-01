@@ -98,7 +98,7 @@ void main() {
         matchesGoldenFile('text_magnifier.0_test.png'),
       );
     },
-    variant: const TargetPlatformVariant(<TargetPlatform>{.iOS, .android}),
+    variant: const TargetPlatformVariant(<TargetPlatform>{TargetPlatform.iOS, TargetPlatform.android}),
     // This image is flaky. https://github.com/flutter/flutter/issues/144350
     skip: true,
   );

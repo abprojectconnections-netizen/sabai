@@ -44,7 +44,7 @@ class _ResizingHeaderExampleState extends State<ResizingHeaderExample> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const .all(4),
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .all(4),
           child: Scrollbar(
             controller: scrollController,
             child: CustomScrollView(
@@ -81,19 +81,19 @@ class ListHeader extends StatelessWidget {
 
     return Container(
       color: colorScheme.surface,
-      padding: const .symmetric(horizontal: 4),
+      padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(horizontal: 4),
       child: Material(
         color: colorScheme.primaryContainer,
         shape: RoundedRectangleBorder(
-          borderRadius: .circular(8),
+          borderRadius: BorderRadiusGeometry.circular(8),
           side: BorderSide(width: 7, color: colorScheme.outline),
         ),
         child: Container(
-          alignment: .center,
-          padding: const .symmetric(vertical: 16),
+          alignment: AlignmentGeometry.center,
+          padding: EdgeInsetsGeometryEdgeInsetsGeometryconst .symmetric(vertical: 16),
           child: Text(
             text,
-            textAlign: .center,
+            textAlign: TextAlign.center,
             style: theme.textTheme.headlineMedium!.copyWith(
               color: colorScheme.onPrimaryContainer,
             ),

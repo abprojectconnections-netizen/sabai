@@ -47,7 +47,7 @@ class InputDecoratorExample extends StatelessWidget {
         }
         return null;
       },
-      autovalidateMode: .always,
+      autovalidateMode: AutovalidateMode.always,
     );
   }
 }

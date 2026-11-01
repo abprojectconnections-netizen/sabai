@@ -23,7 +23,7 @@ class _MagnifierExampleAppState extends State<MagnifierExampleApp> {
       home: Scaffold(
         body: Center(
           child: Column(
-            mainAxisAlignment: .center,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               const Text('Drag on the logo!'),
               RepaintBoundary(

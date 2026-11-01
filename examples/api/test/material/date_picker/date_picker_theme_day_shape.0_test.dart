@@ -13,7 +13,7 @@ void main() {
     (WidgetTester tester) async {
       final ThemeData theme = ThemeData();
       final OutlinedBorder dayShape = RoundedRectangleBorder(
-        borderRadius: .circular(8.0),
+        borderRadius: BorderRadiusGeometry.circular(8.0),
       );
       const Color todayBackgroundColor = Colors.amber;
       const Color todayForegroundColor = Colors.black;
