@@ -11,5 +11,42 @@ jobs:
       - run: go mod download
       - run: go build ./...
       - run: go vet ./...
-      - run: go test ./...
+      - run: go test -race ./...
       - run: npx --yes @apidevtools/swagger-cli@4 validate docs/openapi.yaml docs/openapi-financial-draft.yaml
+
+  integration:
+    # Runs the SQL against a real MySQL 8.4 (the version docker-compose uses); sqlmock cannot prove the SQL is valid.
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: travel_ci
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -proot" --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: '3306'
+      MYSQL_DATABASE: travel_ci
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with: { go-version: '1.23.x' }
+      - name: Apply migrations
+        run: bash database/migrate.sh up
+      - name: Rollback and re-apply every migration (down scripts must work)
+        run: |
+          set -e
+          while bash database/migrate.sh status | grep -q applied; do
+            CONFIRM_DESTRUCTIVE=yes bash database/migrate.sh down || break
+          done
+          bash database/migrate.sh up
+      - name: Integration tests
+        working-directory: backend
+        env:
+          MYSQL_TEST_DSN: root:root@tcp(127.0.0.1:3306)/travel_ci?parseTime=true
+        run: go test -race -tags integration -count=1 ./internal/integration

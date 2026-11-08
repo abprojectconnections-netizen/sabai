@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/travel-super-app/backend/internal/platform/dberr"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -49,6 +50,9 @@ func (s *Service) Register(ctx context.Context, email, password, displayName str
 	}
 	defer tx.Rollback()
 	if _, err = tx.ExecContext(ctx, "INSERT INTO users (id, created_at, updated_at, email, password_hash, status) VALUES (?, ?, ?, ?, ?, 'ACTIVE')", account.ID, now, now, account.Email, string(hash)); err != nil {
+		if dberr.IsDuplicate(err) {
+			return Account{}, "", ErrEmailTaken
+		}
 		return Account{}, "", err
 	}
 	if _, err = tx.ExecContext(ctx, "INSERT INTO user_profiles (id, created_at, updated_at, user_id, first_name) VALUES (?, ?, ?, ?, ?)", uuid.NewString(), now, now, account.ID, account.DisplayName); err != nil {

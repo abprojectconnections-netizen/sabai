@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/travel-super-app/backend/internal/platform/dberr"
 	"math"
 	"strings"
 	"unicode/utf8"
@@ -81,6 +82,9 @@ func (s *Service) Create(ctx context.Context, userID string, in CreateInput) (Re
 	now := dbtime.Now()
 	r := Review{ID: uuid.NewString(), SubjectType: in.SubjectType, SubjectID: in.SubjectID, Rating: in.Rating, Body: in.Body, CreatedAt: now.Format("2006-01-02T15:04:05.000000Z"), Mine: true}
 	if _, err := s.db.ExecContext(ctx, "INSERT INTO reviews (id, created_at, updated_at, user_id, subject_type, subject_id, rating, body) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", r.ID, now, now, userID, r.SubjectType, r.SubjectID, r.Rating, r.Body); err != nil {
+		if dberr.IsDuplicate(err) {
+			return Review{}, ErrDuplicate
+		}
 		return Review{}, err
 	}
 	return r, nil

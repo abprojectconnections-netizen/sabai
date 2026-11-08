@@ -48,12 +48,12 @@ func Authenticate(db *sql.DB, secret string) gin.HandlerFunc {
 			return
 		}
 		var email string
-		if err := db.QueryRowContext(c, "SELECT email FROM users WHERE id = ? AND status = 'ACTIVE' AND deleted_at IS NULL", userID).Scan(&email); err != nil {
+		if err := db.QueryRowContext(c.Request.Context(), "SELECT email FROM users WHERE id = ? AND status = 'ACTIVE' AND deleted_at IS NULL", userID).Scan(&email); err != nil {
 			apiresponse.Unauthorized(c)
 			c.Abort()
 			return
 		}
-		rows, err := db.QueryContext(c, `SELECT r.code FROM roles r JOIN user_roles ur ON ur.role_id=r.id WHERE ur.user_id=? AND r.deleted_at IS NULL AND ur.deleted_at IS NULL`, userID)
+		rows, err := db.QueryContext(c.Request.Context(), `SELECT r.code FROM roles r JOIN user_roles ur ON ur.role_id=r.id WHERE ur.user_id=? AND r.deleted_at IS NULL AND ur.deleted_at IS NULL`, userID)
 		if err != nil {
 			apiresponse.Internal(c)
 			c.Abort()

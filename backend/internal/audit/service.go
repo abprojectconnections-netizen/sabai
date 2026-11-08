@@ -14,7 +14,12 @@ type Entry struct {
 	Before, After                                                     any
 }
 
-func Log(ctx context.Context, db *sql.DB, entry Entry) error {
+// Execer is satisfied by *sql.DB and *sql.Tx, so an audit row can be written in the same transaction as the change it records.
+type Execer interface {
+	ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+}
+
+func Log(ctx context.Context, db Execer, entry Entry) error {
 	before, err := json.Marshal(entry.Before)
 	if err != nil {
 		return err

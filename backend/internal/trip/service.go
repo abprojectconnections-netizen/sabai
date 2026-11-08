@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/travel-super-app/backend/internal/platform/dberr"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -160,6 +161,9 @@ func (s *Service) Create(ctx context.Context, userID string, in CreateInput) (Tr
 	}
 	_, err = s.db.ExecContext(ctx, "INSERT INTO trips (id, created_at, updated_at, user_id, destination_id, name, start_date, end_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'DRAFT')", t.ID, now, now, userID, destArg, name, nullable(start), nullable(end))
 	if err != nil {
+		if dberr.IsForeignKey(err) {
+			return Trip{}, validationf("destination_id does not exist")
+		}
 		return Trip{}, err
 	}
 	return t, nil
@@ -260,6 +264,9 @@ func (s *Service) Update(ctx context.Context, userID, tripID string, in UpdateIn
 	}
 	res, err := s.db.ExecContext(ctx, "UPDATE trips SET name = ?, destination_id = ?, start_date = ?, end_date = ?, status = ?, updated_at = ? WHERE id = ? AND user_id = ? AND deleted_at IS NULL", t.Name, destArg, nullable(start), nullable(end), t.Status, dbtime.Now(), tripID, userID)
 	if err != nil {
+		if dberr.IsForeignKey(err) {
+			return Trip{}, validationf("destination_id does not exist")
+		}
 		return Trip{}, err
 	}
 	if n, err := res.RowsAffected(); err == nil && n == 0 {
@@ -380,6 +387,9 @@ func (s *Service) AddActivity(ctx context.Context, userID, tripID string, in Act
 		destArg = dest
 	}
 	if _, err := tx.ExecContext(ctx, "INSERT INTO trip_activities (id, created_at, updated_at, trip_day_id, destination_id, title, starts_at, ends_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", a.ID, now, now, dayID, destArg, title, startsArg, endsArg); err != nil {
+		if dberr.IsForeignKey(err) {
+			return Activity{}, validationf("destination_id does not exist")
+		}
 		return Activity{}, err
 	}
 	if err := tx.Commit(); err != nil {

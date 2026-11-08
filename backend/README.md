@@ -14,6 +14,13 @@ go vet ./... && go test ./...
 ```
 Handler and service tests use `go-sqlmock`: they verify request/response behaviour, validation, ownership scoping and the SQL statements that are issued, but they do **not** execute SQL on MySQL. Before relying on a new query, run it against the Docker MySQL (`docker compose up mysql api`) and exercise it with the OpenAPI contract.
 
+## Tests
+
+- `go test -race ./...` runs unit tests (sqlmock; fast, no database).
+- Integration tests run the real HTTP API against a real MySQL and are the only proof that the SQL, constraints, transactions and concurrency work:
+  `database/migrate.sh up` then `MYSQL_TEST_DSN='user:pass@tcp(127.0.0.1:3306)/db?parseTime=true' go test -tags integration ./internal/integration`. CI does this on MySQL 8.4.
+- Handlers must pass `c.Request.Context()` (never the `*gin.Context`) to database calls: gin recycles contexts after a request returns.
+
 Not implemented yet: bookings, payments, wallet, coupons (the related tables are skeletons in migration 000001 and need a migration first).
 
 ## Authorization and portal operations
@@ -22,3 +29,7 @@ Every protected route validates the signed JWT, confirms that the account is act
 
 ## Financial design (Section 8) — design only
 `docs/design/0002-financial-baseline-section8.md` (rules, gap analysis, RBAC, state machines), `docs/design/0003-financial-erd.md` (data model) and `docs/openapi-financial-draft.yaml` (draft API, **not served**). Nothing financial is implemented or enabled; see 0002 section 2 for existing endpoints that must be fixed first.
+
+## Known integration gap (found by the real-MySQL tests)
+
+`trips.destination_id` is a foreign key to `destinations(id)` (UUID). The web prototype sends slugs such as `chiangmai`, and `destinations` has no slug column and no seed data. The API now answers 400 `destination_id does not exist` instead of a 500, but the web app cannot create trips with a destination against this backend until destinations are seeded and the web uses their ids (or a `slug` column is added).

@@ -32,6 +32,9 @@ func Unauthorized(c *gin.Context) {
 func Forbidden(c *gin.Context) {
 	c.JSON(http.StatusForbidden, envelope{Error: &errorBody{Code: "FORBIDDEN", Message: "insufficient permissions"}, RequestID: c.GetString("request_id")})
 }
+func ForbiddenWith(c *gin.Context, message string) {
+	c.JSON(http.StatusForbidden, envelope{Error: &errorBody{Code: "FORBIDDEN", Message: message}, RequestID: c.GetString("request_id")})
+}
 func NotFound(c *gin.Context, message string) {
 	c.JSON(http.StatusNotFound, envelope{Error: &errorBody{Code: "NOT_FOUND", Message: message}, RequestID: c.GetString("request_id")})
 }

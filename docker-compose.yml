@@ -9,12 +9,27 @@ services:
     ports: ["3308:3306"]
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database/migrations:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -proot"]
       interval: 5s
       timeout: 5s
       retries: 20
+  # Applies database/migrations (up files only, tracked in schema_migrations). Do NOT mount the folder into
+  # /docker-entrypoint-initdb.d: that would also execute the *.down.sql files.
+  migrate:
+    image: mysql:8.4
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: travel_super_app
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    volumes:
+      - ./database:/database:ro
+    entrypoint: ["bash", "/database/migrate.sh", "up"]
   redis:
     image: redis:7-alpine
     ports: ["6380:6379"]
@@ -34,8 +49,8 @@ services:
     ports: ["8082:8080"]
     restart: unless-stopped
     depends_on:
-      mysql:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_started
       minio:
