@@ -1,5 +1,7 @@
 # Design proposal 0001 — Bookings, Payments, Wallet, Coupons
 
+> **SUPERSEDED** by `0002-financial-baseline-section8.md`, `0003-financial-erd.md` and `../openapi-financial-draft.yaml` (owner Section 8 "Business Model & Financial Operations Specification V1.0" is the baseline). Kept for history; where it differs, Section 8 and the 0002/0003 documents win.
+
 Status: **REVISION 2 — owner policy received (spec section 7, "Payment, Pricing, Refund & Financial Policies"); still no code written.**
 Revision 1 asked seven questions; section 7 below records the answers and what remains open. Where this document and the owner's policy differ, the policy wins.
 

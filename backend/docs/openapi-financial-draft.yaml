@@ -1,0 +1,1060 @@
+openapi: 3.0.3
+info:
+  title: Sabai financial API — DRAFT (Section 8.14)
+  version: 0.1.0-draft
+  description: '**DRAFT. None of these endpoints is implemented or served.** This file is the Phase 1 API specification for Section 8 (Business
+    Model & Financial Operations) and is deliberately separate from `openapi.yaml`, which describes only what the running server exposes.
+
+    Rules that apply to every operation: authentication + RBAC (see `x-required-permissions`), ownership checks, server-side amounts and statuses
+    (no endpoint accepts a price, total or status from the client), `Idempotency-Key` on every operation that creates money-related state, standard
+    error envelope, pagination/filter/sort on lists. Money is a decimal string with an ISO currency code (THB at launch).
+
+    Financial features stay disabled (`503 FEATURE_DISABLED`) unless the environment''s safety switches allow them (design 0002 §7).'
+servers:
+- url: http://localhost:8082/api/v1
+  description: Development only
+tags:
+- name: Partner
+- name: Supplier
+- name: Inventory
+- name: Pricing
+- name: Booking
+- name: Payment
+- name: Refund
+- name: Wallet
+- name: Commission
+- name: Settlement
+- name: Tax Document
+- name: Reconciliation
+paths:
+  /partners:
+    get:
+      summary: List partners the caller may see (own partner for partner roles; all for staff/finance)
+      tags:
+      - Partner
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - partner.read
+      parameters:
+      - &id001
+        $ref: '#/components/parameters/Limit'
+      - &id002
+        $ref: '#/components/parameters/Offset'
+      - &id003
+        $ref: '#/components/parameters/Sort'
+      - name: status
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /partners/{id}/commissions:
+    parameters:
+    - &id004
+      $ref: '#/components/parameters/Id'
+    get:
+      summary: Commission calculations for a partner (snapshots)
+      tags:
+      - Commission
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - commission.read.own
+      - commission.read.any
+      parameters:
+      - *id001
+      - *id002
+      - *id003
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404': &id005
+          $ref: '#/components/responses/NotFound'
+  /partners/{id}/settlements:
+    parameters:
+    - *id004
+    get:
+      summary: Settlement batches for a partner
+      tags:
+      - Settlement
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - settlement.read.own
+      - settlement.read.any
+      parameters:
+      - *id001
+      - *id002
+      - *id003
+      - name: status
+        in: query
+        schema:
+          $ref: '#/components/schemas/SettlementStatus'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404': *id005
+  /suppliers:
+    get:
+      summary: List configured suppliers (no credentials are ever returned)
+      tags:
+      - Supplier
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - supplier.read
+      parameters:
+      - *id001
+      - *id002
+      - *id003
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /inventory:
+    get:
+      summary: Search internal inventory availability
+      tags:
+      - Inventory
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - inventory.read
+      parameters:
+      - *id001
+      - *id002
+      - *id003
+      - name: category
+        in: query
+        schema:
+          $ref: '#/components/schemas/Category'
+      - name: service_date
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: partner_id
+        in: query
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /pricing/quote:
+    post:
+      summary: Server-side price quote with snapshot and expiry; coupon preview. The client never sends prices.
+      tags:
+      - Pricing
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - pricing.quote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteRequest'
+      responses:
+        '201':
+          description: Created
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '400': &id006
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: Inventory unavailable
+  /bookings:
+    get:
+      summary: 'List own bookings (partners: bookings of their partner; officers: assigned)'
+      tags:
+      - Booking
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - booking.read.own
+      - booking.read.partner
+      - booking.read.assigned
+      parameters:
+      - *id001
+      - *id002
+      - *id003
+      - name: status
+        in: query
+        schema:
+          $ref: '#/components/schemas/BookingStatus'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      summary: Create a booking (status DRAFT→PENDING_PAYMENT) from an unexpired quote. Holds inventory. Revalidates price and availability.
+      tags:
+      - Booking
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - booking.create
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookingRequest'
+      responses:
+        '201':
+          description: Created
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '400': *id006
+        '409': &id007
+          $ref: '#/components/responses/Conflict'
+        '422':
+          description: Quote expired or price changed; customer must re-confirm
+  /bookings/{id}:
+    parameters:
+    - *id004
+    get:
+      summary: Get a booking with price snapshot, terms snapshot and documents
+      tags:
+      - Booking
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - booking.read.own
+      - booking.read.partner
+      - booking.read.assigned
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404': *id005
+  /bookings/{id}/confirm:
+    parameters:
+    - *id004
+    post:
+      summary: Supplier/partner confirmation or rejection of a PAID booking (PENDING_SUPPLIER_CONFIRMATION → CONFIRMED|REJECTED). Rejection or
+        timeout automatically creates a full refund request.
+      tags:
+      - Booking
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - booking.confirm.own
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfirmBookingRequest'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '400': *id006
+        '404': *id005
+        '409': *id007
+  /bookings/{id}/cancel:
+    parameters:
+    - *id004
+    post:
+      summary: Customer requests cancellation (→ CANCELLATION_REQUESTED); amounts follow the terms snapshot and supplier answer, never fixed percentages
+      tags:
+      - Booking
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - booking.cancel.own
+      - booking.cancel.assigned
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancelBookingRequest'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '400': *id006
+        '404': *id005
+        '409': *id007
+  /payments/intents:
+    post:
+      summary: Create a payment intent for a booking BEFORE redirecting to the payment UI. Amount comes from the booking snapshot, never from
+        the request.
+      tags:
+      - Payment
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - payment.create.own
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePaymentIntentRequest'
+      responses:
+        '201':
+          description: Created
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '400': *id006
+        '404': *id005
+        '409': *id007
+        '503':
+          $ref: '#/components/responses/FeatureDisabled'
+  /payments/{id}:
+    parameters:
+    - *id004
+    get:
+      summary: Payment status (read-only; status can only change via verified webhook or server-side PSP query)
+      tags:
+      - Payment
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - payment.read.own
+      - payment.read.finance
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404': *id005
+  /webhooks/payments/{provider}:
+    parameters:
+    - name: provider
+      in: path
+      required: true
+      schema:
+        type: string
+    post:
+      summary: PSP callback. Not user-authenticated; authenticity = signature + timestamp (replay window) + unique (provider,event_id).
+      tags:
+      - Payment
+      security: []
+      x-required-permissions: []
+      parameters:
+      - name: X-Signature
+        in: header
+        required: true
+        schema:
+          type: string
+        description: Provider-specific signature header name is configured per adapter
+      - name: X-Timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: Accepted (also returned for an already-processed duplicate event)
+        '400':
+          description: Malformed payload
+        '401':
+          description: Invalid signature or timestamp outside the replay window; nothing is stored as trusted
+  /refunds:
+    get:
+      summary: List refund requests (own; or by role)
+      tags:
+      - Refund
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - refund.read.own
+      - refund.read.review
+      parameters:
+      - *id001
+      - *id002
+      - *id003
+      - name: status
+        in: query
+        schema:
+          $ref: '#/components/schemas/RefundStatus'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      summary: Request a refund. method defaults to ORIGINAL_METHOD; SABAI_WALLET needs consent_id.
+      tags:
+      - Refund
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - refund.request.own
+      - refund.request.assisted
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRefundRequest'
+      responses:
+        '201':
+          description: Created
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '400': *id006
+        '404': *id005
+        '409': *id007
+  /refunds/{id}/approve:
+    parameters:
+    - *id004
+    post:
+      summary: Approve or reject a refund within the caller's approval limit. Requester cannot approve; high-risk needs two distinct approvers;
+        auto-refund is halted on chargeback/fraud alert.
+      tags:
+      - Refund
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - refund.approve
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundDecisionRequest'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '400': *id006
+        '404': *id005
+        '409': *id007
+  /refunds/{id}/consent:
+    parameters:
+    - *id004
+    post:
+      summary: Record explicit customer consent to receive this refund as Sabai Wallet credit. Wallet is never pre-selected.
+      tags:
+      - Refund
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - refund.consent.own
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WalletConsentRequest'
+      responses:
+        '201':
+          description: Created
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '400': *id006
+        '404': *id005
+        '409': *id007
+  /wallet:
+    get:
+      summary: Sabai Wallet balance (ledger-derived, read-only). No top-up, transfer or withdrawal endpoints exist.
+      tags:
+      - Wallet
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - wallet.read.own
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /wallet/transactions:
+    get:
+      summary: Sabai Wallet ledger entries
+      tags:
+      - Wallet
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - wallet.read.own
+      - wallet.read.audit
+      parameters:
+      - *id001
+      - *id002
+      - *id003
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+  /settlements/{id}:
+    parameters:
+    - *id004
+    get:
+      summary: Settlement batch with items and statement
+      tags:
+      - Settlement
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - settlement.read.own
+      - settlement.read.any
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404': *id005
+  /settlements/{id}/approve:
+    parameters:
+    - *id004
+    post:
+      summary: Finance review/approval of a settlement batch (creator ≠ approver)
+      tags:
+      - Settlement
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - settlement.approve
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettlementDecisionRequest'
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '400': *id006
+        '404': *id005
+        '409': *id007
+  /settlements/{id}/payout:
+    parameters:
+    - *id004
+    post:
+      summary: Initiate payout of an APPROVED batch (initiator ≠ approver; one non-failed payout per batch)
+      tags:
+      - Settlement
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - settlement.payout
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404': *id005
+        '409': *id007
+        '503':
+          $ref: '#/components/responses/FeatureDisabled'
+  /tax-documents/{id}:
+    parameters:
+    - *id004
+    get:
+      summary: Get a financial document (confirmation, receipt, tax invoice, commission invoice, credit note, refund confirmation, settlement
+        statement)
+      tags:
+      - Tax Document
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - document.read.own
+      - document.read.partner
+      - document.read.finance
+      responses:
+        '200':
+          description: OK
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404': *id005
+  /admin/reconciliation:
+    post:
+      summary: Run reconciliation against a PSP report
+      tags:
+      - Reconciliation
+      security:
+      - bearerAuth: []
+      x-required-permissions:
+      - reconciliation.run
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReconciliationRequest'
+      responses:
+        '202':
+          description: Accepted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '400': *id006
+        '409': *id007
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 50
+    Offset:
+      name: offset
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    Sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+        example: -created_at
+      description: Field name, prefix - for descending; only whitelisted fields are accepted
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 64
+      description: Replaying the same key with the same body returns the original result; with a different body returns 409
+  responses:
+    Unauthorized:
+      description: Missing, invalid or expired token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Forbidden:
+      description: Authenticated but not permitted (role, ownership, approval limit, separation of duties)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFound:
+      description: Not found, or belongs to someone else
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ValidationError:
+      description: VALIDATION_ERROR
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    Conflict:
+      description: Invalid state transition, idempotency conflict, or concurrent modification
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    FeatureDisabled:
+      description: 'FEATURE_DISABLED: live financial transactions are not enabled in this environment'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+  schemas:
+    Money:
+      type: object
+      required:
+      - amount
+      - currency
+      properties:
+        amount:
+          type: string
+          pattern: ^-?\d+\.\d{2}$
+          example: '5000.00'
+          description: Decimal string; never a float
+        currency:
+          type: string
+          pattern: ^[A-Z]{3}$
+          example: THB
+    Category:
+      type: string
+      enum:
+      - HOTEL
+      - TOUR
+      - FLIGHT
+      - TRANSPORT
+      - ATTRACTION
+    PaymentStatus:
+      type: string
+      enum:
+      - PENDING
+      - PROCESSING
+      - SUCCEEDED
+      - FAILED
+      - EXPIRED
+    BookingStatus:
+      type: string
+      enum:
+      - DRAFT
+      - PENDING_PAYMENT
+      - PAYMENT_FAILED
+      - PAID
+      - PENDING_SUPPLIER_CONFIRMATION
+      - CONFIRMED
+      - REJECTED
+      - IN_PROGRESS
+      - COMPLETED
+      - CANCELLATION_REQUESTED
+      - CANCELLED
+    RefundStatus:
+      type: string
+      enum:
+      - REQUESTED
+      - UNDER_REVIEW
+      - REJECTED
+      - APPROVED
+      - PROCESSING
+      - COMPLETED
+      - FAILED
+    SettlementStatus:
+      type: string
+      enum:
+      - PENDING
+      - CALCULATED
+      - UNDER_REVIEW
+      - ON_HOLD
+      - APPROVED
+      - PAYOUT_PROCESSING
+      - PAID
+      - FAILED
+    RefundMethod:
+      type: string
+      enum:
+      - ORIGINAL_METHOD
+      - SABAI_WALLET
+    PaymentMethodType:
+      type: string
+      enum:
+      - PROMPTPAY_QR
+      - CARD
+      - SABAI_WALLET
+    BasketItem:
+      type: object
+      required:
+      - inventory_item_id
+      - service_date
+      - quantity
+      properties:
+        inventory_item_id:
+          type: string
+        service_date:
+          type: string
+          format: date
+        quantity:
+          type: integer
+          minimum: 1
+    QuoteRequest:
+      type: object
+      required:
+      - items
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/BasketItem'
+        coupon_code:
+          type: string
+          description: At most one coupon per booking
+      description: No price or total fields are accepted.
+    PriceLine:
+      type: object
+      properties:
+        line_type:
+          type: string
+          enum:
+          - BASE
+          - DISCOUNT
+          - TAX
+          - MANDATORY_FEE
+          - OPTIONAL_FEE
+          - SERVICE_FEE
+        label:
+          type: string
+        amount:
+          $ref: '#/components/schemas/Money'
+        charged_by:
+          type: string
+          description: Entity charging the tax/fee
+        vat_included:
+          type: string
+          enum:
+          - 'YES'
+          - 'NO'
+          - UNVERIFIED
+    Quote:
+      type: object
+      properties:
+        id:
+          type: string
+        lines:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceLine'
+        payable:
+          $ref: '#/components/schemas/Money'
+        expires_at:
+          type: string
+          format: date-time
+        terms:
+          type: object
+          description: Cancellation/refund terms that will be snapshotted
+    CreateBookingRequest:
+      type: object
+      required:
+      - quote_id
+      properties:
+        quote_id:
+          type: string
+        customer_reconfirmed_price:
+          type: boolean
+          description: Required true when the supplier price changed since the quote (8.6.2)
+    ConfirmBookingRequest:
+      type: object
+      required:
+      - decision
+      properties:
+        decision:
+          type: string
+          enum:
+          - CONFIRM
+          - REJECT
+        external_booking_ref:
+          type: string
+        reason:
+          type: string
+    CancelBookingRequest:
+      type: object
+      required:
+      - reason_code
+      properties:
+        reason_code:
+          type: string
+        reason_text:
+          type: string
+          maxLength: 500
+    CreatePaymentIntentRequest:
+      type: object
+      required:
+      - booking_id
+      - method
+      properties:
+        booking_id:
+          type: string
+        method:
+          $ref: '#/components/schemas/PaymentMethodType'
+        use_wallet_credit:
+          type: boolean
+          default: false
+      description: No amount field is accepted.
+    CreateRefundRequest:
+      type: object
+      required:
+      - booking_id
+      - reason_code
+      properties:
+        booking_id:
+          type: string
+        reason_code:
+          type: string
+        reason_text:
+          type: string
+          maxLength: 500
+        method:
+          $ref: '#/components/schemas/RefundMethod'
+        consent_id:
+          type: string
+          description: Required when method = SABAI_WALLET
+        requested_amount:
+          $ref: '#/components/schemas/Money'
+      description: requested_amount is advisory (partial refunds); the approved amount is computed server-side from the terms snapshot and may
+        never exceed captured minus prior refunds.
+    RefundDecisionRequest:
+      type: object
+      required:
+      - decision
+      - reason
+      properties:
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - REJECT
+        approved_amount:
+          $ref: '#/components/schemas/Money'
+        reason:
+          type: string
+    WalletConsentRequest:
+      type: object
+      required:
+      - consent_version
+      - accepted
+      properties:
+        consent_version:
+          type: string
+        accepted:
+          type: boolean
+      description: Server stores the text hash that was shown, timestamp, IP and device.
+    SettlementDecisionRequest:
+      type: object
+      required:
+      - decision
+      properties:
+        decision:
+          type: string
+          enum:
+          - APPROVE
+          - HOLD
+          - RETURN_FOR_REVIEW
+        reason:
+          type: string
+    ReconciliationRequest:
+      type: object
+      required:
+      - provider
+      - period_from
+      - period_to
+      properties:
+        provider:
+          type: string
+        period_from:
+          type: string
+          format: date
+        period_to:
+          type: string
+          format: date
+        report_file_ref:
+          type: string
+    ErrorEnvelope:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+        request_id:
+          type: string

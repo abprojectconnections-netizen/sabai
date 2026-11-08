@@ -89,7 +89,7 @@ paths:
               $ref: '#/components/schemas/CreateActivityRequest'
       responses:
         '201': { description: Activity created }
-        '400': { description: Invalid input, or date outside the trip's dates }
+        '400': { description: "Invalid input, or date outside the trip's dates" }
         '404': { $ref: '#/components/responses/NotFound' }
   /trips/{id}/activities/{activityId}:
     parameters: [{ $ref: '#/components/parameters/Id' }, { name: activityId, in: path, required: true, schema: { type: string } }]
@@ -168,7 +168,7 @@ paths:
       summary: Get operational queue counts for Staff or Admin
       security: [{ bearerAuth: [] }]
       responses:
-        '200': { description: Booking, payment, partner, ticket and dispute queue counts }
+        '200': { description: "Booking, payment, partner, ticket and dispute queue counts" }
         '403': { description: Staff or Admin role required }
   /portal/bookings/{id}/status:
     patch:

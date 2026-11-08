@@ -19,3 +19,6 @@ Not implemented yet: bookings, payments, wallet, coupons (the related tables are
 ## Authorization and portal operations
 
 Every protected route validates the signed JWT, confirms that the account is active, and reads current roles from MySQL on every request. The fixed role set is `CUSTOMER`, `PARTNER`, `STAFF`, and `ADMIN`; registering an account assigns `CUSTOMER`. Staff/Admin portal routes operate booking status, payment verification, partner approval, ticket assignment/status, and disputes. Every operational status change is recorded in `audit_logs` with actor, before/after state, IP address, request ID, and timestamp.
+
+## Financial design (Section 8) — design only
+`docs/design/0002-financial-baseline-section8.md` (rules, gap analysis, RBAC, state machines), `docs/design/0003-financial-erd.md` (data model) and `docs/openapi-financial-draft.yaml` (draft API, **not served**). Nothing financial is implemented or enabled; see 0002 section 2 for existing endpoints that must be fixed first.
