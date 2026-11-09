@@ -1,0 +1,10 @@
+DROP TABLE document_sequences;
+DROP TABLE go_live_approvals;
+DROP TABLE retention_policies;
+DROP TABLE consent_versions;
+DROP TABLE tax_rates;
+DROP TABLE approval_limits;
+DROP TABLE commission_policies;
+DROP TABLE legal_entities;
+ALTER TABLE currencies DROP CHECK ck_currencies_code, DROP COLUMN enabled, DROP COLUMN minor_unit;
+DELETE FROM currencies WHERE code = 'THB' AND name = 'Thai Baht';
