@@ -1,0 +1,18 @@
+DROP TRIGGER trg_document_sequences_forward;
+DROP TRIGGER trg_document_sequences_nod;
+ALTER TABLE disputes DROP FOREIGN KEY fk_disputes_payment, DROP CHECK ck_disputes_type, DROP COLUMN payment_id, DROP COLUMN dispute_type;
+DROP TABLE financial_reconciliation_records;
+DROP TABLE payment_reconciliations;
+DROP TABLE tax_document_items;
+ALTER TABLE partner_settlement_batches DROP FOREIGN KEY fk_settlement_batches_statement;
+DROP TABLE tax_documents;
+DROP TABLE inventory_holds;
+DROP TABLE inventory_availability;
+DROP TABLE inventory_items;
+ALTER TABLE booking_items DROP FOREIGN KEY fk_booking_items_supplier_product, DROP COLUMN supplier_product_id;
+DROP TABLE supplier_products;
+DROP TABLE supplier_credentials;
+DROP TABLE suppliers;
+ALTER TABLE partner_payouts DROP FOREIGN KEY fk_payouts_bank_account;
+DROP TABLE partner_bank_accounts;
+DROP TABLE partner_contracts;

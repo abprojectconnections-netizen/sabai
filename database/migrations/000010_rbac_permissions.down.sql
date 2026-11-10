@@ -1,0 +1,7 @@
+DROP TABLE role_change_requests;
+DELETE rp FROM role_permissions rp;
+DELETE FROM permissions;
+DELETE FROM user_roles WHERE role_id IN (SELECT id FROM roles WHERE code IN ('PARTNER_ADMIN','PARTNER_FINANCE','BOOKING_OFFICER','REFUND_OFFICER','FINANCE_MANAGER','CFO_CEO','SYSTEM_ADMIN','AUDITOR'));
+DELETE FROM roles WHERE code IN ('PARTNER_ADMIN','PARTNER_FINANCE','BOOKING_OFFICER','REFUND_OFFICER','FINANCE_MANAGER','CFO_CEO','SYSTEM_ADMIN','AUDITOR');
+ALTER TABLE role_permissions DROP INDEX uq_role_permissions_active, DROP COLUMN active_key;
+ALTER TABLE permissions DROP INDEX uq_permissions_code, DROP COLUMN description;
