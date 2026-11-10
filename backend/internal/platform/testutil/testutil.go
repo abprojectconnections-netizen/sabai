@@ -43,11 +43,20 @@ func NewDB(t *testing.T) (*sql.DB, sqlmock.Sqlmock) {
 // Router returns an engine whose requests are authenticated as the user in the X-Test-User header
 // (no header = unauthenticated), so handlers can be tested without the JWT/role middleware.
 func Router(register func(rg *gin.RouterGroup)) *gin.Engine {
+	return RouterWithPermissions(nil, register)
+}
+
+// RouterWithPermissions is Router, but the authenticated test user also holds the given permission codes.
+func RouterWithPermissions(perms []string, register func(rg *gin.RouterGroup)) *gin.Engine {
+	granted := map[string]bool{}
+	for _, p := range perms {
+		granted[p] = true
+	}
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
 	r.Use(func(c *gin.Context) {
 		if u := c.GetHeader("X-Test-User"); u != "" {
-			auth.SetPrincipal(c, auth.Principal{UserID: u, Roles: map[string]bool{"CUSTOMER": true}})
+			auth.SetPrincipal(c, auth.Principal{UserID: u, Roles: map[string]bool{"CUSTOMER": true}, Permissions: granted})
 		}
 		c.Next()
 	})

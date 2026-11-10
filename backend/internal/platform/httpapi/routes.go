@@ -32,9 +32,9 @@ func RegisterRoutes(router *gin.Engine, db *sql.DB, jwtSecret string) {
 	reviews.Use(userRoles)
 	review.RegisterRoutes(reviews, review.NewService(db))
 	portalRoutes := secured.Group("/portal")
-	portalRoutes.Use(auth.RequireRoles("STAFF", "ADMIN"))
+	portalRoutes.Use(auth.RequirePermission("portal.read"))
 	portal.RegisterRoutes(portalRoutes, db)
 	adminRoutes := secured.Group("/admin")
-	adminRoutes.Use(auth.RequireRoles("ADMIN"))
+	adminRoutes.Use(auth.RequirePermission("role.request", "role.approve", "role.approve.financial"))
 	admin.RegisterRoutes(adminRoutes, db)
 }

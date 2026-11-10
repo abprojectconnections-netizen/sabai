@@ -11,7 +11,7 @@ import (
 
 func router(t *testing.T) (*gin.Engine, sqlmock.Sqlmock) {
 	db, mock := testutil.NewDB(t)
-	return testutil.Router(func(rg *gin.RouterGroup) { RegisterRoutes(rg, db) }), mock
+	return testutil.RouterWithPermissions([]string{"booking.manage"}, func(rg *gin.RouterGroup) { RegisterRoutes(rg, db) }), mock
 }
 
 func TestTransitionTable(t *testing.T) {
@@ -60,5 +60,15 @@ func TestDisallowedTransitionTouchesNothing(t *testing.T) {
 	}
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestPermissionIsRequiredPerRoute(t *testing.T) {
+	db, _ := testutil.NewDB(t)
+	r := testutil.RouterWithPermissions([]string{"portal.read"}, func(rg *gin.RouterGroup) { RegisterRoutes(rg, db) })
+	for _, path := range []string{"/t/bookings/b1/status", "/t/partners/p1/approval", "/t/tickets/t1/status", "/t/disputes/d1/status"} {
+		if res := testutil.Do(t, r, "u1", "PATCH", path, map[string]string{"status": "CONFIRMED"}); res.Status != 403 {
+			t.Errorf("%s without its permission = %d, want 403", path, res.Status)
+		}
 	}
 }

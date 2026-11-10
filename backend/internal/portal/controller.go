@@ -40,12 +40,12 @@ var (
 
 func RegisterRoutes(group *gin.RouterGroup, db *sql.DB) {
 	group.GET("/queue", queue(db))
-	group.PATCH("/bookings/:id/status", statusChange(db, "bookings", "booking", "booking.status.changed", bookingTransitions))
-	group.PATCH("/partners/:id/approval", statusChange(db, "partners", "partner", "partner.approval.changed", partnerTransitions))
-	group.PATCH("/tickets/:id/assign", ticketAssign(db))
-	group.PATCH("/tickets/:id/status", statusChange(db, "support_tickets", "support_ticket", "support.ticket.status.changed", ticketTransitions))
-	group.POST("/disputes", createDispute(db))
-	group.PATCH("/disputes/:id/status", statusChange(db, "disputes", "dispute", "dispute.status.changed", disputeTransitions))
+	group.PATCH("/bookings/:id/status", auth.RequirePermission("booking.manage"), statusChange(db, "bookings", "booking", "booking.status.changed", bookingTransitions))
+	group.PATCH("/partners/:id/approval", auth.RequirePermission("partner.review"), statusChange(db, "partners", "partner", "partner.approval.changed", partnerTransitions))
+	group.PATCH("/tickets/:id/assign", auth.RequirePermission("support.manage"), ticketAssign(db))
+	group.PATCH("/tickets/:id/status", auth.RequirePermission("support.manage"), statusChange(db, "support_tickets", "support_ticket", "support.ticket.status.changed", ticketTransitions))
+	group.POST("/disputes", auth.RequirePermission("support.manage"), createDispute(db))
+	group.PATCH("/disputes/:id/status", auth.RequirePermission("support.manage"), statusChange(db, "disputes", "dispute", "dispute.status.changed", disputeTransitions))
 }
 
 func queue(db *sql.DB) gin.HandlerFunc {

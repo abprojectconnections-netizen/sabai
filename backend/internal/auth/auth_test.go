@@ -74,7 +74,14 @@ func expectUser(mock sqlmock.Sqlmock, roles ...string) {
 		rows.AddRow(r)
 	}
 	mock.ExpectQuery("FROM roles r JOIN user_roles ur").WithArgs(uid).WillReturnRows(rows)
+	prows := sqlmock.NewRows([]string{"code"})
+	for _, p := range perms {
+		prows.AddRow(p)
+	}
+	mock.ExpectQuery("FROM permissions p").WithArgs(uid).WillReturnRows(prows)
 }
+
+var perms []string
 
 func TestAuthenticateRejectsBadCredentialsWithoutQueries(t *testing.T) {
 	db, mock := newMock(t)
@@ -201,6 +208,31 @@ func TestRegisterCreatesUserProfileAndCustomerRole(t *testing.T) {
 	if w := post(`{"email":"a@b.co","password":"password1"}`); w.Code != 400 {
 		t.Fatalf("duplicate email = %d", w.Code)
 	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestRequirePermissionUsesPermissionsLoadedFromTheDatabase(t *testing.T) {
+	db, mock := newMock(t)
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	g := r.Group("/p")
+	g.Use(Authenticate(db, secret), RequirePermission("refund.approve"))
+	g.GET("", func(c *gin.Context) { c.String(200, "ok") })
+	h := "Bearer " + token(t, jwt.SigningMethodHS256, []byte(secret), okClaims())
+
+	perms = nil
+	expectUser(mock, "ADMIN") // a legacy administrator has no financial permission
+	if w := get(r, h); w.Code != 403 {
+		t.Fatalf("admin without refund.approve = %d", w.Code)
+	}
+	perms = []string{"refund.approve"}
+	expectUser(mock, "REFUND_OFFICER")
+	if w := get(r, h); w.Code != 200 {
+		t.Fatalf("refund officer = %d", w.Code)
+	}
+	perms = nil
 	if err := mock.ExpectationsWereMet(); err != nil {
 		t.Fatal(err)
 	}

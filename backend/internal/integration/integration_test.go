@@ -463,28 +463,99 @@ func TestConcurrentStatusChangesApplyExactlyOnce(t *testing.T) {
 	}
 }
 
-func TestAdminRoleAssignment(t *testing.T) {
+func roleRequest(t *testing.T, by user, target, role string) resp {
+	return call(t, "POST", "/api/v1/admin/role-requests", by.Token, map[string]string{"user_id": target, "role": role, "reason": "ทดสอบ"})
+}
+
+func TestRoleAssignmentNeedsTwoPeople(t *testing.T) {
 	admin1, admin2, target := newUser(t, "ADMIN"), newUser(t, "ADMIN"), newUser(t)
-	if r := call(t, "PUT", "/api/v1/admin/users/"+admin1.ID+"/roles", admin1.Token, map[string]string{"role": "STAFF"}); r.Status != 403 {
-		t.Errorf("changing your own roles = %d", r.Status)
+	if r := call(t, "PUT", "/api/v1/admin/users/"+target.ID+"/roles", admin1.Token, map[string]string{"role": "STAFF"}); r.Status != 404 {
+		t.Errorf("direct role assignment must not exist, got %d", r.Status)
 	}
-	if r := call(t, "PUT", "/api/v1/admin/users/"+target.ID+"/roles", target.Token, map[string]string{"role": "ADMIN"}); r.Status != 403 {
-		t.Errorf("a customer must not assign roles = %d", r.Status)
+	if r := roleRequest(t, admin1, admin1.ID, "STAFF"); r.Status != 403 {
+		t.Errorf("requesting a role for yourself = %d", r.Status)
 	}
-	for i, want := range []bool{true, false} {
-		r := call(t, "PUT", "/api/v1/admin/users/"+target.ID+"/roles", admin2.Token, map[string]string{"role": "STAFF"})
-		if r.Status != 200 || r.data()["new_assignment"] != want {
-			t.Errorf("grant #%d: %d %v", i+1, r.Status, r.Body)
+	if r := roleRequest(t, target, target.ID, "ADMIN"); r.Status != 403 {
+		t.Errorf("a customer must not request roles = %d", r.Status)
+	}
+	if r := roleRequest(t, admin1, target.ID, "NOPE"); r.Status != 400 {
+		t.Errorf("unknown role = %d", r.Status)
+	}
+	if r := roleRequest(t, admin1, uuid.NewString(), "STAFF"); r.Status != 404 {
+		t.Errorf("unknown user = %d", r.Status)
+	}
+	req := roleRequest(t, admin1, target.ID, "STAFF")
+	if req.Status != 201 {
+		t.Fatalf("request: %d %v", req.Status, req.Body)
+	}
+	id := req.data()["id"].(string)
+	if r := roleRequest(t, admin1, target.ID, "STAFF"); r.Status != 409 {
+		t.Errorf("a duplicate pending request = %d", r.Status)
+	}
+	if r := call(t, "POST", "/api/v1/admin/role-requests/"+id+"/approve", admin1.Token, nil); r.Status != 403 {
+		t.Errorf("the requester approving their own request = %d", r.Status)
+	}
+	if r := call(t, "POST", "/api/v1/admin/role-requests/"+id+"/approve", target.Token, nil); r.Status != 403 {
+		t.Errorf("the target approving = %d", r.Status)
+	}
+	var n int
+	db.QueryRow("SELECT COUNT(*) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = ? AND r.code = 'STAFF'", target.ID).Scan(&n)
+	if n != 0 {
+		t.Fatal("no role may be granted before an independent approval")
+	}
+	if r := call(t, "POST", "/api/v1/admin/role-requests/"+id+"/approve", admin2.Token, nil); r.Status != 200 || r.data()["new_assignment"] != true {
+		t.Fatalf("approval by a second admin: %d %v", r.Status, r.Body)
+	}
+	if r := call(t, "POST", "/api/v1/admin/role-requests/"+id+"/approve", admin2.Token, nil); r.Status != 409 {
+		t.Errorf("approving twice = %d", r.Status)
+	}
+	db.QueryRow("SELECT COUNT(*) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = ? AND r.code = 'STAFF' AND ur.deleted_at IS NULL", target.ID).Scan(&n)
+	var audits int
+	db.QueryRow("SELECT COUNT(*) FROM audit_logs WHERE subject_id = ? AND action IN ('user.role.requested','user.role.assigned')", target.ID).Scan(&audits)
+	if n != 1 || audits != 2 {
+		t.Fatalf("active STAFF grants=%d (want 1), audit rows=%d (want 2: request + approval)", n, audits)
+	}
+	// the newly staffed user now reaches the portal through permissions
+	staff := loginAs(t, target)
+	if r := call(t, "GET", "/api/v1/portal/queue", staff.Token, nil); r.Status != 200 {
+		t.Errorf("new STAFF on the portal = %d", r.Status)
+	}
+	rej := roleRequest(t, admin1, target.ID, "AUDITOR")
+	if r := call(t, "POST", "/api/v1/admin/role-requests/"+rej.data()["id"].(string)+"/reject", admin2.Token, nil); r.Status != 200 || r.data()["status"] != "REJECTED" {
+		t.Errorf("reject: %v", r.Body)
+	}
+}
+
+func loginAs(t *testing.T, u user) user {
+	l := call(t, "POST", "/api/v1/auth/login", "", map[string]string{"email": u.Email, "password": "password-123"})
+	u.Token = l.data()["access_token"].(string)
+	return u
+}
+
+func TestFinancialRolesNeedAFinancialApprover(t *testing.T) {
+	admin1, admin2, cfo, target := newUser(t, "ADMIN"), newUser(t, "ADMIN"), newUser(t, "CFO_CEO"), newUser(t)
+	req := roleRequest(t, admin1, target.ID, "REFUND_OFFICER")
+	id := req.data()["id"].(string)
+	if r := call(t, "POST", "/api/v1/admin/role-requests/"+id+"/approve", admin2.Token, nil); r.Status != 403 {
+		t.Fatalf("a system admin must not be able to grant a financial role, got %d", r.Status)
+	}
+	if r := call(t, "POST", "/api/v1/admin/role-requests/"+id+"/approve", cfo.Token, nil); r.Status != 200 {
+		t.Fatalf("the CFO approving: %d %v", r.Status, r.Body)
+	}
+}
+
+func TestSystemAdminHasNoFinancialAuthority(t *testing.T) {
+	admin := newUser(t, "ADMIN")
+	for _, p := range []string{"/api/v1/portal/queue"} {
+		if r := call(t, "GET", p, admin.Token, nil); r.Status != 403 {
+			t.Errorf("ADMIN on %s = %d, want 403 (no portal.read permission)", p, r.Status)
 		}
 	}
-	var n, audits int
-	db.QueryRow("SELECT COUNT(*) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = ? AND r.code = 'STAFF' AND ur.deleted_at IS NULL", target.ID).Scan(&n)
-	db.QueryRow("SELECT COUNT(*) FROM audit_logs WHERE subject_type = 'user' AND subject_id = ? AND action = 'user.role.assigned'", target.ID).Scan(&audits)
-	if n != 1 || audits != 2 {
-		t.Fatalf("active STAFF grants=%d (want 1), audit rows=%d (want 2)", n, audits)
-	}
-	if r := call(t, "PUT", "/api/v1/admin/users/"+uuid.NewString()+"/roles", admin2.Token, map[string]string{"role": "STAFF"}); r.Status != 404 {
-		t.Errorf("unknown user = %d", r.Status)
+	var n int
+	db.QueryRow(`SELECT COUNT(*) FROM role_permissions rp JOIN roles r ON r.id = rp.role_id JOIN permissions p ON p.id = rp.permission_id
+		WHERE r.code IN ('ADMIN','SYSTEM_ADMIN') AND (p.code LIKE 'refund.%' OR p.code LIKE 'settlement.%' OR p.code LIKE 'reconciliation.%' OR p.code LIKE 'commission.%')`).Scan(&n)
+	if n != 0 {
+		t.Fatalf("system admin roles hold %d financial permissions", n)
 	}
 }
 

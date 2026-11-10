@@ -14,6 +14,7 @@ const principalKey = "principal"
 type Principal struct {
 	UserID, Email string
 	Roles         map[string]bool
+	Permissions   map[string]bool
 }
 
 func Authenticate(db *sql.DB, secret string) gin.HandlerFunc {
@@ -75,7 +76,32 @@ func Authenticate(db *sql.DB, secret string) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		c.Set(principalKey, Principal{UserID: userID, Email: email, Roles: roles})
+		prows, err := db.QueryContext(c.Request.Context(), `SELECT DISTINCT p.code FROM permissions p
+			JOIN role_permissions rp ON rp.permission_id = p.id AND rp.deleted_at IS NULL
+			JOIN user_roles ur ON ur.role_id = rp.role_id AND ur.deleted_at IS NULL
+			WHERE ur.user_id = ? AND p.deleted_at IS NULL`, userID)
+		if err != nil {
+			apiresponse.Internal(c)
+			c.Abort()
+			return
+		}
+		defer prows.Close()
+		perms := map[string]bool{}
+		for prows.Next() {
+			var code string
+			if err := prows.Scan(&code); err != nil {
+				apiresponse.Internal(c)
+				c.Abort()
+				return
+			}
+			perms[code] = true
+		}
+		if err := prows.Err(); err != nil {
+			apiresponse.Internal(c)
+			c.Abort()
+			return
+		}
+		c.Set(principalKey, Principal{UserID: userID, Email: email, Roles: roles, Permissions: perms})
 		c.Next()
 	}
 }
@@ -98,6 +124,28 @@ func RequireRoles(allowed ...string) gin.HandlerFunc {
 		c.Abort()
 	}
 }
+
+// RequirePermission allows the request when the caller holds at least one of the permissions (granted through roles).
+// Prefer it to RequireRoles for anything that touches money, so authority follows the role-permission data, not code.
+func RequirePermission(allowed ...string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		principal, ok := CurrentPrincipal(c)
+		if !ok {
+			apiresponse.Unauthorized(c)
+			c.Abort()
+			return
+		}
+		for _, code := range allowed {
+			if principal.Permissions[code] {
+				c.Next()
+				return
+			}
+		}
+		apiresponse.Forbidden(c)
+		c.Abort()
+	}
+}
+
 func CurrentPrincipal(c *gin.Context) (Principal, bool) {
 	raw, ok := c.Get(principalKey)
 	principal, valid := raw.(Principal)
