@@ -188,20 +188,207 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
       responses: { '200': { description: Partner status changed } }
-  /admin/users/{id}/roles:
-    put:
-      summary: Assign a platform role; Admin only and audited
+  /bookings:
+    post:
+      summary: Create a booking (server prices it; holds inventory for the payment window)
+      description: Requires `booking.create`. Returns 503 FINANCIAL_TRANSACTIONS_DISABLED unless the environment safety switches allow it. No price, total or status is accepted from the client.
       security: [{ bearerAuth: [] }]
-      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
-      responses: { '200': { description: Role assigned }, '403': { description: Admin role required } }
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateBookingRequest' }
+      responses:
+        '201': { description: "Booking created (data: BookingResult)" }
+        '200': { description: "Idempotent replay of an earlier request (replayed=true)" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { description: "Not enough availability" }
+        '503': { $ref: '#/components/responses/FinancialDisabled' }
+  /payments/intents:
+    post:
+      summary: Create a payment intent for the caller's own unpaid booking
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatePaymentIntentRequest' }
+      responses:
+        '201': { description: "Intent created (amount comes from the booking price snapshot)" }
+        '200': { description: "Idempotent replay" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: "Booking is not payable or its hold expired" }
+        '503': { $ref: '#/components/responses/FinancialDisabled' }
+  /webhooks/payments:
+    post:
+      summary: Payment provider webhook (public; authenticated by signature)
+      description: Verified with `X-Signature` (HMAC-SHA256), a 5-minute replay window and a unique provider event id. A 5xx response makes the provider retry.
+      security: []
+      parameters: [{ name: X-Signature, in: header, required: true, schema: { type: string } }]
+      requestBody:
+        required: true
+        content:
+          application/json: { schema: { type: object } }
+      responses:
+        '200': { description: "Event processed or recognised as a duplicate (data.result)" }
+        '400': { description: "Event timestamp outside the accepted window" }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /refunds:
+    post:
+      summary: Request a refund for the caller's booking
+      description: The amount is calculated by the server from the booking snapshot terms. Auto-approved only inside the free-cancellation window, up to the AUTO limit, for reason CUSTOMER_CANCELLATION and a partner that is not high risk.
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateRefundRequest' }
+      responses:
+        '201': { description: "Refund request created (status, calculated_amount, auto_approved)" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: "Booking is not refundable or a refund is already open" }
+        '503': { $ref: '#/components/responses/FinancialDisabled' }
+  /refunds/{id}/consent:
+    post:
+      summary: Record the customer's consent to a wallet refund
+      description: Only legally approved, currently effective consent wording is accepted; the text hash must match.
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefundConsentRequest' }
+      responses:
+        '200': { description: "Consent recorded; an approved refund is then paid out" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: "Refund is in the wrong state" }
+        '503': { $ref: '#/components/responses/FinancialDisabled' }
+  /portal/refunds/{id}/approve:
+    post:
+      summary: Approve a refund (requires `refund.approve`)
+      description: Limits follow the approval matrix (a PROPOSAL pending finance sign-off). No self-approval; above the top limit two distinct approvers including CFO_CEO are required.
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DecisionRequest' }
+      responses:
+        '200': { description: "data.status is APPROVED, COMPLETED or still PENDING when another approver is required" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: "Already decided or wrong state" }
+  /portal/refunds/{id}/reject:
+    post:
+      summary: Reject a refund (requires `refund.approve`)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DecisionRequest' }
+      responses:
+        '200': { description: "Rejected" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: "Already decided or wrong state" }
+  /portal/settlements/build:
+    post:
+      summary: Build a settlement batch for a partner and period (requires `settlement.review`)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BuildSettlementRequest' }
+      responses:
+        '201': { description: "Batch in DRAFT (id, items, gross, commission, net)" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { description: "Batch already exists, nothing to settle, no bank account or no commission policy" }
+        '503': { $ref: '#/components/responses/FinancialDisabled' }
+  /portal/settlements/{id}/review:
+    post:
+      summary: Mark a batch as under review (requires `settlement.review`)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: "UNDER_REVIEW" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: "Wrong state" }
+  /portal/settlements/{id}/approve:
+    post:
+      summary: Approve a batch (requires `settlement.approve`; approver must differ from preparer and reviewer)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: "APPROVED" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: "Wrong state" }
+  /portal/settlements/{id}/payout:
+    post:
+      summary: Pay out an approved batch (requires `settlement.approve`)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: "PAID" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: "Wrong state" }
+        '503': { $ref: '#/components/responses/FinancialDisabled' }
+  /admin/role-requests:
+    post:
+      summary: Request a role change (requires `role.request`); roles are never assigned directly
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleRequest' }
+      responses:
+        '201': { description: "Request created, awaiting a different approver" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/role-requests/{id}/approve:
+    post:
+      summary: Approve a role request (requester, approver and target must be three different users; financial roles need `role.approve.financial`)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: "Role granted and audited in the same transaction" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: "Already decided" }
+  /admin/role-requests/{id}/reject:
+    post:
+      summary: Reject a role request
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: "Rejected" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
 components:
   securitySchemes:
     bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
   parameters:
+    IdempotencyKey: { name: Idempotency-Key, in: header, required: true, schema: { type: string } }
     Id: { name: id, in: path, required: true, schema: { type: string } }
     Limit: { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 100, default: 50 } }
     Offset: { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
   responses:
+    Forbidden: { description: "Missing permission or a separation-of-duties rule (error.code FORBIDDEN)" }
+    FinancialDisabled: { description: "Financial transactions are not enabled in this environment (error.code FINANCIAL_TRANSACTIONS_DISABLED)" }
     ValidationError: { description: "Invalid request (error.code VALIDATION_ERROR)" }
     Unauthorized: { description: "Missing, invalid or expired token (error.code UNAUTHORIZED)" }
     NotFound: { description: "Not found, or owned by another user (error.code NOT_FOUND)" }
@@ -253,3 +440,56 @@ components:
         subject_id: { type: string, maxLength: 36 }
         rating: { type: number, minimum: 1, maximum: 5, multipleOf: 0.5 }
         body: { type: string, maxLength: 2000 }
+    CreateBookingRequest:
+      type: object
+      required: [items]
+      properties:
+        items:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [inventory_item_id, service_date, quantity]
+            properties:
+              inventory_item_id: { type: string, format: uuid }
+              service_date: { type: string, format: date }
+              quantity: { type: integer, minimum: 1 }
+        coupon_code: { type: string }
+    CreatePaymentIntentRequest:
+      type: object
+      required: [booking_id, method]
+      properties:
+        booking_id: { type: string, format: uuid }
+        method: { type: string, description: "payment method code, e.g. PROMPTPAY_QR" }
+    CreateRefundRequest:
+      type: object
+      required: [booking_id, method]
+      properties:
+        booking_id: { type: string, format: uuid }
+        reason_code: { type: string, default: CUSTOMER_CANCELLATION }
+        method: { type: string, enum: [ORIGINAL_METHOD, WALLET] }
+    RefundConsentRequest:
+      type: object
+      required: [consent_version_id, text_sha256]
+      properties:
+        consent_version_id: { type: string }
+        text_sha256: { type: string }
+    DecisionRequest:
+      type: object
+      properties:
+        reason: { type: string }
+    BuildSettlementRequest:
+      type: object
+      required: [partner_id, period_from, period_to]
+      properties:
+        partner_id: { type: string, format: uuid }
+        period_from: { type: string, format: date }
+        period_to: { type: string, format: date }
+        as_of: { type: string, format: date, description: "defaults to now; items inside the reconciliation window are excluded" }
+    RoleRequest:
+      type: object
+      required: [user_id, role, reason]
+      properties:
+        user_id: { type: string, format: uuid }
+        role: { type: string }
+        reason: { type: string }

@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Sabai financial API — DRAFT (Section 8.14)
   version: 0.1.0-draft
-  description: '**DRAFT. None of these endpoints is implemented or served.** This file is the Phase 1 API specification for Section 8 (Business
+  description: '**DRAFT. Only the endpoints now described in `openapi.yaml` are served (bookings, payment intents, the payment webhook, refunds, refund consent, refund approval, settlement build/review/approve/payout); every other operation here is unimplemented.** The served webhook path is `/webhooks/payments` (no `{provider}` segment). This file is the Phase 1 API specification for Section 8 (Business
     Model & Financial Operations) and is deliberately separate from `openapi.yaml`, which describes only what the running server exposes.
 
     Rules that apply to every operation: authentication + RBAC (see `x-required-permissions`), ownership checks, server-side amounts and statuses
