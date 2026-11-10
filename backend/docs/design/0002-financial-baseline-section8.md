@@ -111,3 +111,13 @@ Config, validated at start-up, process refuses to boot on an unsafe combination:
 ## 10. Test obligations (8.17)
 
 Each acceptance-criteria line gets a named test: price snapshot immutability, availability check before confirmation, supplier-confirmation failure → refund, commission formula (incl. the 10,000 → 500 / 9,500 example and partner-funded vs platform-funded discounts), duplicate payout prevention, refund ≤ charged − prior refunds (concurrent), approval-matrix and creator≠approver rules, consent required for wallet refunds, ledger balance invariants, webhook signature/replay/duplicate, ownership checks, no endpoint accepts amounts or statuses from the client. Concurrency tests run against a real MySQL 8.4 in CI; sqlmock alone does not count as evidence for money paths.
+
+
+## Implementation status (2026-11-10)
+
+Built and verified on a real MySQL 8.0.46 (CI repeats on 8.4): schema migrations 000006–000012, permission RBAC with two-person role grants,
+mock-provider booking/payment/refund/wallet/settlement flows, hash-chained audit log. The web prototype no longer adds a 5% fee,
+no longer shows top-up/withdraw, and no longer credits refunds to the wallet itself (a cancellation is a request; amount and method are server decisions).
+Gaps F4 (permission-based RBAC), F6 (immutability) and F7 (audit fields) are closed for the new tables; the older `audit_logs` table is unchanged.
+Defaults still waiting for business/legal confirmation: service fee off, wallet-leg refund rules, "high risk" = partner risk_level HIGH,
+payment window 15 minutes, 48-hour free cancellation, two approvers above 50,000 THB (CFO required), seller of record = partner.

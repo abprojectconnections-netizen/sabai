@@ -33,3 +33,26 @@ Every protected route validates the signed JWT, confirms that the account is act
 ## Known integration gap (found by the real-MySQL tests)
 
 `trips.destination_id` is a foreign key to `destinations(id)` (UUID). The web prototype sends slugs such as `chiangmai`, and `destinations` has no slug column and no seed data. The API now answers 400 `destination_id does not exist` instead of a 500, but the web app cannot create trips with a destination against this backend until destinations are seeded and the web uses their ids (or a `slug` column is added).
+
+## Financial core (Section 8) — what exists
+
+All of it runs on a **mock payment provider** and is **off by default** (`FINANCIAL_TRANSACTIONS_ENABLED=false`; endpoints answer 503).
+A non-mock provider or live supplier is refused until `go_live_approvals` holds PSP, LEGAL, ACCOUNTING and SECURITY approvals.
+
+| Area | Where | Guarantees (each proven by integration tests on real MySQL) |
+|---|---|---|
+| Schema | `database/migrations/000006`–`000012` | money `DECIMAL(14,2)`+currency; CHECKs for price sums, commission formula, refunded ≤ captured; append-only triggers; unique keys for idempotency, one live payout, one live refund disbursement |
+| Booking | `internal/finance/booking` | server-side price from inventory, immutable price snapshot, coupons (platform/partner funded), idempotency key, no overselling, hold expiry |
+| Payment | `internal/finance/payment` | charge = stored booking total; verified-signature webhook, replay window, duplicate and amount-mismatch handling; status changes only via webhook; late payment flagged, not resurrected |
+| Refund | `internal/finance/refund` | refund from the booking's own terms; auto-approval only for small, low-risk, in-window cases; approval limits from data; no self-approval; two approvers above 50,000; wallet only with legally approved consent |
+| Wallet | `internal/finance/wallet` | append-only ledger chain, refund-credit only, no double spend |
+| Settlement | `internal/finance/settlement` | commission by policy version, partner-funded discounts reduce the base, 7-day window, maker/checker approval, one payout per batch |
+| Audit | `internal/finance/faudit` | hash-chained, append-only; `Verify` detects forged or removed rows |
+| RBAC | `database/migrations/000010`, `internal/auth` | permissions per role (data); System Admin/legacy ADMIN hold no financial permission; role grants need a second person |
+
+All financial transactions use READ COMMITTED with row locks (`internal/finance/txopt`); the reason is documented there.
+
+### Still open (blocked outside engineering, or not built yet)
+- PSP selection/contract and a real provider implementation; supplier adapters other than internal inventory.
+- Legal/accounting review: tax-invoice issuer, retention periods, fund flow, VAT treatment (`vat_included = UNVERIFIED`), approved consent wording, and the cancellation-policy defaults (`platform_default_proposal`).
+- Not implemented: partial-refund commission reversal, REFUND_REVERSAL settlement items, tax-document generation/PDFs, reconciliation runner, scheduled jobs (hold expiry, weekly settlement), wallet as a payment method at checkout, category-scoped commission policies, `audit_logs` → `financial_audit_logs` migration for the older portal actions, OpenAPI for the new endpoints (draft in `docs/openapi-financial-draft.yaml` is design only).

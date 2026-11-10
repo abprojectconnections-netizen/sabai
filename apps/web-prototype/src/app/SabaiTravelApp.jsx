@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Wifi } from 'lucide-react';
 import { TabBar, Toast } from '../components/ui';
 import { DESTINATIONS, LISTINGS } from '../data/catalog';
-import { refundFor } from '../domain/bookings';
+import { payableTotal } from '../domain/pricing';
 import { addDaysISO, fmtDate, fmtRange } from '../domain/dates';
 import { buildItinerary } from '../domain/itinerary';
 import { describeApiErrorTh } from '../repositories/errors';
@@ -90,10 +90,6 @@ export default function SabaiTravelApp({ repo, snapshot }) {
 
   const [walletBalance, setWalletBalance] = useState(snapshot.walletBalance);
   const [walletTransactions, setWalletTransactions] = useState(snapshot.walletTransactions);
-  const handleTopUp = () => {
-    setWalletBalance((prev) => prev + 1000);
-    setWalletTransactions((prev) => [{ id: Date.now(), type: 'in', label: 'เติมเงินผ่านพร้อมเพย์', date: 'วันนี้', amount: 1000 }, ...prev]);
-  };
 
   const [selectedTrip, setSelectedTrip] = useState(null);
 
@@ -197,13 +193,12 @@ export default function SabaiTravelApp({ repo, snapshot }) {
   };
   const handleConfirmCancel = () => {
     const b = selectedBooking;
-    const refund = refundFor(b);
-    setBookings((prev) => prev.map((x) => (x.id === b.id ? { ...x, status: 'cancelled', cancelReason, refund } : x)));
-    setWalletBalance((prev) => prev + refund);
-    setWalletTransactions((prev) => [{ id: Date.now(), type: 'in', label: `เงินคืนจากการยกเลิก ${b.title}`, date: 'วันนี้', amount: refund }, ...prev]);
-    pushNotification('booking', 'ยกเลิกการจองแล้ว', `${b.title} (${b.number}) ถูกยกเลิก เงินคืน ฿${refund.toLocaleString()} เข้า Sabai Wallet แล้ว`);
+    // A cancellation is a REQUEST. The server computes the refund, approves it where required, and pays it back to the original
+    // payment method (or to Sabai Wallet only with the customer's recorded consent). The client never credits money itself.
+    setBookings((prev) => prev.map((x) => (x.id === b.id ? { ...x, status: 'cancelled', cancelReason, refundStatus: 'requested' } : x)));
+    pushNotification('booking', 'ส่งคำขอยกเลิกแล้ว', `${b.title} (${b.number}) ส่งคำขอยกเลิกและขอคืนเงินแล้ว ระบบจะแจ้งผลและยอดเงินคืนให้ทราบ`);
     setCancelReason('');
-    showToast(`ยกเลิกแล้ว คืนเงิน ฿${refund.toLocaleString()} เข้า Wallet`);
+    showToast('ส่งคำขอยกเลิกและขอคืนเงินแล้ว');
     pop();
   };
 
@@ -269,9 +264,9 @@ export default function SabaiTravelApp({ repo, snapshot }) {
 
   const PAYMENT_LABEL = { promptpay: 'พร้อมเพย์ (PromptPay)', card: 'บัตรเครดิต/เดบิต', wallet: 'Sabai Wallet' };
   const handleConfirmPayment = () => {
-    const total = Math.round(bookingItem.price * 1.05);
+    const total = payableTotal(bookingItem.price);
     if (paymentMethod === 'wallet' && total > walletBalance) {
-      setPaymentError(`ยอด Sabai Wallet ไม่เพียงพอ (คงเหลือ ฿${walletBalance.toLocaleString()}) กรุณาเติมเงินหรือเลือกวิธีชำระอื่น`);
+      setPaymentError(`ยอด Sabai Wallet ไม่เพียงพอ (คงเหลือ ฿${walletBalance.toLocaleString()}) กรุณาเลือกวิธีชำระอื่น`);
       return;
     }
     setPaymentError('');
@@ -311,7 +306,7 @@ export default function SabaiTravelApp({ repo, snapshot }) {
   } else if (screen === 'register-3') {
     content = <RegisterScreen step={3} form={registerForm} onChange={updateRegisterForm} onToggleStyle={toggleRegisterStyle} onBack={pop} onFinish={handleFinishRegister} error={authError} busy={authBusy} />;
   } else if (screen === 'wallet') {
-    content = <WalletScreen balance={walletBalance} transactions={walletTransactions} onBack={pop} onTopUp={handleTopUp} />;
+    content = <WalletScreen balance={walletBalance} transactions={walletTransactions} onBack={pop} />;
   } else if (screen === 'trip-detail') {
     content = <TripDetailScreen trip={selectedTrip} onBack={pop} />;
   } else if (screen === 'notifications') {
@@ -389,7 +384,7 @@ export default function SabaiTravelApp({ repo, snapshot }) {
   } else if (screen === 'booking') {
     content = <BookingScreen item={bookingItem} onBack={pop} onPay={() => push('payment')} />;
   } else if (screen === 'payment') {
-    content = <PaymentScreen total={bookingItem ? Math.round(bookingItem.price * 1.05) : 0} method={paymentMethod} setMethod={(m) => { setPaymentMethod(m); setPaymentError(''); }} error={paymentError} onBack={pop} onConfirm={handleConfirmPayment} processing={processingPayment} walletBalance={walletBalance} />;
+    content = <PaymentScreen total={bookingItem ? payableTotal(bookingItem.price) : 0} method={paymentMethod} setMethod={(m) => { setPaymentMethod(m); setPaymentError(''); }} error={paymentError} onBack={pop} onConfirm={handleConfirmPayment} processing={processingPayment} walletBalance={walletBalance} />;
   } else if (screen === 'confirmation') {
     content = <ConfirmationScreen bookingNumber={bookingNumber} item={bookingItem} onHome={handleBackToHome} onViewBookings={() => { setStack(['profile', 'bookings']); setBookingItem(null); }} onViewCalendar={() => { hub.openCalendar(bookingItem.plan.startDate); setStack(['trips']); setBookingItem(null); }} />;
   }

@@ -1,7 +1,7 @@
 import { ArrowDown, ArrowUp } from 'lucide-react';
 import { TopBar } from '../../components/ui';
 
-export function WalletScreen({ balance, transactions, onBack, onTopUp }) {
+export function WalletScreen({ balance, transactions, onBack }) {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <TopBar title="กระเป๋าเงิน" onBack={onBack} />
@@ -9,14 +9,7 @@ export function WalletScreen({ balance, transactions, onBack, onTopUp }) {
         <div style={{ borderRadius: 20, padding: 20, background: 'linear-gradient(135deg, var(--pine) 0%, #1C5C57 100%)', color: '#fff' }}>
           <p style={{ fontSize: 12, opacity: 0.8 }}>ยอดคงเหลือ</p>
           <p className="font-display" style={{ fontSize: 30, fontWeight: 600, margin: '6px 0 16px' }}>฿{balance.toLocaleString()}</p>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={onTopUp} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: 10, borderRadius: 12, border: 'none', background: 'var(--amber)', color: 'var(--on-amber-solid)', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
-              <ArrowDown size={14} /> เติมเงิน
-            </button>
-            <button style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: 10, borderRadius: 12, border: '1.5px solid rgba(255,255,255,0.4)', background: 'transparent', color: '#fff', fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
-              <ArrowUp size={14} /> ถอนเงิน
-            </button>
-          </div>
+          <p style={{ fontSize: 11.5, opacity: 0.85, lineHeight: 1.5 }}>เครดิตจากการคืนเงินที่คุณเลือกรับเท่านั้น ใช้ชำระค่าจองได้ · ไม่มีการเติมเงิน โอน หรือถอนในขณะนี้</p>
         </div>
         <div>
           <p className="font-display" style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>ธุรกรรมล่าสุด</p>

@@ -43,7 +43,7 @@ export function seedEvents() {
 
 /* ---- mock account snapshot (DEV / mock mode only — never copied into BETA or PRODUCTION data) ---- */
 export const seedWalletTransactions = () => [
-    { id: 1, type: 'in', label: 'เติมเงินผ่านพร้อมเพย์', date: '5 ก.ย. 2569', amount: 2000 },
+    { id: 1, type: 'in', label: 'เงินคืนจากการยกเลิก (เครดิต)', date: '5 ก.ย. 2569', amount: 2000 },
     { id: 2, type: 'out', label: 'ชำระค่าที่พัก ล้านนา วิว รีสอร์ท', date: '2 ก.ย. 2569', amount: 1490 },
     { id: 3, type: 'in', label: 'เงินคืนจากการยกเลิกจอง', date: '28 ส.ค. 2569', amount: 990 },
     { id: 4, type: 'out', label: 'ชำระค่าอาหาร ข้าวซอยแม่สาย', date: '20 ส.ค. 2569', amount: 120 },

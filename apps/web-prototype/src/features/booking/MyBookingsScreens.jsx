@@ -139,7 +139,6 @@ export function BookingDetailScreen({ booking, onBack, onCancel, onReview }) {
 export function CancelBookingScreen({ booking, reason, setReason, onBack, onConfirm }) {
   if (!booking) return null;
   const refund = refundFor(booking);
-  const pct = booking.type === 'flight' ? 80 : 100;
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <TopBar title="ยกเลิกการจอง" onBack={onBack} />
@@ -155,13 +154,13 @@ export function CancelBookingScreen({ booking, reason, setReason, onBack, onConf
           </div>
         </div>
         <div style={{ borderRadius: 16, background: 'var(--pine-pale)', padding: 16 }}>
-          <p style={{ fontSize: 12, color: 'var(--ink-soft)' }}>เงินคืนที่คุณจะได้รับ ({pct}%)</p>
+          <p style={{ fontSize: 12, color: 'var(--ink-soft)' }}>ประมาณการเงินคืน (ยอดจริงคำนวณโดยระบบ)</p>
           <p className="font-display" style={{ fontSize: 24, fontWeight: 700, color: 'var(--pine)', margin: '4px 0' }}>฿{refund.toLocaleString()}</p>
-          <p style={{ fontSize: 11.5, color: 'var(--ink-soft)', lineHeight: 1.5 }}>เงินคืนเข้า Sabai Wallet ทันทีหลังยืนยันการยกเลิก{booking.type === 'flight' ? ' (ตั๋วเครื่องบินหักค่าธรรมเนียมยกเลิก 20%)' : ''}</p>
+          <p style={{ fontSize: 11.5, color: 'var(--ink-soft)', lineHeight: 1.5 }}>ยอดเงินคืนจริงคำนวณตามเงื่อนไขของการจองและอาจต้องรอการอนุมัติ เงินจะคืนไปยังช่องทางที่ชำระเงิน เว้นแต่คุณเลือกรับเป็นเครดิต Sabai Wallet ด้วยความยินยอมของคุณเอง</p>
         </div>
       </div>
       <div style={{ padding: '14px 20px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-        <PrimaryButton onClick={onConfirm} disabled={!reason}>ยืนยันการยกเลิก</PrimaryButton>
+        <PrimaryButton onClick={onConfirm} disabled={!reason}>ส่งคำขอยกเลิกและขอคืนเงิน</PrimaryButton>
       </div>
     </div>
   );
