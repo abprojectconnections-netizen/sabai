@@ -23,12 +23,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/travel-super-app/backend/internal/finance/payment"
+	"github.com/travel-super-app/backend/internal/finance/safety"
 	"github.com/travel-super-app/backend/internal/notification"
 	"github.com/travel-super-app/backend/internal/platform/database"
 	"github.com/travel-super-app/backend/internal/platform/httpapi"
 )
 
 const secret = "integration-test-secret"
+
+var mockPSP = payment.Mock{Secret: "mock-psp-secret"}
 
 var (
 	db     *sql.DB
@@ -48,7 +52,7 @@ func TestMain(m *testing.M) {
 	}
 	gin.SetMode(gin.TestMode)
 	router = gin.New()
-	httpapi.RegisterRoutes(router, db, secret)
+	httpapi.RegisterRoutesWith(router, db, secret, safety.Config{PaymentProvider: "mock", SupplierMode: "mock", Enabled: true, Environment: "dev"}, mockPSP)
 	os.Exit(m.Run())
 }
 
