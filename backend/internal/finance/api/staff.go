@@ -112,7 +112,7 @@ func RegisterStaff(portal *gin.RouterGroup, d Deps) {
 			apiresponse.NotFound(c, "batch not found")
 		case errors.Is(err, settlement.ErrSoD):
 			apiresponse.ForbiddenWith(c, err.Error())
-		case errors.Is(err, settlement.ErrExists), errors.Is(err, settlement.ErrState), errors.Is(err, settlement.ErrNothing), errors.Is(err, settlement.ErrNoAccount), errors.Is(err, settlement.ErrNoPolicy):
+		case errors.Is(err, settlement.ErrExists), errors.Is(err, settlement.ErrState), errors.Is(err, settlement.ErrNothing), errors.Is(err, settlement.ErrNoAccount), errors.Is(err, settlement.ErrNoPolicy), errors.Is(err, settlement.ErrNegative):
 			apiresponse.Conflict(c, err.Error())
 		default:
 			apiresponse.Internal(c)

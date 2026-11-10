@@ -339,3 +339,79 @@ func TestSettlementCommissionApprovalAndPayout(t *testing.T) {
 	}
 	_ = fmt.Sprint
 }
+
+func TestRefundAfterSettlementIsReversedInTheNextBatch(t *testing.T) {
+	i := newInventory(t, 20, "10000.00")
+	u := newUser(t)
+	b, _ := paid(t, i, u, 1, "")
+	other, _ := paid(t, i, u, 1, "") // keeps the first batch positive and the second one non-empty
+	for _, id := range []string{b, other} {
+		mustOK(t, "service long ago", "UPDATE booking_items SET service_date = DATE_SUB(CURDATE(), INTERVAL 30 DAY) WHERE booking_id = ?", id)
+	}
+	maker := newUser(t, "FINANCE_MANAGER")
+	day := func(n int) string { return time.Now().UTC().AddDate(0, 0, n).Format("2006-01-02") }
+	build := func(from, to string) resp {
+		return call(t, "POST", "/api/v1/portal/settlements/build", maker.Token, map[string]string{"partner_id": i.partner, "period_from": from, "period_to": to})
+	}
+	first := build(day(-40), day(-20))
+	if first.Status != 201 || first.data()["net"] != "19000.00" {
+		t.Fatalf("first batch: %v", first.Body)
+	}
+	if x := build(day(-19), day(0)); x.Status != 409 {
+		t.Fatalf("nothing to settle yet = %d", x.Status)
+	}
+
+	// 5,000 of the 10,000 payment is refunded after settlement (a completed refund, seeded: the refund window rules are tested elsewhere)
+	var pay string
+	if err := db.QueryRow("SELECT id FROM payments WHERE booking_id = ?", b).Scan(&pay); err != nil {
+		t.Fatal(err)
+	}
+	rid := uuid.NewString()
+	mustOK(t, "completed refund", "INSERT INTO refund_requests (id, created_at, updated_at, booking_id, payment_id, reason_code, requested_amount, approved_amount, currency_code, method, status, idempotency_key) VALUES (?, "+now+", "+now+", ?, ?, 'PARTNER_CANCELLATION', 5000.00, 5000.00, 'THB', 'ORIGINAL_METHOD', 'COMPLETED', ?)", rid, b, pay, "rev-"+rid)
+	mustOK(t, "payment shows the refund", "UPDATE payments SET refunded_amount = 5000.00 WHERE id = ?", pay)
+
+	// a later booking provides the sales the reversal is netted against
+	c, _ := paid(t, i, u, 1, "")
+	mustOK(t, "service long ago", "UPDATE booking_items SET service_date = DATE_SUB(CURDATE(), INTERVAL 10 DAY) WHERE booking_id = ?", c)
+	second := build(day(-19), day(0))
+	// c: gross 10,000, commission 500; reversal: gross -5,000, commission -250 -> gross 5,000, commission 250, net 4,750
+	if second.Status != 201 || second.data()["items"] != float64(2) || second.data()["gross"] != "5000.00" || second.data()["commission"] != "250.00" || second.data()["net"] != "4750.00" {
+		t.Fatalf("second batch with a reversal: %v", second.Body)
+	}
+	if col(t, "SELECT COUNT(*) FROM partner_settlement_items WHERE batch_id = ? AND kind = 'REFUND_REVERSAL' AND gross_amount = -5000.00 AND commission_amount = -250.00 AND net_amount = -4750.00", second.data()["id"].(string)) != "1" {
+		t.Fatal("reversal item")
+	}
+	if col(t, "SELECT COUNT(*) FROM commission_calculations WHERE refund_request_id = ? AND kind = 'REFUND_REVERSAL' AND commission_rate = 0.05", rid) != "1" {
+		t.Fatal("reversal uses the original rate and is tied to the refund")
+	}
+	// reversed exactly once
+	d, _ := paid(t, i, u, 1, "")
+	mustOK(t, "service long ago", "UPDATE booking_items SET service_date = DATE_SUB(CURDATE(), INTERVAL 9 DAY) WHERE booking_id = ?", d)
+	third := call(t, "POST", "/api/v1/portal/settlements/build", maker.Token, map[string]string{"partner_id": i.partner, "period_from": day(-19), "period_to": day(1)})
+	if third.Status != 201 || third.data()["items"] != float64(1) || third.data()["net"] != "9500.00" {
+		t.Fatalf("the refund must not be reversed twice: %v", third.Body)
+	}
+}
+
+func TestReversalsLargerThanSalesAreHeldBackNotPaidAsNegative(t *testing.T) {
+	i := newInventory(t, 5, "10000.00")
+	u := newUser(t)
+	b, _ := paid(t, i, u, 1, "")
+	mustOK(t, "service long ago", "UPDATE booking_items SET service_date = DATE_SUB(CURDATE(), INTERVAL 30 DAY) WHERE booking_id = ?", b)
+	maker := newUser(t, "FINANCE_MANAGER")
+	day := func(n int) string { return time.Now().UTC().AddDate(0, 0, n).Format("2006-01-02") }
+	if x := call(t, "POST", "/api/v1/portal/settlements/build", maker.Token, map[string]string{"partner_id": i.partner, "period_from": day(-40), "period_to": day(-20)}); x.Status != 201 {
+		t.Fatalf("first batch: %v", x.Body)
+	}
+	var pay string
+	db.QueryRow("SELECT id FROM payments WHERE booking_id = ?", b).Scan(&pay)
+	rid := uuid.NewString()
+	mustOK(t, "full refund", "INSERT INTO refund_requests (id, created_at, updated_at, booking_id, payment_id, reason_code, requested_amount, approved_amount, currency_code, method, status, idempotency_key) VALUES (?, "+now+", "+now+", ?, ?, 'PARTNER_CANCELLATION', 10000.00, 10000.00, 'THB', 'ORIGINAL_METHOD', 'COMPLETED', ?)", rid, b, pay, "neg-"+rid)
+	x := call(t, "POST", "/api/v1/portal/settlements/build", maker.Token, map[string]string{"partner_id": i.partner, "period_from": day(-19), "period_to": day(0)})
+	if x.Status != 409 {
+		t.Fatalf("a batch whose net would be negative = %d %v", x.Status, x.Body)
+	}
+	if col(t, "SELECT COUNT(*) FROM commission_calculations WHERE refund_request_id = ?", rid) != "0" {
+		t.Fatal("the failed build must leave no reversal behind")
+	}
+}

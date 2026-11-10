@@ -310,10 +310,10 @@ paths:
           application/json:
             schema: { $ref: '#/components/schemas/BuildSettlementRequest' }
       responses:
-        '201': { description: "Batch in DRAFT (id, items, gross, commission, net)" }
+        '201': { description: "Batch in CALCULATED state (id, items, gross, commission, net). Completed refunds of already-settled bookings appear as negative REFUND_REVERSAL items." }
         '400': { $ref: '#/components/responses/ValidationError' }
         '403': { $ref: '#/components/responses/Forbidden' }
-        '409': { description: "Batch already exists, nothing to settle, no bank account or no commission policy" }
+        '409': { description: "Batch already exists, nothing to settle, no commission policy, or refund reversals exceed the batch's sales (they stay pending)" }
         '503': { $ref: '#/components/responses/FinancialDisabled' }
   /portal/settlements/{id}/review:
     post:

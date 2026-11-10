@@ -26,6 +26,7 @@ var (
 	ErrSoD       = errors.New("the person who created or reviewed a batch cannot approve it")
 	ErrNoAccount = errors.New("partner has no verified bank account")
 	ErrNoPolicy  = errors.New("no active commission policy")
+	ErrNegative  = errors.New("refund reversals exceed the sales in this batch; the reversals stay pending for a later period")
 )
 
 type Service struct {
@@ -80,7 +81,11 @@ func (s *Service) Build(ctx context.Context, actorID, partnerID string, from, to
 		cands = append(cands, c)
 	}
 	rows.Close()
-	if len(cands) == 0 {
+	revs, err := reversalCandidates(ctx, tx, partnerID)
+	if err != nil {
+		return Batch{}, err
+	}
+	if len(cands) == 0 && len(revs) == 0 {
 		return Batch{}, ErrNothing
 	}
 	now := time.Now().UTC()
@@ -92,7 +97,9 @@ func (s *Service) Build(ctx context.Context, actorID, partnerID string, from, to
 		WHERE status = 'ACTIVE' AND effective_from <= ? AND (effective_to IS NULL OR effective_to > ?) AND (scope = 'DEFAULT' OR (scope = 'PARTNER' AND partner_id = ?))
 		ORDER BY FIELD(scope, 'PARTNER', 'DEFAULT') LIMIT 1`, now, now, partnerID).Scan(&policyID, &version, &ptype, &rate, &fixed)
 	if err == sql.ErrNoRows {
-		return Batch{}, ErrNoPolicy
+		if len(cands) > 0 {
+			return Batch{}, ErrNoPolicy
+		}
 	} else if err != nil {
 		return Batch{}, err
 	}
@@ -139,6 +146,31 @@ func (s *Service) Build(ctx context.Context, actorID, partnerID string, from, to
 		gross += base
 		comm += amount
 	}
+	for _, r := range revs {
+		calcID := uuid.NewString()
+		var rateArg any
+		if r.ptype == "PERCENT" {
+			rateArg = r.rate
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO commission_calculations (id, created_at, booking_id, partner_id, kind, refund_request_id, commission_policy_id, policy_version, commission_type, commission_rate,
+			eligible_service_amount, partner_funded_discount, excluded_pass_through, commission_base_amount, commission_amount, currency_code, calculation_timestamp)
+			VALUES (?, ?, ?, ?, 'REFUND_REVERSAL', ?, ?, ?, ?, ?, ?, 0, 0, ?, ?, 'THB', ?)`, calcID, now, r.booking, partnerID, r.refund, r.policyID, r.version, r.ptype, rateArg, r.base.String(), r.base.String(), (-r.commission).String(), now); err != nil {
+			if dberr.IsDuplicate(err) {
+				return Batch{}, ErrExists
+			}
+			return Batch{}, err
+		}
+		// a reversal row is negative: gross -base, commission -commission, so net = gross - commission = -(base - commission)
+		if _, err := tx.ExecContext(ctx, `INSERT INTO partner_settlement_items (id, created_at, batch_id, booking_id, commission_calculation_id, kind, eligible_on, gross_amount, commission_amount, net_amount)
+			VALUES (?, ?, ?, ?, ?, 'REFUND_REVERSAL', ?, ?, ?, ?)`, uuid.NewString(), now, batchID, r.booking, calcID, asOf, (-r.base).String(), (-r.commission).String(), (-(r.base - r.commission)).String()); err != nil {
+			return Batch{}, err
+		}
+		gross -= r.base
+		comm -= r.commission
+	}
+	if gross-comm < 0 {
+		return Batch{}, ErrNegative
+	}
 	if _, err := tx.ExecContext(ctx, "UPDATE partner_settlement_batches SET gross_sales = ?, commission_total = ?, net_amount = ?, updated_at = ? WHERE id = ?", gross.String(), comm.String(), (gross - comm).String(), now, batchID); err != nil {
 		return Batch{}, err
 	}
@@ -147,10 +179,10 @@ func (s *Service) Build(ctx context.Context, actorID, partnerID string, from, to
 		actorType = "STAFF"
 	}
 	if err := faudit.Append(ctx, tx, faudit.Entry{ActorUserID: actorID, ActorType: actorType, EntityType: "settlement_batch", EntityID: batchID, Action: "settlement.calculated",
-		Changes: map[string]any{"gross": gross.String(), "commission": comm.String(), "net": (gross - comm).String(), "items": len(cands), "policy_version": version}}); err != nil {
+		Changes: map[string]any{"gross": gross.String(), "commission": comm.String(), "net": (gross - comm).String(), "items": len(cands) + len(revs), "reversals": len(revs), "policy_version": version}}); err != nil {
 		return Batch{}, err
 	}
-	return Batch{ID: batchID, Items: len(cands), Gross: gross, Commission: comm, Net: gross - comm, Status: "CALCULATED"}, tx.Commit()
+	return Batch{ID: batchID, Items: len(cands) + len(revs), Gross: gross, Commission: comm, Net: gross - comm, Status: "CALCULATED"}, tx.Commit()
 }
 
 func (s *Service) move(ctx context.Context, actorID, batchID, from, to, col, action string) error {
@@ -256,4 +288,59 @@ func (s *Service) Payout(ctx context.Context, actorID, batchID string) error {
 		return err
 	}
 	return tx.Commit()
+}
+
+type reversal struct {
+	refund, booking, policyID, ptype, rate string
+	version                                int
+	base, commission                       money.Amount // positive magnitudes
+}
+
+// reversalCandidates finds completed refunds of bookings that were already settled and have not been reversed yet.
+// DEFAULT RULE (needs Finance sign-off): the partner gives back the same share of the settled base and commission as the share of the
+// captured payment that was refunded, using the rate of the original calculation (not today's policy).
+func reversalCandidates(ctx context.Context, tx *sql.Tx, partnerID string) ([]reversal, error) {
+	rows, err := tx.QueryContext(ctx, `SELECT r.id, r.booking_id, r.approved_amount, p.captured_amount, c.commission_policy_id, c.policy_version, c.commission_type,
+			c.commission_rate, c.commission_base_amount, c.commission_amount
+		FROM refund_requests r
+		JOIN payments p ON p.id = r.payment_id
+		JOIN commission_calculations c ON c.booking_id = r.booking_id AND c.kind = 'ORIGINAL'
+		WHERE c.partner_id = ? AND r.status = 'COMPLETED' AND p.captured_amount > 0
+		  AND NOT EXISTS (SELECT 1 FROM commission_calculations x WHERE x.refund_request_id = r.id AND x.kind = 'REFUND_REVERSAL')
+		ORDER BY r.updated_at, r.id FOR UPDATE`, partnerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []reversal
+	for rows.Next() {
+		var r reversal
+		var approved, captured, base, comm string
+		var rate sql.NullString
+		if err := rows.Scan(&r.refund, &r.booking, &approved, &captured, &r.policyID, &r.version, &r.ptype, &rate, &base, &comm); err != nil {
+			return nil, err
+		}
+		ap, _ := money.Parse(approved)
+		cap, _ := money.Parse(captured)
+		if ap > cap {
+			ap = cap
+		}
+		b, _ := money.Parse(base)
+		cm, _ := money.Parse(comm)
+		r.base = share(b, ap, cap)
+		if r.ptype == "PERCENT" {
+			r.rate = rate.String
+			rt, _ := money.ParseRate(r.rate)
+			r.commission = money.Percent(r.base, rt)
+		} else {
+			r.commission = share(cm, ap, cap)
+		}
+		out = append(out, r)
+	}
+	return out, rows.Err()
+}
+
+// share returns a * num / den rounded half up, in integer satang (all inputs non-negative).
+func share(a, num, den money.Amount) money.Amount {
+	return money.Amount((int64(a)*int64(num)*2 + int64(den)) / (2 * int64(den)))
 }
