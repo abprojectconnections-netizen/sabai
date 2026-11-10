@@ -44,6 +44,7 @@ func RegisterRoutesWith(router *gin.Engine, db *sql.DB, jwtSecret string, cfg sa
 	portalRoutes := secured.Group("/portal")
 	portalRoutes.Use(auth.RequirePermission("portal.read"))
 	portal.RegisterRoutes(portalRoutes, db)
+	financeapi.RegisterStaff(portalRoutes, financeapi.Deps{DB: db, Cfg: cfg, Provider: provider})
 	adminRoutes := secured.Group("/admin")
 	adminRoutes.Use(auth.RequirePermission("role.request", "role.approve", "role.approve.financial"))
 	admin.RegisterRoutes(adminRoutes, db)

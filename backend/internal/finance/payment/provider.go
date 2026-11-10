@@ -41,6 +41,10 @@ type Provider interface {
 	CreateCharge(ctx context.Context, r ChargeRequest) (ChargeResponse, error)
 	// VerifyAndParse checks the signature over the raw body and parses it; it must not accept unsigned input.
 	VerifyAndParse(signature string, body []byte) (Event, error)
+	// Refund returns the provider's refund reference. The key makes a retry safe: the same key must never refund twice.
+	Refund(ctx context.Context, paymentReference string, amount money.Amount, key string) (string, error)
+	// Payout sends money to a partner bank account. Same idempotency rule.
+	Payout(ctx context.Context, reference string, amount money.Amount, key string) (string, error)
 }
 
 // Mock is the development/test provider. Its webhook signature is HMAC-SHA256 over the raw body with a shared secret,
@@ -81,4 +85,12 @@ func (m Mock) VerifyAndParse(signature string, body []byte) (Event, error) {
 		return Event{}, err
 	}
 	return Event{ID: b.EventID, Type: b.Type, PaymentReference: b.Reference, Amount: amt, Currency: b.Currency, Timestamp: time.Unix(b.Timestamp, 0).UTC()}, nil
+}
+
+func (Mock) Refund(_ context.Context, paymentReference string, _ money.Amount, key string) (string, error) {
+	return "mock_refund_" + key, nil
+}
+
+func (Mock) Payout(_ context.Context, _ string, _ money.Amount, key string) (string, error) {
+	return "mock_payout_" + key, nil
 }

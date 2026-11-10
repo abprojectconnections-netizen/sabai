@@ -365,3 +365,29 @@ func TestExpiredBookingReleasesInventoryAndCouponAndLatePaymentIsFlagged(t *test
 		t.Fatalf("late payment: %v flagged=%d booking=%s", r.Body, late, st)
 	}
 }
+
+func TestPerUserCouponLimitHoldsUnderConcurrency(t *testing.T) {
+	i := newInventory(t, 50, "1000.00")
+	u := newUser(t)
+	d, c, code := uuid.NewString(), uuid.NewString(), "U"+strings.ToUpper(uuid.NewString()[:8])
+	mustOK(t, "discount", "INSERT INTO discounts (id, created_at, owner_type, discount_type, value, valid_from, funded_by, status, usage_limit_per_user) VALUES (?, "+now+", 'PLATFORM', 'FIXED', 100, '2020-01-01', 'PLATFORM', 'ACTIVE', 1)", d)
+	mustOK(t, "coupon", "INSERT INTO coupons (id, created_at, updated_at, code, max_redemptions, discount_id) VALUES (?, "+now+", "+now+", ?, 100, ?)", c, code, d)
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	ok := 0
+	for n := 0; n < 6; n++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if idem(t, "POST", "/api/v1/bookings", u.Token, "pu-"+uuid.NewString(), i.body(1, code)).Status == 201 {
+				mu.Lock()
+				ok++
+				mu.Unlock()
+			}
+		}()
+	}
+	wg.Wait()
+	if ok != 1 {
+		t.Fatalf("a coupon limited to one use per user was used %d times", ok)
+	}
+}

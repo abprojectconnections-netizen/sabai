@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"errors"
+	"github.com/travel-super-app/backend/internal/finance/txopt"
 	"time"
 
 	"github.com/google/uuid"
@@ -55,7 +56,7 @@ func (s *Service) CreateIntent(ctx context.Context, userID, bookingID, method, i
 	if idemKey == "" || len(idemKey) > 100 {
 		return Intent{}, errors.New("Idempotency-Key header is required")
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.db.BeginTx(ctx, txopt.Financial)
 	if err != nil {
 		return Intent{}, err
 	}
@@ -149,7 +150,7 @@ func (s *Service) HandleWebhook(ctx context.Context, signature string, body []by
 	evID := uuid.NewString()
 	// The event row and its effects commit together. If applying fails, nothing is stored, so the provider's retry of the
 	// same event is processed instead of being swallowed as a "duplicate".
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.db.BeginTx(ctx, txopt.Financial)
 	if err != nil {
 		return Failed, err
 	}

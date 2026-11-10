@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/travel-super-app/backend/internal/finance/txopt"
 	"time"
 
 	"github.com/google/uuid"
@@ -68,7 +69,7 @@ func (s *Service) Create(ctx context.Context, in Input) (Result, error) {
 	if len(in.Items) == 0 || len(in.Items) > 20 {
 		return Result{}, ValidationError{"items must contain 1 to 20 entries"}
 	}
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.db.BeginTx(ctx, txopt.Financial)
 	if err != nil {
 		return Result{}, err
 	}
@@ -168,6 +169,10 @@ func (s *Service) Create(ctx context.Context, in Input) (Result, error) {
 			}
 		}
 		if perUser.Valid {
+			// serialise bookings that use this discount so the per-user count below cannot be raced
+			if _, err := tx.ExecContext(ctx, "SELECT id FROM discounts WHERE id = ? FOR UPDATE", discountID.String); err != nil {
+				return Result{}, err
+			}
 			var used int64
 			if err := tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM discount_allocations da JOIN bookings b ON b.id = da.booking_id WHERE da.discount_id = ? AND b.user_id = ?", discountID.String, in.UserID).Scan(&used); err != nil {
 				return Result{}, err
@@ -287,7 +292,7 @@ func (s *Service) ExpireHolds(ctx context.Context) (int, error) {
 }
 
 func (s *Service) expireOne(ctx context.Context, id string) (bool, error) {
-	tx, err := s.db.BeginTx(ctx, nil)
+	tx, err := s.db.BeginTx(ctx, txopt.Financial)
 	if err != nil {
 		return false, err
 	}
