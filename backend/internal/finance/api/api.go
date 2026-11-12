@@ -29,6 +29,7 @@ func Register(public, secured *gin.RouterGroup, d Deps) {
 	secured.POST("/payments/intents", user, createIntent(ps))
 	public.POST("/webhooks/payments", webhook(ps))
 	RegisterRefunds(secured, d)
+	RegisterReads(public, secured, d)
 }
 
 type bookingBody struct {

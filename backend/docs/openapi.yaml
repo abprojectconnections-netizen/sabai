@@ -188,7 +188,27 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
       responses: { '200': { description: Partner status changed } }
+  /catalog/items:
+    get:
+      summary: Public catalogue of bookable items (approved partners, active items with stock from today)
+      security: []
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+        - { name: category, in: query, schema: { type: string, enum: [HOTEL, TOUR, FLIGHT, TRANSPORT, ATTRACTION] } }
+      responses:
+        '200': { description: "Array of {id (inventory item id, used in POST /bookings), title, category, partner_id, partner_name, from_price, currency, next_available_date}" }
+        '400': { $ref: '#/components/responses/ValidationError' }
   /bookings:
+    get:
+      summary: The caller's own bookings, newest first
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "Array of {id, booking_code, status, currency, base_total, discount_total, payable_total, payment_status, expires_at, created_at}. Works even when financial transactions are disabled." }
+        '401': { $ref: '#/components/responses/Unauthorized' }
     post:
       summary: Create a booking (server prices it; holds inventory for the payment window)
       description: Requires `booking.create`. Returns 503 FINANCIAL_TRANSACTIONS_DISABLED unless the environment safety switches allow it. No price, total or status is accepted from the client.
@@ -206,6 +226,29 @@ paths:
         '403': { $ref: '#/components/responses/Forbidden' }
         '409': { description: "Not enough availability" }
         '503': { $ref: '#/components/responses/FinancialDisabled' }
+  /bookings/{id}:
+    get:
+      summary: One of the caller's bookings with items, cancellation terms and refunds
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '200': { description: "Booking summary plus items[], terms (as shown at purchase) and refunds[]" }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /wallet:
+    get:
+      summary: The caller's wallet (refund credit only; there is no top-up, transfer or withdrawal)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: "available_balance, pending_balance, currency, balance_type; zero when the wallet does not exist yet" }
+  /wallet/transactions:
+    get:
+      summary: The caller's wallet ledger, newest first
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "Array of {id, created_at, type, reference_type, credit_amount, debit_amount, balance_after}" }
   /payments/intents:
     post:
       summary: Create a payment intent for the caller's own unpaid booking
