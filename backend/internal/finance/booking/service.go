@@ -111,7 +111,7 @@ func (s *Service) Create(ctx context.Context, in Input) (Result, error) {
 		var availID, price, st string
 		var pid sql.NullString
 		var title string
-		err := tx.QueryRowContext(ctx, `SELECT a.id, a.base_price, i.status, sp.partner_id, i.sku
+		err := tx.QueryRowContext(ctx, `SELECT a.id, a.base_price, i.status, sp.partner_id, COALESCE(sp.title, i.sku)
 			FROM inventory_availability a JOIN inventory_items i ON i.id = a.inventory_item_id JOIN supplier_products sp ON sp.id = i.supplier_product_id
 			WHERE a.inventory_item_id = ? AND a.service_date = ? FOR UPDATE`, it.InventoryItemID, it.ServiceDate).Scan(&availID, &price, &st, &pid, &title)
 		if err == sql.ErrNoRows || (err == nil && st != "ACTIVE") {

@@ -191,15 +191,21 @@ export default function SabaiTravelApp({ repo, snapshot }) {
     if (match) setWriteReviewItem(match);
     push('write-review');
   };
-  const handleConfirmCancel = () => {
+  const handleConfirmCancel = async () => {
     const b = selectedBooking;
-    // A cancellation is a REQUEST. The server computes the refund, approves it where required, and pays it back to the original
-    // payment method (or to Sabai Wallet only with the customer's recorded consent). The client never credits money itself.
-    setBookings((prev) => prev.map((x) => (x.id === b.id ? { ...x, status: 'cancelled', cancelReason, refundStatus: 'requested' } : x)));
-    pushNotification('booking', 'ส่งคำขอยกเลิกแล้ว', `${b.title} (${b.number}) ส่งคำขอยกเลิกและขอคืนเงินแล้ว ระบบจะแจ้งผลและยอดเงินคืนให้ทราบ`);
-    setCancelReason('');
-    showToast('ส่งคำขอยกเลิกและขอคืนเงินแล้ว');
-    pop();
+    // A cancellation is a REQUEST sent to the server. The server computes the refund, approves it where required, and pays it back to the
+    // original payment method (or to Sabai Wallet only with the customer's recorded consent). The client never credits money itself,
+    // and the booking is only marked once the server has accepted the request.
+    try {
+      const r = await repo.refunds.request({ bookingId: b.id, method: 'ORIGINAL_METHOD' });
+      setBookings((prev) => prev.map((x) => (x.id === b.id ? { ...x, status: 'cancelled', cancelReason, refundStatus: String(r.status).toLowerCase() } : x)));
+      pushNotification('booking', 'ส่งคำขอยกเลิกแล้ว', `${b.title} (${b.number}) ส่งคำขอยกเลิกและขอคืนเงินแล้ว ระบบจะแจ้งผลและยอดเงินคืนให้ทราบ`);
+      setCancelReason('');
+      showToast('ส่งคำขอยกเลิกและขอคืนเงินแล้ว');
+      pop();
+    } catch (e) {
+      showToast(describeApiErrorTh(e));
+    }
   };
 
   const toggleAiStyle = (s) => setAiStyles((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));

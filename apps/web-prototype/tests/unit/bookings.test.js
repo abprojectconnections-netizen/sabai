@@ -7,7 +7,7 @@ describe('booking rules', () => {
     expect(refundFor({ type: 'hotel', amount: 1564 })).toBe(1564);
   });
   it('exposes labelled statuses and cancel reasons', () => {
-    expect(Object.keys(BOOKING_STATUS)).toEqual(['confirmed', 'completed', 'cancelled']);
+    expect(Object.keys(BOOKING_STATUS).sort()).toEqual(['cancelled', 'completed', 'confirmed', 'pending', 'refunded']);
     expect(CANCEL_REASONS.length).toBeGreaterThan(2);
   });
 });

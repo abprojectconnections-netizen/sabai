@@ -127,10 +127,60 @@ describe('http repository (contract tests with a fake fetch)', () => {
     await repo.trips.list();
     expect(f.calls[1].init.headers.Authorization).toBeUndefined();
   });
-  it('never injects mock data: BETA/PRODUCTION accounts start empty', async () => {
-    const snap = await http(fakeFetch(json(200, { data: [], request_id: 'r' }))).loadAccountSnapshot();
+  const routes = (over = {}) => (url) => {
+    const path = new URL(url).pathname.replace('/api/v1', '');
+    const base = { '/bookings': [], '/wallet': { available_balance: '0.00', pending_balance: '0.00', currency: 'THB', balance_type: 'REFUND_CREDIT' }, '/wallet/transactions': [], '/notifications': [], '/reviews/mine': [] };
+    const data = path in over ? over[path] : base[path];
+    return data === undefined ? json(404, { error: { code: 'NOT_FOUND', message: 'x' }, request_id: 'r' }) : json(200, { data, request_id: 'r' });
+  };
+  it('sends a refund as a request with a stable Idempotency-Key and never sends an amount', async () => {
+    const f = fakeFetch(json(201, { data: { id: 'rf1', status: 'APPROVED', calculated_amount: '1950.00', auto_approved: true }, request_id: 'r' }));
+    const repo = http(f);
+    const a = await repo.refunds.request({ bookingId: 'b1' });
+    await repo.refunds.request({ bookingId: 'b1' });
+    expect(a).toEqual({ id: 'rf1', status: 'APPROVED', calculatedAmount: 1950, autoApproved: true });
+    const [c1, c2] = f.calls;
+    expect(c1.url).toBe('https://api.test/api/v1/refunds');
+    expect(JSON.parse(c1.init.body)).toEqual({ booking_id: 'b1', method: 'ORIGINAL_METHOD' });
+    expect(c1.init.headers['Idempotency-Key']).toBeTruthy();
+    expect(c2.init.headers['Idempotency-Key']).toBe(c1.init.headers['Idempotency-Key']);
+  });
+  it('explains refund failures in Thai without leaking server text', async () => {
+    const f = fakeFetch(json(409, { error: { code: 'CONFLICT', message: 'booking is not refundable: internal detail' }, request_id: 'r' }));
+    const err = await http(f).refunds.request({ bookingId: 'b1' }).catch((e) => e);
+    expect(err.code).toBe('CONFLICT');
+    expect(describeApiErrorTh(err)).not.toContain('internal detail');
+    expect(describeApiErrorTh({ code: 'FINANCIAL_TRANSACTIONS_DISABLED' })).toContain('ยังไม่เปิดใช้งาน');
+  });
+  it('mock refunds only record the request', async () => {
+    expect(await createMockRepository().refunds.request({ bookingId: 'b1' })).toMatchObject({ status: 'REQUESTED', calculatedAmount: 0, autoApproved: false });
+  });
+  it('never injects mock data: a new BETA/PRODUCTION account starts empty', async () => {
+    const snap = await http(fakeFetch(routes())).loadAccountSnapshot();
     expect(snap).toEqual(emptyAccountSnapshot());
     expect(validateAccountSnapshot(snap)).toEqual([]);
+  });
+  it('builds the snapshot from the real endpoints and keeps money as server-provided figures', async () => {
+    const f = fakeFetch(routes({
+      '/bookings': [{ id: 'b1', booking_code: 'SB1', title: 'ทัวร์เกาะ', status: 'PENDING_PAYMENT', payable_total: '1950.00', payment_status: null, created_at: '2026-11-10T09:00:00Z' }],
+      '/wallet': { available_balance: '300.00', pending_balance: '0.00', currency: 'THB', balance_type: 'REFUND_CREDIT' },
+      '/wallet/transactions': [{ id: 'w1', type: 'REFUND_CREDIT', credit_amount: '300.00', debit_amount: '0.00', created_at: '2026-11-11T09:00:00Z' }],
+      '/notifications': [{ id: 'n1', type: 'booking', title: 'หัวข้อ', body: 'ข้อความ', read: false, created_at: '2026-11-11T09:00:00Z' }],
+      '/reviews/mine': [{ id: 'r1', subject_type: 'HOTEL', subject_id: 'h1', rating: 4.5, body: 'ดี', created_at: '2026-11-09T09:00:00Z', mine: true }],
+    }));
+    const snap = await http(f).loadAccountSnapshot();
+    expect(validateAccountSnapshot(snap)).toEqual([]);
+    expect(snap.bookings[0]).toMatchObject({ id: 'b1', number: 'SB1', title: 'ทัวร์เกาะ', amount: 1950, status: 'pending', serverStatus: 'PENDING_PAYMENT' });
+    expect(snap.walletBalance).toBe(300);
+    expect(snap.walletTransactions[0]).toMatchObject({ type: 'in', amount: 300 });
+    expect(snap.notifications[0]).toMatchObject({ id: 'n1', message: 'ข้อความ', read: false });
+    expect(snap.reviews[0]).toMatchObject({ itemType: 'hotel', rating: 4.5, comment: 'ดี' });
+    expect(f.calls.every((c) => c.init.method === 'GET')).toBe(true);
+  });
+  it('fails the whole load (no half-empty account) when an endpoint breaks or returns the wrong shape', async () => {
+    await expect(http(fakeFetch(routes({ '/wallet/transactions': undefined }))).loadAccountSnapshot()).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect(http(fakeFetch(routes({ '/wallet': [] }))).loadAccountSnapshot()).rejects.toMatchObject({ code: 'BAD_RESPONSE' });
+    await expect(http(fakeFetch(routes({ '/bookings': {} }))).loadAccountSnapshot()).rejects.toMatchObject({ code: 'BAD_RESPONSE' });
   });
 });
 

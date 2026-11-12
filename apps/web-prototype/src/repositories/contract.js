@@ -25,6 +25,8 @@
  * @property {{ login(input: { email: string, password: string }): Promise<Session>,
  *             register(input: { email: string, password: string, displayName: string }): Promise<Session>,
  *             logout(): void }} auth
+ * @property {{ request(input: { bookingId: string, method?: 'ORIGINAL_METHOD'|'SABAI_WALLET' }): Promise<{ id: string, status: string, calculatedAmount: number, autoApproved: boolean }> }} refunds
+ *   A refund is a REQUEST: the server computes the amount from the booking's own price snapshot and decides approval.
  * @property {{ list(): Promise<Trip[]>,
  *             create(input: { name: string, destinationId?: string, startDate?: string, endDate?: string }): Promise<Trip>,
  *             get(id: string): Promise<Trip>,
@@ -65,6 +67,7 @@ export function assertRepository(repo) {
   const missing = [];
   if (!repo || typeof repo.loadAccountSnapshot !== 'function') missing.push('loadAccountSnapshot');
   ['login', 'register', 'logout'].forEach((m) => { if (!repo || !repo.auth || typeof repo.auth[m] !== 'function') missing.push(`auth.${m}`); });
+  if (!repo || !repo.refunds || typeof repo.refunds.request !== 'function') missing.push('refunds.request');
   ['list', 'create', 'get', 'update', 'remove', 'addActivity', 'removeActivity'].forEach((m) => { if (!repo || !repo.trips || typeof repo.trips[m] !== 'function') missing.push(`trips.${m}`); });
   if (missing.length) throw new Error(`Repository is missing: ${missing.join(', ')}`);
   return repo;

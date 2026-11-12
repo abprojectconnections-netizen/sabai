@@ -67,7 +67,8 @@ func myBookings(db *sql.DB) gin.HandlerFunc {
 			return
 		}
 		rows, err := db.QueryContext(c.Request.Context(), `SELECT b.id, b.booking_code, b.status, b.currency_code, COALESCE(s.base_total, b.total_amount), COALESCE(s.discount_total, 0), COALESCE(s.payable_total, b.total_amount), b.expires_at, b.created_at,
-				(SELECT status FROM payments WHERE booking_id = b.id ORDER BY created_at DESC LIMIT 1)
+				(SELECT status FROM payments WHERE booking_id = b.id ORDER BY created_at DESC LIMIT 1),
+				COALESCE((SELECT title_snapshot FROM booking_items WHERE booking_id = b.id AND deleted_at IS NULL ORDER BY created_at, id LIMIT 1), '')
 			FROM bookings b LEFT JOIN booking_price_snapshots s ON s.id = b.price_snapshot_id
 			WHERE b.user_id = ? AND b.deleted_at IS NULL ORDER BY b.created_at DESC, b.id LIMIT ? OFFSET ?`, p.UserID, limit, offset)
 		if err != nil {
@@ -81,11 +82,14 @@ func myBookings(db *sql.DB) gin.HandlerFunc {
 			var expires sql.NullTime
 			var created time.Time
 			var pay sql.NullString
-			if err := rows.Scan(&id, &code, &status, &cur, &base, &disc, &payable, &expires, &created, &pay); err != nil {
+			var title string
+			if err := rows.Scan(&id, &code, &status, &cur, &base, &disc, &payable, &expires, &created, &pay, &title); err != nil {
 				apiresponse.Internal(c)
 				return
 			}
-			out = append(out, bookingJSON(id, code, status, cur, base, disc, payable, expires, created, pay))
+			h := bookingJSON(id, code, status, cur, base, disc, payable, expires, created, pay)
+			h["title"] = title
+			out = append(out, h)
 		}
 		if rows.Err() != nil {
 			apiresponse.Internal(c)

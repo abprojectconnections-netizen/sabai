@@ -1,13 +1,15 @@
 import { emptyAccountSnapshot, validateTrip } from './contract';
 import { ApiError } from './errors';
+import { toBooking, toNotification, toReview, toWalletTransaction } from './mappers';
 
 const newRequestId = () => (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function' ? globalThis.crypto.randomUUID() : `req-${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
 /**
  * REST repository for BETA and PRODUCTION. Implements the endpoints that exist in backend/docs/openapi.yaml:
  *   POST /auth/register, POST /auth/login,
+ *   GET /bookings, /wallet, /wallet/transactions, /notifications, /reviews/mine,
  *   GET/POST /trips, GET/PATCH/DELETE /trips/{id}, POST /trips/{id}/activities, DELETE /trips/{id}/activities/{activityId}
- * Notifications and reviews endpoints exist on the server but are not wired into the UI yet.
+ * loadAccountSnapshot reads GET /bookings, /wallet, /wallet/transactions, /notifications and /reviews/mine.
  * Response envelope: { data?, error?: { code, message }, request_id }.
  *
  * The access token is kept in memory only (never localStorage). Authorization is enforced by the server.
@@ -19,13 +21,14 @@ const newRequestId = () => (globalThis.crypto && typeof globalThis.crypto.random
  */
 export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 10000, onUnauthorized }) {
   let accessToken = '';
+  const refundKeys = new Map();
   const doFetch = (...args) => (fetchImpl || globalThis.fetch)(...args);
 
-  async function request(path, { method = 'GET', body, auth = false } = {}) {
+  async function request(path, { method = 'GET', body, auth = false, headers: extra = {} } = {}) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     const requestId = newRequestId();
-    const headers = { Accept: 'application/json', 'X-Request-ID': requestId };
+    const headers = { Accept: 'application/json', 'X-Request-ID': requestId, ...extra };
     if (body !== undefined) headers['Content-Type'] = 'application/json';
     if (auth && accessToken) headers.Authorization = `Bearer ${accessToken}`;
     let response;
@@ -70,12 +73,42 @@ export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 100
 
   return {
     mode,
-    // No snapshot endpoint exists yet: a new BETA/PRODUCTION account starts empty. Mock data is never injected here.
-    async loadAccountSnapshot() { return emptyAccountSnapshot(); },
+    /**
+     * Built from the real endpoints (bookings, wallet, notifications, reviews). Everything without an endpoint yet
+     * (coupons, support tickets, calendar events, community) starts empty: mock data is never injected here.
+     */
+    async loadAccountSnapshot() {
+      const list = async (path) => {
+        const d = await request(path, { auth: true });
+        if (!Array.isArray(d)) throw new ApiError({ code: 'BAD_RESPONSE', message: `${path} must return an array` });
+        return d;
+      };
+      const [bookings, wallet, ledger, notifications, reviews] = await Promise.all([
+        list('/bookings'), request('/wallet', { auth: true }), list('/wallet/transactions'), list('/notifications'), list('/reviews/mine'),
+      ]);
+      if (!wallet || typeof wallet.available_balance !== 'string') throw new ApiError({ code: 'BAD_RESPONSE', message: 'wallet payload is invalid' });
+      return {
+        ...emptyAccountSnapshot(),
+        bookings: bookings.map(toBooking),
+        walletBalance: Number(wallet.available_balance) || 0,
+        walletTransactions: ledger.map(toWalletTransaction),
+        notifications: notifications.map(toNotification),
+        reviews: reviews.map(toReview),
+      };
+    },
     auth: {
       async login({ email, password }) { return toSession(await request('/auth/login', { method: 'POST', body: { email, password } })); },
       async register({ email, password, displayName }) { return toSession(await request('/auth/register', { method: 'POST', body: { email, password, display_name: displayName } })); },
       logout() { accessToken = ''; },
+    },
+    refunds: {
+      /** One Idempotency-Key per booking for this session, so a retry after a timeout can never create a second refund. */
+      async request({ bookingId, method = 'ORIGINAL_METHOD' }) {
+        if (!refundKeys.has(bookingId)) refundKeys.set(bookingId, `web-refund-${bookingId}-${newRequestId()}`);
+        const r = await request('/refunds', { method: 'POST', auth: true, headers: { 'Idempotency-Key': refundKeys.get(bookingId) }, body: { booking_id: bookingId, method } });
+        if (!r || typeof r.id !== 'string') throw new ApiError({ code: 'BAD_RESPONSE', message: 'refund payload is invalid' });
+        return { id: r.id, status: r.status, calculatedAmount: Number(r.calculated_amount) || 0, autoApproved: !!r.auto_approved };
+      },
     },
     trips: {
       async list() {

@@ -72,6 +72,14 @@ export function createMockRepository({ latencyMs = 0, failLoad = false } = {}) {
       },
       logout() { session = null; },
     },
+    refunds: {
+      /** Mock: records the request only. It never decides or pays anything, same as the server contract. */
+      async request({ bookingId }) {
+        await sleep(latencyMs);
+        if (!bookingId) throw validation('booking_id is required');
+        return { id: `mock-refund-${bookingId}`, status: 'REQUESTED', calculatedAmount: 0, autoApproved: false };
+      },
+    },
     trips: {
       async list() { await sleep(latencyMs); return clone(trips.map(({ days, ...t }) => t)); },
       async create({ name, destinationId = '', startDate = '', endDate = '' }) {

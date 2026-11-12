@@ -19,6 +19,9 @@ export function describeApiErrorTh(error) {
     case 'UNAUTHORIZED': return 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
     case 'FORBIDDEN': return 'คุณไม่มีสิทธิ์ทำรายการนี้';
     case 'VALIDATION_ERROR': return `ข้อมูลไม่ถูกต้อง: ${error.message}`;
+    case 'NOT_FOUND': return 'ไม่พบรายการที่ต้องการ';
+    case 'CONFLICT': return 'ไม่สามารถทำรายการนี้ได้ในสถานะปัจจุบันของการจอง';
+    case 'FINANCIAL_TRANSACTIONS_DISABLED': return 'ระบบการเงินยังไม่เปิดใช้งานในสภาพแวดล้อมนี้';
     case 'NETWORK_ERROR': return 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง';
     case 'TIMEOUT': return 'เซิร์ฟเวอร์ตอบสนองช้าเกินไป ลองอีกครั้ง';
     case 'INTERNAL_ERROR': return 'ระบบขัดข้องชั่วคราว ลองอีกครั้งภายหลัง';

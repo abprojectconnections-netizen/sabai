@@ -1,4 +1,6 @@
 export const BOOKING_STATUS = {
+  pending: { label: 'รอชำระเงิน', bg: 'var(--muted-bg)', color: 'var(--ink-soft)' },
+  refunded: { label: 'คืนเงินแล้ว', bg: 'var(--muted-bg)', color: 'var(--ink-soft)' },
   confirmed: { label: 'ยืนยันแล้ว', bg: 'var(--pine-pale)', color: 'var(--pine)' },
   completed: { label: 'เสร็จสิ้น', bg: 'var(--muted-bg)', color: 'var(--ink-soft)' },
   cancelled: { label: 'ยกเลิกแล้ว', bg: 'var(--danger-soft)', color: 'var(--danger)' },

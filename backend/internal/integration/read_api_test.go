@@ -47,7 +47,7 @@ func TestCustomersSeeOnlyTheirOwnBookingsAndWallet(t *testing.T) {
 		t.Fatalf("own list: %d %v", list.Status, list.Body)
 	}
 	row := list.list()[0].(map[string]any)
-	if row["id"] != id || row["payable_total"] != "2000.00" || row["status"] != "PENDING_PAYMENT" || row["payment_status"] != nil {
+	if row["id"] != id || row["payable_total"] != "2000.00" || row["status"] != "PENDING_PAYMENT" || row["payment_status"] != nil || row["title"] != "DAY-TOUR" {
 		t.Fatalf("list row: %v", row)
 	}
 	one := call(t, "GET", "/api/v1/bookings/"+id, a.Token, nil)
