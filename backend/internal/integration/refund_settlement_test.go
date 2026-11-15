@@ -415,3 +415,44 @@ func TestReversalsLargerThanSalesAreHeldBackNotPaidAsNegative(t *testing.T) {
 		t.Fatal("the failed build must leave no reversal behind")
 	}
 }
+
+func TestCommissionPolicyPrecedenceIsPartnerThenCategoryThenDefault(t *testing.T) {
+	policy := func(scope, partner, category, rate string) {
+		var p, c any
+		if partner != "" {
+			p = partner
+		}
+		if category != "" {
+			c = category
+		}
+		mustOK(t, "policy", "INSERT INTO commission_policies (id, created_at, scope, partner_id, category, commission_type, rate, effective_from, policy_version, status, approved_at) VALUES (UUID(), "+now+", ?, ?, ?, 'PERCENT', ?, '2000-01-01', 100, 'ACTIVE', "+now+")", scope, p, c, rate)
+	}
+	settle := func(i inv, expectCommission string) {
+		u := newUser(t)
+		b, _ := paid(t, i, u, 1, "")
+		mustOK(t, "service long ago", "UPDATE booking_items SET service_date = DATE_SUB(CURDATE(), INTERVAL 30 DAY) WHERE booking_id = ?", b)
+		maker := newUser(t, "FINANCE_MANAGER")
+		day := func(n int) string { return time.Now().UTC().AddDate(0, 0, n).Format("2006-01-02") }
+		r := call(t, "POST", "/api/v1/portal/settlements/build", maker.Token, map[string]string{"partner_id": i.partner, "period_from": day(-40), "period_to": day(-20)})
+		if r.Status != 201 || r.data()["commission"] != expectCommission {
+			t.Fatalf("commission want %s: %d %v", expectCommission, r.Status, r.Body)
+		}
+	}
+	// default: the seeded 5% applies to a category nobody has a policy for
+	plain := newInventory(t, 3, "10000.00")
+	settle(plain, "500.00")
+	// category policy beats the default
+	cat := newInventory(t, 3, "10000.00")
+	mustOK(t, "category", "UPDATE supplier_products sp JOIN inventory_items i ON i.supplier_product_id = sp.id SET sp.category = 'TRANSPORT' WHERE i.id = ?", cat.item)
+	policy("CATEGORY", "", "TRANSPORT", "0.030000")
+	settle(cat, "300.00")
+	// a partner policy beats the category policy
+	both := newInventory(t, 3, "10000.00")
+	mustOK(t, "category", "UPDATE supplier_products sp JOIN inventory_items i ON i.supplier_product_id = sp.id SET sp.category = 'TRANSPORT' WHERE i.id = ?", both.item)
+	policy("PARTNER", both.partner, "", "0.020000")
+	settle(both, "200.00")
+	// the batch audit records which policy versions were used
+	if col(t, "SELECT COUNT(*) FROM financial_audit_logs WHERE action = 'settlement.calculated' AND field_changes_json LIKE '%policies_used%'") == "0" {
+		t.Fatal("audit must record the policies used")
+	}
+}

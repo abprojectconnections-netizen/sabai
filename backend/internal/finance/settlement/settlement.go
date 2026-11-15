@@ -90,19 +90,6 @@ func (s *Service) Build(ctx context.Context, actorID, partnerID string, from, to
 	}
 	now := time.Now().UTC()
 	batchID := uuid.NewString()
-	var policyID, ptype string
-	var version int
-	var rate, fixed sql.NullString
-	err = tx.QueryRowContext(ctx, `SELECT id, policy_version, commission_type, rate, fixed_amount FROM commission_policies
-		WHERE status = 'ACTIVE' AND effective_from <= ? AND (effective_to IS NULL OR effective_to > ?) AND (scope = 'DEFAULT' OR (scope = 'PARTNER' AND partner_id = ?))
-		ORDER BY FIELD(scope, 'PARTNER', 'DEFAULT') LIMIT 1`, now, now, partnerID).Scan(&policyID, &version, &ptype, &rate, &fixed)
-	if err == sql.ErrNoRows {
-		if len(cands) > 0 {
-			return Batch{}, ErrNoPolicy
-		}
-	} else if err != nil {
-		return Batch{}, err
-	}
 	var createdBy any
 	if actorID != "" {
 		createdBy = actorID
@@ -116,7 +103,14 @@ func (s *Service) Build(ctx context.Context, actorID, partnerID string, from, to
 		return Batch{}, err
 	}
 	var gross, comm money.Amount
+	used := map[string]int{} // policy id -> version, for the audit record
 	for _, c := range cands {
+		pol, err := resolvePolicy(ctx, tx, partnerID, c.booking, now)
+		if err != nil {
+			return Batch{}, err
+		}
+		policyID, version, ptype, rate, fixed := pol.id, pol.version, pol.ptype, pol.rate, pol.fixed
+		used[policyID] = version
 		eligible, _ := money.Parse(c.base)
 		var pf string
 		if err := tx.QueryRowContext(ctx, "SELECT COALESCE(SUM(amount), 0) FROM discount_allocations WHERE booking_id = ? AND funded_by = 'PARTNER'", c.booking).Scan(&pf); err != nil {
@@ -179,7 +173,7 @@ func (s *Service) Build(ctx context.Context, actorID, partnerID string, from, to
 		actorType = "STAFF"
 	}
 	if err := faudit.Append(ctx, tx, faudit.Entry{ActorUserID: actorID, ActorType: actorType, EntityType: "settlement_batch", EntityID: batchID, Action: "settlement.calculated",
-		Changes: map[string]any{"gross": gross.String(), "commission": comm.String(), "net": (gross - comm).String(), "items": len(cands) + len(revs), "reversals": len(revs), "policy_version": version}}); err != nil {
+		Changes: map[string]any{"gross": gross.String(), "commission": comm.String(), "net": (gross - comm).String(), "items": len(cands) + len(revs), "reversals": len(revs), "policies_used": used}}); err != nil {
 		return Batch{}, err
 	}
 	return Batch{ID: batchID, Items: len(cands) + len(revs), Gross: gross, Commission: comm, Net: gross - comm, Status: "CALCULATED"}, tx.Commit()
@@ -343,4 +337,32 @@ func reversalCandidates(ctx context.Context, tx *sql.Tx, partnerID string) ([]re
 // share returns a * num / den rounded half up, in integer satang (all inputs non-negative).
 func share(a, num, den money.Amount) money.Amount {
 	return money.Amount((int64(a)*int64(num)*2 + int64(den)) / (2 * int64(den)))
+}
+
+type policy struct {
+	id, ptype   string
+	version     int
+	rate, fixed sql.NullString
+}
+
+// resolvePolicy picks the commission policy for one booking: a PARTNER policy beats a CATEGORY policy, which beats the DEFAULT.
+// A booking's category is the category of its items when they all share one; a mixed-category booking only matches PARTNER or DEFAULT.
+// Both the order and the mixed-category rule are DEFAULTS that Finance must confirm. Within a scope the highest active version wins.
+func resolvePolicy(ctx context.Context, tx *sql.Tx, partnerID, bookingID string, now time.Time) (policy, error) {
+	var category sql.NullString
+	if err := tx.QueryRowContext(ctx, `SELECT CASE WHEN COUNT(DISTINCT sp.category) = 1 THEN MIN(sp.category) END
+		FROM booking_items bi JOIN inventory_items i ON i.id = bi.reference_id JOIN supplier_products sp ON sp.id = i.supplier_product_id
+		WHERE bi.booking_id = ? AND bi.deleted_at IS NULL`, bookingID).Scan(&category); err != nil {
+		return policy{}, err
+	}
+	var p policy
+	err := tx.QueryRowContext(ctx, `SELECT id, policy_version, commission_type, rate, fixed_amount FROM commission_policies
+		WHERE status = 'ACTIVE' AND effective_from <= ? AND (effective_to IS NULL OR effective_to > ?)
+		  AND (scope = 'DEFAULT' OR (scope = 'PARTNER' AND partner_id = ?) OR (scope = 'CATEGORY' AND category = ? AND ? IS NOT NULL))
+		ORDER BY FIELD(scope, 'PARTNER', 'CATEGORY', 'DEFAULT'), policy_version DESC, created_at DESC LIMIT 1`,
+		now, now, partnerID, category, category).Scan(&p.id, &p.version, &p.ptype, &p.rate, &p.fixed)
+	if err == sql.ErrNoRows {
+		return policy{}, ErrNoPolicy
+	}
+	return p, err
 }
