@@ -1,11 +1,11 @@
 import { Calendar, CheckCircle2, CreditCard, Lock, QrCode, Ticket, Wallet } from 'lucide-react';
 import { PrimaryButton, SecondaryButton, TextField, TopBar } from '../../components/ui';
+import { payableTotal } from '../../domain/pricing';
 import { TYPE_LABEL } from '../../ui/typeMeta';
 
 export function BookingScreen({ item, onBack, onPay }) {
   if (!item) return null;
-  const fee = Math.round(item.price * 0.05);
-  const total = item.price + fee;
+  const total = payableTotal(item.price); // the listed price: no service fee is approved, and the server's figure is final
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <TopBar title="สรุปการจอง" onBack={onBack} />
@@ -31,7 +31,6 @@ export function BookingScreen({ item, onBack, onPay }) {
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}><span style={{ color: 'var(--ink-soft)' }}>ราคารวม</span><span style={{ fontWeight: 600 }}>฿{item.price.toLocaleString()}</span></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13 }}><span style={{ color: 'var(--ink-soft)' }}>ค่าธรรมเนียมบริการ</span><span style={{ fontWeight: 600 }}>฿{fee.toLocaleString()}</span></div>
           <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 10, borderTop: '1px dashed var(--border)' }}>
             <span style={{ fontWeight: 700 }}>ยอดชำระทั้งหมด</span>
             <span className="font-display" style={{ fontSize: 18, fontWeight: 700, color: 'var(--pine)' }}>฿{total.toLocaleString()}</span>
@@ -109,7 +108,7 @@ export function ConfirmationScreen({ bookingNumber, item, onHome, onViewBookings
         <CheckCircle2 size={40} color="var(--pine)" />
       </div>
       <p className="font-display" style={{ fontSize: 22, fontWeight: 600 }}>จองสำเร็จ!</p>
-      <p style={{ fontSize: 13, color: 'var(--ink-soft)' }}>เราได้ส่งรายละเอียดการจองไปยังอีเมลของคุณแล้ว</p>
+      <p style={{ fontSize: 13, color: 'var(--ink-soft)' }}>ดูรายละเอียดและสถานะการจองได้ที่ "การจองของฉัน"</p>
       <div style={{ width: '100%', border: '1px dashed var(--border)', borderRadius: 16, padding: 16 }}>
         <p style={{ fontSize: 11, color: 'var(--ink-soft)' }}>หมายเลขการจอง</p>
         <p className="font-display" style={{ fontSize: 18, fontWeight: 700, color: 'var(--pine)' }}>{bookingNumber}</p>

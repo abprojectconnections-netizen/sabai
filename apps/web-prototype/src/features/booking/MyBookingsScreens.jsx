@@ -74,7 +74,7 @@ export function BookingDetailScreen({ booking, onBack, onCancel, onReview }) {
   const rows = [
     ['หมายเลขการจอง', booking.number],
     ['วันที่จอง', booking.date],
-    ['วิธีชำระเงิน', booking.method],
+    ...(booking.method ? [['วิธีชำระเงิน', booking.method]] : []),
     ['ยอดชำระ', `฿${booking.amount.toLocaleString()}`],
   ];
   if (booking.plan) {

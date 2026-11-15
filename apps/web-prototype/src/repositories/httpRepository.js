@@ -80,13 +80,19 @@ export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 100
      * (coupons, support tickets, calendar events, community) starts empty: mock data is never injected here.
      */
     async loadAccountSnapshot() {
+      // Before sign-in only the public catalogue can be read; the account parts load after login (and again after each money action).
+      const catalogRows = await request('/catalog/items?limit=100');
+      if (!Array.isArray(catalogRows)) throw new ApiError({ code: 'BAD_RESPONSE', message: '/catalog/items must return an array' });
+      if (!accessToken) return { ...emptyAccountSnapshot(), listings: catalogRows.map(toListing) };
+      // The server returns a bare array for bookings and the ledger, and {items: [...]} for notifications and reviews.
       const list = async (path) => {
         const d = await request(path, { auth: true });
-        if (!Array.isArray(d)) throw new ApiError({ code: 'BAD_RESPONSE', message: `${path} must return an array` });
-        return d;
+        const rows = Array.isArray(d) ? d : (d && Array.isArray(d.items) ? d.items : null);
+        if (!rows) throw new ApiError({ code: 'BAD_RESPONSE', message: `${path} must return a list` });
+        return rows;
       };
-      const [bookings, wallet, ledger, notifications, reviews, catalog] = await Promise.all([
-        list('/bookings'), request('/wallet', { auth: true }), list('/wallet/transactions'), list('/notifications'), list('/reviews/mine'), list('/catalog/items?limit=100'),
+      const [bookings, wallet, ledger, notifications, reviews] = await Promise.all([
+        list('/bookings'), request('/wallet', { auth: true }), list('/wallet/transactions'), list('/notifications'), list('/reviews/mine'),
       ]);
       if (!wallet || typeof wallet.available_balance !== 'string') throw new ApiError({ code: 'BAD_RESPONSE', message: 'wallet payload is invalid' });
       return {
@@ -96,7 +102,7 @@ export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 100
         walletTransactions: ledger.map(toWalletTransaction),
         notifications: notifications.map(toNotification),
         reviews: reviews.map(toReview),
-        listings: catalog.map(toListing),
+        listings: catalogRows.map(toListing),
       };
     },
     auth: {

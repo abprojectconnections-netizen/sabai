@@ -69,11 +69,20 @@ export default function SabaiTravelApp({ repo, snapshot }) {
   }));
   const [authBusy, setAuthBusy] = useState(false);
   const [authError, setAuthError] = useState('');
+  // Server-owned account data (bookings, wallet, notifications, reviews). Never applied for the mock repository, whose demo data is local.
+  const applyAccount = (fresh) => {
+    setBookings(fresh.bookings);
+    setWalletBalance(fresh.walletBalance);
+    setWalletTransactions(fresh.walletTransactions);
+    setNotifications(fresh.notifications);
+    setReviews(fresh.reviews);
+  };
   const runAuth = async (action) => {
     setAuthError('');
     setAuthBusy(true);
     try {
       await action();
+      if (repo.checkout.supported) applyAccount(await repo.loadAccountSnapshot());
       gotoTab('home');
     } catch (e) {
       setAuthError(describeApiErrorTh(e));
@@ -86,7 +95,12 @@ export default function SabaiTravelApp({ repo, snapshot }) {
     email: registerForm.email.trim(), password: registerForm.password,
     displayName: `${registerForm.firstName} ${registerForm.lastName}`.trim(),
   }));
-  const handleLogout = () => { repo.auth.logout(); setAuthError(''); setStack(['login']); };
+  const handleLogout = () => {
+    repo.auth.logout();
+    if (repo.checkout.supported) applyAccount({ bookings: snapshot.bookings, walletBalance: snapshot.walletBalance, walletTransactions: snapshot.walletTransactions, notifications: snapshot.notifications, reviews: snapshot.reviews }); // nothing of the previous user stays on screen
+    setAuthError('');
+    setStack(['login']);
+  };
 
   const listings = snapshot.listings;
   const [walletBalance, setWalletBalance] = useState(snapshot.walletBalance);
@@ -279,11 +293,7 @@ export default function SabaiTravelApp({ repo, snapshot }) {
     setProcessingPayment(true);
     try {
       const r = await repo.checkout.pay({ inventoryItemId: bookingItem.inventoryItemId, serviceDate: bookingItem.serviceDate, quantity: 1, method: API_PAYMENT_METHOD[paymentMethod] });
-      const fresh = await repo.loadAccountSnapshot();
-      setBookings(fresh.bookings);
-      setWalletBalance(fresh.walletBalance);
-      setWalletTransactions(fresh.walletTransactions);
-      setNotifications(fresh.notifications);
+      applyAccount(await repo.loadAccountSnapshot());
       if (r.status === 'PENDING_PAYMENT') {
         setPaymentError('ยังไม่ได้รับการยืนยันการชำระเงินจากผู้ให้บริการ ตรวจสอบสถานะได้ที่ "การจองของฉัน" (การจองจะถูกกันไว้ชั่วคราวตามเวลาที่กำหนด)');
         return;

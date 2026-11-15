@@ -65,7 +65,7 @@ func CORS(configuredOrigins string) gin.HandlerFunc {
 			)
 			c.Header(
 				"Access-Control-Allow-Headers",
-				"Authorization, Content-Type, X-Request-ID",
+				"Authorization, Content-Type, Idempotency-Key, X-Request-ID",
 			)
 			c.Header("Access-Control-Expose-Headers", "X-Request-ID")
 		}

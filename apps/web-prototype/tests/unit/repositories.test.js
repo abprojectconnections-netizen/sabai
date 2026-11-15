@@ -127,9 +127,10 @@ describe('http repository (contract tests with a fake fetch)', () => {
     await repo.trips.list();
     expect(f.calls[1].init.headers.Authorization).toBeUndefined();
   });
+  const signedIn = async (f) => { const r = http(f); await r.auth.login({ email: 'a@b.co', password: 'password1' }); return r; };
   const routes = (over = {}) => (url) => {
     const path = new URL(url).pathname.replace('/api/v1', '');
-    const base = { '/bookings': [], '/wallet': { available_balance: '0.00', pending_balance: '0.00', currency: 'THB', balance_type: 'REFUND_CREDIT' }, '/wallet/transactions': [], '/notifications': [], '/reviews/mine': [], '/catalog/items': [] };
+    const base = { '/bookings': [], '/wallet': { available_balance: '0.00', pending_balance: '0.00', currency: 'THB', balance_type: 'REFUND_CREDIT' }, '/wallet/transactions': [], '/notifications': { items: [], unread_count: 0 }, '/reviews/mine': { items: [] }, '/catalog/items': [], '/auth/login': { access_token: 'tok', token_type: 'Bearer' } };
     const data = path in over ? over[path] : base[path];
     return data === undefined ? json(404, { error: { code: 'NOT_FOUND', message: 'x' }, request_id: 'r' }) : json(200, { data, request_id: 'r' });
   };
@@ -211,8 +212,16 @@ describe('http repository (contract tests with a fake fetch)', () => {
     expect(repo.checkout.supported).toBe(false);
     await expect(repo.checkout.pay({})).rejects.toMatchObject({ code: 'NOT_SUPPORTED' });
   });
-  it('never injects mock data: a new BETA/PRODUCTION account starts empty', async () => {
-    const snap = await http(fakeFetch(routes())).loadAccountSnapshot();
+  it('before sign-in the snapshot is the public catalogue only and no authenticated call is made', async () => {
+    const f = fakeFetch(routes({ '/catalog/items': [{ id: 'i1', title: 'ทัวร์', category: 'TOUR', partner_name: 'p', from_price: '100.00', next_available_date: '2026-12-01' }] }));
+    const snap = await http(f).loadAccountSnapshot();
+    expect(snap.listings).toHaveLength(1);
+    expect({ ...snap, listings: [] }).toEqual(emptyAccountSnapshot());
+    expect(f.calls.map((c) => new URL(c.url).pathname)).toEqual(['/api/v1/catalog/items']);
+  });
+  it('never injects mock data: a new BETA/PRODUCTION account starts empty after sign-in', async () => {
+    const repo = await signedIn(fakeFetch(routes()));
+    const snap = await repo.loadAccountSnapshot();
     expect(snap).toEqual(emptyAccountSnapshot());
     expect(validateAccountSnapshot(snap)).toEqual([]);
   });
@@ -221,11 +230,11 @@ describe('http repository (contract tests with a fake fetch)', () => {
       '/bookings': [{ id: 'b1', booking_code: 'SB1', title: 'ทัวร์เกาะ', status: 'PENDING_PAYMENT', payable_total: '1950.00', payment_status: null, created_at: '2026-11-10T09:00:00Z' }],
       '/wallet': { available_balance: '300.00', pending_balance: '0.00', currency: 'THB', balance_type: 'REFUND_CREDIT' },
       '/wallet/transactions': [{ id: 'w1', type: 'REFUND_CREDIT', credit_amount: '300.00', debit_amount: '0.00', created_at: '2026-11-11T09:00:00Z' }],
-      '/notifications': [{ id: 'n1', type: 'booking', title: 'หัวข้อ', body: 'ข้อความ', read: false, created_at: '2026-11-11T09:00:00Z' }],
-      '/reviews/mine': [{ id: 'r1', subject_type: 'HOTEL', subject_id: 'h1', rating: 4.5, body: 'ดี', created_at: '2026-11-09T09:00:00Z', mine: true }],
+      '/notifications': { items: [{ id: 'n1', type: 'booking', title: 'หัวข้อ', body: 'ข้อความ', read: false, created_at: '2026-11-11T09:00:00Z' }], unread_count: 1 },
+      '/reviews/mine': { items: [{ id: 'r1', subject_type: 'HOTEL', subject_id: 'h1', rating: 4.5, body: 'ดี', created_at: '2026-11-09T09:00:00Z', mine: true }] },
       '/catalog/items': [{ id: 'i1', title: 'ทัวร์เกาะ', category: 'TOUR', partner_name: 'ตัวอย่างทัวร์', from_price: '1200.00', next_available_date: '2026-12-01' }],
     }));
-    const snap = await http(f).loadAccountSnapshot();
+    const snap = await (await signedIn(f)).loadAccountSnapshot();
     expect(validateAccountSnapshot(snap)).toEqual([]);
     expect(snap.bookings[0]).toMatchObject({ id: 'b1', number: 'SB1', title: 'ทัวร์เกาะ', amount: 1950, status: 'pending', serverStatus: 'PENDING_PAYMENT' });
     expect(snap.walletBalance).toBe(300);
@@ -233,12 +242,12 @@ describe('http repository (contract tests with a fake fetch)', () => {
     expect(snap.notifications[0]).toMatchObject({ id: 'n1', message: 'ข้อความ', read: false });
     expect(snap.reviews[0]).toMatchObject({ itemType: 'hotel', rating: 4.5, comment: 'ดี' });
     expect(snap.listings[0]).toMatchObject({ id: 'i1', inventoryItemId: 'i1', type: 'attraction', name: 'ทัวร์เกาะ', price: 1200, serviceDate: '2026-12-01' });
-    expect(f.calls.every((c) => c.init.method === 'GET')).toBe(true);
+    expect(f.calls.filter((c) => !c.url.endsWith('/auth/login')).every((c) => c.init.method === 'GET')).toBe(true);
   });
   it('fails the whole load (no half-empty account) when an endpoint breaks or returns the wrong shape', async () => {
-    await expect(http(fakeFetch(routes({ '/wallet/transactions': undefined }))).loadAccountSnapshot()).rejects.toMatchObject({ code: 'NOT_FOUND' });
-    await expect(http(fakeFetch(routes({ '/wallet': [] }))).loadAccountSnapshot()).rejects.toMatchObject({ code: 'BAD_RESPONSE' });
-    await expect(http(fakeFetch(routes({ '/bookings': {} }))).loadAccountSnapshot()).rejects.toMatchObject({ code: 'BAD_RESPONSE' });
+    await expect((await signedIn(fakeFetch(routes({ '/wallet/transactions': undefined })))).loadAccountSnapshot()).rejects.toMatchObject({ code: 'NOT_FOUND' });
+    await expect((await signedIn(fakeFetch(routes({ '/wallet': [] })))).loadAccountSnapshot()).rejects.toMatchObject({ code: 'BAD_RESPONSE' });
+    await expect((await signedIn(fakeFetch(routes({ '/bookings': {} })))).loadAccountSnapshot()).rejects.toMatchObject({ code: 'BAD_RESPONSE' });
   });
 });
 
