@@ -1,0 +1,269 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:http/http.dart' as http;
+
+import '../../core/config/app_config.dart';
+import '../../core/errors/api_error.dart';
+import '../../core/util/format.dart';
+import '../models/models.dart';
+import 'app_repository.dart';
+
+/// REST repository for beta and production (endpoints in backend/docs/openapi.yaml).
+/// Response envelope: `{data, request_id}` or `{error: {code, message}, request_id}`.
+/// The access token is kept in memory only. Authorization is enforced by the server.
+class HttpRepository implements AppRepository {
+  HttpRepository({
+    required http.Client client,
+    required String baseUrl,
+    required this.mode,
+    this.timeout = const Duration(seconds: 10),
+    this.pollTries = 8,
+    this.pollDelay = const Duration(seconds: 1),
+    this.onUnauthorized,
+    Random? random,
+  })  : _client = client,
+        _baseUrl = baseUrl,
+        _random = random ?? Random.secure();
+
+  final http.Client _client;
+  final String _baseUrl;
+  final ApiMode mode;
+  final Duration timeout;
+  final int pollTries;
+  final Duration pollDelay;
+  final void Function()? onUnauthorized;
+  final Random _random;
+
+  String _token = '';
+  final Map<String, String> _refundKeys = {};
+  final Map<String, String> _attemptKeys = {};
+
+  @override
+  bool get isRealCheckout => true;
+
+  String _newId() {
+    String hex(int n) =>
+        List.generate(n, (_) => _random.nextInt(16).toRadixString(16)).join();
+    return '${hex(8)}-${hex(4)}-${hex(4)}-${hex(4)}-${hex(12)}';
+  }
+
+  Future<dynamic> _request(
+    String path, {
+    String method = 'GET',
+    Object? body,
+    bool auth = false,
+    Map<String, String> headers = const {},
+  }) async {
+    final requestId = _newId();
+    final h = <String, String>{
+      'Accept': 'application/json',
+      'X-Request-ID': requestId,
+      ...headers,
+    };
+    if (body != null) h['Content-Type'] = 'application/json';
+    if (auth && _token.isNotEmpty) h['Authorization'] = 'Bearer $_token';
+
+    http.Response res;
+    try {
+      final req = http.Request(method, Uri.parse('$_baseUrl$path'))
+        ..headers.addAll(h);
+      if (body != null) req.body = jsonEncode(body);
+      final streamed = await _client.send(req).timeout(timeout);
+      res = await http.Response.fromStream(streamed);
+    } on TimeoutException {
+      throw ApiError(code: 'TIMEOUT', message: 'request timed out', requestId: requestId);
+    } catch (_) {
+      throw ApiError(code: 'NETWORK_ERROR', message: 'request failed', requestId: requestId);
+    }
+
+    final ok = res.statusCode >= 200 && res.statusCode < 300;
+    if (ok && res.statusCode == 204) return null;
+
+    Map<String, dynamic>? payload;
+    try {
+      final decoded = jsonDecode(utf8.decode(res.bodyBytes));
+      if (decoded is Map<String, dynamic>) payload = decoded;
+    } catch (_) {
+      payload = null;
+    }
+    final rid = (payload?['request_id'] ?? requestId).toString();
+
+    if (!ok) {
+      final err = payload?['error'];
+      if (res.statusCode == 401 && auth) onUnauthorized?.call();
+      final errMap = err is Map<String, dynamic> ? err : const <String, dynamic>{};
+      throw ApiError(
+        code: (errMap['code'] ?? (res.statusCode >= 500 ? 'INTERNAL_ERROR' : 'HTTP_ERROR')).toString(),
+        message: (errMap['message'] ?? 'HTTP ${res.statusCode}').toString(),
+        status: res.statusCode,
+        requestId: rid,
+      );
+    }
+    if (payload == null || !payload.containsKey('data')) {
+      throw ApiError(code: 'BAD_RESPONSE', message: 'response is missing data', status: res.statusCode, requestId: rid);
+    }
+    return payload['data'];
+  }
+
+  /// Bookings and the ledger return a bare array; notifications and reviews return `{items: [...]}`.
+  List<Map<String, dynamic>> _rows(dynamic data, String path) {
+    final raw = data is List
+        ? data
+        : (data is Map<String, dynamic> && data['items'] is List ? data['items'] as List<dynamic> : null);
+    if (raw == null) {
+      throw ApiError(code: 'BAD_RESPONSE', message: '$path must return a list');
+    }
+    return raw.whereType<Map<String, dynamic>>().toList();
+  }
+
+  Session _toSession(dynamic data) {
+    if (data is! Map<String, dynamic> ||
+        data['access_token'] is! String ||
+        (data['access_token'] as String).isEmpty) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: 'response is missing access_token');
+    }
+    _token = data['access_token'] as String;
+    final u = data['user'];
+    final user = u is Map<String, dynamic> ? u : const <String, dynamic>{};
+    return Session(
+      accessToken: _token,
+      userId: (user['id'] ?? '').toString(),
+      email: (user['email'] ?? '').toString(),
+      displayName: (user['display_name'] ?? '').toString(),
+    );
+  }
+
+  @override
+  Future<List<Listing>> listings() async {
+    final data = await _request('/catalog/items?limit=100');
+    return _rows(data, '/catalog/items').map(Listing.fromJson).toList();
+  }
+
+  @override
+  Future<Session> login({required String email, required String password}) async =>
+      _toSession(await _request('/auth/login', method: 'POST', body: {'email': email, 'password': password}));
+
+  @override
+  Future<Session> register({
+    required String email,
+    required String password,
+    required String displayName,
+  }) async =>
+      _toSession(await _request('/auth/register',
+          method: 'POST', body: {'email': email, 'password': password, 'display_name': displayName}));
+
+  @override
+  void logout() {
+    _token = '';
+  }
+
+  @override
+  Future<List<Booking>> bookings() async {
+    final data = await _request('/bookings', auth: true);
+    return _rows(data, '/bookings').map(Booking.fromJson).toList();
+  }
+
+  @override
+  Future<Wallet> wallet() async {
+    final results = await Future.wait<dynamic>([
+      _request('/wallet', auth: true),
+      _request('/wallet/transactions', auth: true),
+    ]);
+    final w = results[0];
+    if (w is! Map<String, dynamic> || w['available_balance'] is! String) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: 'wallet payload is invalid');
+    }
+    return Wallet(
+      balance: parseAmount(w['available_balance']),
+      transactions: _rows(results[1], '/wallet/transactions').map(WalletTransaction.fromJson).toList(),
+    );
+  }
+
+  @override
+  Future<CheckoutResult> pay({
+    required String inventoryItemId,
+    required String serviceDate,
+    int quantity = 1,
+    String method = 'PROMPTPAY_QR',
+  }) async {
+    // One Idempotency-Key per (item, date, quantity) attempt, so a retry after a timeout cannot create a second booking.
+    final attempt = '$inventoryItemId|$serviceDate|$quantity';
+    final key = _attemptKeys.putIfAbsent(attempt, _newId);
+
+    final b = await _request('/bookings',
+        method: 'POST',
+        auth: true,
+        headers: {'Idempotency-Key': 'app-bk-$key'},
+        body: {
+          'items': [
+            {'inventory_item_id': inventoryItemId, 'service_date': serviceDate, 'quantity': quantity}
+          ]
+        });
+    if (b is! Map<String, dynamic> || b['id'] is! String) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: 'booking payload is invalid');
+    }
+    final bookingId = b['id'] as String;
+
+    final intent = await _request('/payments/intents',
+        method: 'POST',
+        auth: true,
+        headers: {'Idempotency-Key': 'app-pi-$key'},
+        body: {'booking_id': bookingId, 'method': method});
+    if (intent is! Map<String, dynamic> || intent['payment_reference'] is! String) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: 'payment payload is invalid');
+    }
+
+    if (mode != ApiMode.production) {
+      // Development simulator: absent (404) when the server runs a real provider.
+      try {
+        await _request('/dev/payments/simulate',
+            method: 'POST', auth: true, body: {'payment_reference': intent['payment_reference']});
+      } on ApiError catch (e) {
+        if (e.code != 'NOT_FOUND') rethrow;
+      }
+    }
+
+    Map<String, dynamic> detail = const {};
+    for (var i = 0; i < pollTries; i++) {
+      final d = await _request('/bookings/$bookingId', auth: true);
+      if (d is! Map<String, dynamic>) {
+        throw const ApiError(code: 'BAD_RESPONSE', message: 'booking detail is invalid');
+      }
+      detail = d;
+      if (d['status'] != 'PENDING_PAYMENT') break;
+      if (i < pollTries - 1) await Future<void>.delayed(pollDelay);
+    }
+    _attemptKeys.remove(attempt);
+    return CheckoutResult(
+      bookingId: bookingId,
+      bookingCode: (detail['booking_code'] ?? '').toString(),
+      status: (detail['status'] ?? '').toString(),
+      payableTotal: parseAmount(detail['payable_total']),
+      qrPayload: (intent['qr_payload'] ?? '').toString(),
+    );
+  }
+
+  @override
+  Future<RefundResult> requestRefund({
+    required String bookingId,
+    String method = 'ORIGINAL_METHOD',
+  }) async {
+    final key = _refundKeys.putIfAbsent(bookingId, () => 'app-refund-$bookingId-${_newId()}');
+    final r = await _request('/refunds',
+        method: 'POST',
+        auth: true,
+        headers: {'Idempotency-Key': key},
+        body: {'booking_id': bookingId, 'method': method});
+    if (r is! Map<String, dynamic> || r['id'] is! String) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: 'refund payload is invalid');
+    }
+    return RefundResult(
+      id: r['id'] as String,
+      status: (r['status'] ?? '').toString(),
+      calculatedAmount: parseAmount(r['calculated_amount']),
+      autoApproved: r['auto_approved'] == true,
+    );
+  }
+}

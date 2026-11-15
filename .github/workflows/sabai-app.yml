@@ -1,0 +1,28 @@
+name: sabai-app
+
+on:
+  push:
+    branches: [main]
+    paths: ['apps/sabai_app/**', '.github/workflows/sabai-app.yml']
+  pull_request:
+    paths: ['apps/sabai_app/**', '.github/workflows/sabai-app.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/sabai_app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter --version
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos
+      - run: flutter test
