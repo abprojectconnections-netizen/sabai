@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sabai_app/src/app.dart';
 import 'package:sabai_app/src/core/config/app_config.dart';
 import 'package:sabai_app/src/data/repositories/mock_repository.dart';
 
 void main() {
   testWidgets('browse, sign in, pay and see the booking (mock repository)', (tester) async {
+    SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(SabaiApp(
       config: AppConfig.parse(const {}),
       repository: MockRepository(),
+      prefs: await SharedPreferences.getInstance(),
     ));
     await tester.pumpAndSettle();
 
@@ -36,9 +39,11 @@ void main() {
   });
 
   testWidgets('sold-out items cannot be booked', (tester) async {
+    SharedPreferences.setMockInitialValues({});
     await tester.pumpWidget(SabaiApp(
       config: AppConfig.parse(const {}),
       repository: MockRepository(),
+      prefs: await SharedPreferences.getInstance(),
     ));
     await tester.pumpAndSettle();
     await tester.tap(find.text('อันดามัน บีช วิลลา'));
