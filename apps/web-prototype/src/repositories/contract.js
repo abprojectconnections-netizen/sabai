@@ -17,6 +17,7 @@
  * @property {Array<object>} reviews
  * @property {Array<object>} supportTickets
  * @property {Array<object>} events
+ * @property {Array<object>} listings  bookable items shown in Search (BETA/PRODUCTION: GET /catalog/items)
  * @property {{ posts: Array<object>, comments: Record<string, Array<object>> }} community
  *
  * @typedef {Object} AppRepository
@@ -25,6 +26,9 @@
  * @property {{ login(input: { email: string, password: string }): Promise<Session>,
  *             register(input: { email: string, password: string, displayName: string }): Promise<Session>,
  *             logout(): void }} auth
+ * @property {{ supported: boolean, pay(input: { inventoryItemId: string, serviceDate: string, quantity?: number, method: 'PROMPTPAY_QR'|'CARD' }): Promise<{ bookingId: string, bookingCode: string, status: string, payableTotal: number, qrPayload: string }> }} checkout
+ *   Real checkout: create booking -> payment intent -> (development only) simulated provider event -> wait for the server's status.
+ *   `supported` is false for the mock repository, whose checkout stays a local simulation.
  * @property {{ request(input: { bookingId: string, method?: 'ORIGINAL_METHOD'|'SABAI_WALLET' }): Promise<{ id: string, status: string, calculatedAmount: number, autoApproved: boolean }> }} refunds
  *   A refund is a REQUEST: the server computes the amount from the booking's own price snapshot and decides approval.
  * @property {{ list(): Promise<Trip[]>,
@@ -36,12 +40,12 @@
  *             removeActivity(tripId: string, activityId: string): Promise<void> }} trips
  */
 
-export const SNAPSHOT_KEYS = ['coupons', 'bookings', 'walletBalance', 'walletTransactions', 'notifications', 'reviews', 'supportTickets', 'events', 'community'];
+export const SNAPSHOT_KEYS = ['coupons', 'bookings', 'walletBalance', 'walletTransactions', 'notifications', 'reviews', 'supportTickets', 'events', 'listings', 'community'];
 
 /** Brand-new account: nothing booked, nothing in the wallet. Used for BETA/PRODUCTION until their endpoints exist. */
 export function emptyAccountSnapshot() {
   return {
-    coupons: [], bookings: [], walletBalance: 0, walletTransactions: [], notifications: [], reviews: [], supportTickets: [], events: [],
+    coupons: [], bookings: [], walletBalance: 0, walletTransactions: [], notifications: [], reviews: [], supportTickets: [], events: [], listings: [],
     community: { posts: [], comments: {} },
   };
 }
@@ -50,7 +54,7 @@ export function emptyAccountSnapshot() {
 export function validateAccountSnapshot(snapshot) {
   const problems = [];
   if (!snapshot || typeof snapshot !== 'object') return ['snapshot must be an object'];
-  ['coupons', 'bookings', 'walletTransactions', 'notifications', 'reviews', 'supportTickets', 'events'].forEach((k) => {
+  ['coupons', 'bookings', 'walletTransactions', 'notifications', 'reviews', 'supportTickets', 'events', 'listings'].forEach((k) => {
     if (!Array.isArray(snapshot[k])) problems.push(`${k} must be an array`);
   });
   if (typeof snapshot.walletBalance !== 'number' || Number.isNaN(snapshot.walletBalance)) problems.push('walletBalance must be a number');
@@ -67,6 +71,7 @@ export function assertRepository(repo) {
   const missing = [];
   if (!repo || typeof repo.loadAccountSnapshot !== 'function') missing.push('loadAccountSnapshot');
   ['login', 'register', 'logout'].forEach((m) => { if (!repo || !repo.auth || typeof repo.auth[m] !== 'function') missing.push(`auth.${m}`); });
+  if (!repo || !repo.checkout || typeof repo.checkout.pay !== 'function' || typeof repo.checkout.supported !== 'boolean') missing.push('checkout');
   if (!repo || !repo.refunds || typeof repo.refunds.request !== 'function') missing.push('refunds.request');
   ['list', 'create', 'get', 'update', 'remove', 'addActivity', 'removeActivity'].forEach((m) => { if (!repo || !repo.trips || typeof repo.trips[m] !== 'function') missing.push(`trips.${m}`); });
   if (missing.length) throw new Error(`Repository is missing: ${missing.join(', ')}`);

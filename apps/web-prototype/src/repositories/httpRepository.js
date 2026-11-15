@@ -1,6 +1,6 @@
 import { emptyAccountSnapshot, validateTrip } from './contract';
 import { ApiError } from './errors';
-import { toBooking, toNotification, toReview, toWalletTransaction } from './mappers';
+import { toBooking, toListing, toNotification, toReview, toWalletTransaction } from './mappers';
 
 const newRequestId = () => (globalThis.crypto && typeof globalThis.crypto.randomUUID === 'function' ? globalThis.crypto.randomUUID() : `req-${Date.now()}-${Math.random().toString(16).slice(2)}`);
 
@@ -19,9 +19,11 @@ const newRequestId = () => (globalThis.crypto && typeof globalThis.crypto.random
  * @param {{ baseUrl: string, mode: 'beta'|'production', fetchImpl?: typeof fetch, timeoutMs?: number, onUnauthorized?: () => void }} options
  * @returns {import('./contract').AppRepository}
  */
-export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 10000, onUnauthorized }) {
+export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 10000, onUnauthorized, sleepImpl, pollTries = 8, pollMs = 1000 }) {
   let accessToken = '';
   const refundKeys = new Map();
+  const attemptKeys = new Map(); // one Idempotency-Key per (item, date, quantity) attempt, cleared once the booking exists
+  const wait = sleepImpl || ((ms) => new Promise((r) => setTimeout(r, ms)));
   const doFetch = (...args) => (fetchImpl || globalThis.fetch)(...args);
 
   async function request(path, { method = 'GET', body, auth = false, headers: extra = {} } = {}) {
@@ -83,8 +85,8 @@ export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 100
         if (!Array.isArray(d)) throw new ApiError({ code: 'BAD_RESPONSE', message: `${path} must return an array` });
         return d;
       };
-      const [bookings, wallet, ledger, notifications, reviews] = await Promise.all([
-        list('/bookings'), request('/wallet', { auth: true }), list('/wallet/transactions'), list('/notifications'), list('/reviews/mine'),
+      const [bookings, wallet, ledger, notifications, reviews, catalog] = await Promise.all([
+        list('/bookings'), request('/wallet', { auth: true }), list('/wallet/transactions'), list('/notifications'), list('/reviews/mine'), list('/catalog/items?limit=100'),
       ]);
       if (!wallet || typeof wallet.available_balance !== 'string') throw new ApiError({ code: 'BAD_RESPONSE', message: 'wallet payload is invalid' });
       return {
@@ -94,12 +96,43 @@ export function createHttpRepository({ baseUrl, mode, fetchImpl, timeoutMs = 100
         walletTransactions: ledger.map(toWalletTransaction),
         notifications: notifications.map(toNotification),
         reviews: reviews.map(toReview),
+        listings: catalog.map(toListing),
       };
     },
     auth: {
       async login({ email, password }) { return toSession(await request('/auth/login', { method: 'POST', body: { email, password } })); },
       async register({ email, password, displayName }) { return toSession(await request('/auth/register', { method: 'POST', body: { email, password, display_name: displayName } })); },
       logout() { accessToken = ''; },
+    },
+    checkout: {
+      supported: true,
+      /**
+       * Create the booking, open a payment intent and wait for the SERVER to report the result. The client sends ids, a date, a
+       * quantity and a method only: price, discounts and totals are computed and returned by the server.
+       * In non-production environments with the mock provider, a simulated provider event is delivered through the real webhook path;
+       * in production the booking stays PENDING_PAYMENT until the real provider confirms (the UI shows the QR and waits).
+       */
+      async pay({ inventoryItemId, serviceDate, quantity = 1, method = 'PROMPTPAY_QR' }) {
+        const attempt = `${inventoryItemId}|${serviceDate}|${quantity}`;
+        if (!attemptKeys.has(attempt)) attemptKeys.set(attempt, newRequestId());
+        const key = attemptKeys.get(attempt);
+        const b = await request('/bookings', { method: 'POST', auth: true, headers: { 'Idempotency-Key': `web-bk-${key}` }, body: { items: [{ inventory_item_id: inventoryItemId, service_date: serviceDate, quantity }] } });
+        if (!b || typeof b.id !== 'string') throw new ApiError({ code: 'BAD_RESPONSE', message: 'booking payload is invalid' });
+        const intent = await request('/payments/intents', { method: 'POST', auth: true, headers: { 'Idempotency-Key': `web-pi-${key}` }, body: { booking_id: b.id, method } });
+        if (!intent || typeof intent.payment_reference !== 'string') throw new ApiError({ code: 'BAD_RESPONSE', message: 'payment payload is invalid' });
+        if (mode !== 'production') {
+          // Development simulator; absent (404) when the server runs a real provider or production. Failing here only leaves the booking unpaid.
+          try { await request('/dev/payments/simulate', { method: 'POST', auth: true, body: { payment_reference: intent.payment_reference } }); } catch (e) { if (e.code !== 'NOT_FOUND') throw e; }
+        }
+        let detail = null;
+        for (let i = 0; i < pollTries; i += 1) {
+          detail = await request(`/bookings/${b.id}`, { auth: true });
+          if (detail.status !== 'PENDING_PAYMENT') break;
+          if (i < pollTries - 1) await wait(pollMs);
+        }
+        attemptKeys.delete(attempt);
+        return { bookingId: b.id, bookingCode: detail.booking_code, status: detail.status, payableTotal: Number(detail.payable_total) || 0, qrPayload: intent.qr_payload || '' };
+      },
     },
     refunds: {
       /** One Idempotency-Key per booking for this session, so a retry after a timeout can never create a second refund. */

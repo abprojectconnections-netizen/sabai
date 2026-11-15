@@ -16,6 +16,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/travel-super-app/backend/internal/finance/booking"
 	"github.com/travel-super-app/backend/internal/finance/faudit"
+	"github.com/travel-super-app/backend/internal/finance/safety"
 	"github.com/travel-super-app/backend/internal/platform/httpapi"
 )
 
@@ -389,5 +390,44 @@ func TestPerUserCouponLimitHoldsUnderConcurrency(t *testing.T) {
 	wg.Wait()
 	if ok != 1 {
 		t.Fatalf("a coupon limited to one use per user was used %d times", ok)
+	}
+}
+
+func TestSimulatedPaymentGoesThroughTheRealWebhookPath(t *testing.T) {
+	i := newInventory(t, 3, "1000.00")
+	u, other := newUser(t), newUser(t)
+	b := idem(t, "POST", "/api/v1/bookings", u.Token, "sim-"+uuid.NewString(), i.body(1, ""))
+	bid := b.data()["id"].(string)
+	in := idem(t, "POST", "/api/v1/payments/intents", u.Token, "simi-"+uuid.NewString(), map[string]any{"booking_id": bid, "method": "PROMPTPAY_QR"})
+	ref := in.data()["payment_reference"].(string)
+
+	if x := call(t, "POST", "/api/v1/dev/payments/simulate", other.Token, map[string]string{"payment_reference": ref}); x.Status != 404 {
+		t.Fatalf("someone else's payment = %d", x.Status)
+	}
+	if x := call(t, "POST", "/api/v1/dev/payments/simulate", u.Token, map[string]string{}); x.Status != 400 {
+		t.Fatalf("missing reference = %d", x.Status)
+	}
+	if x := call(t, "POST", "/api/v1/dev/payments/simulate", u.Token, map[string]string{"payment_reference": ref}); x.Status != 200 || x.data()["result"] != "APPLIED" {
+		t.Fatalf("simulate: %d %v", x.Status, x.Body)
+	}
+	got := call(t, "GET", "/api/v1/bookings/"+bid, u.Token, nil)
+	if got.data()["status"] != "CONFIRMED" && got.data()["status"] != "PAID" {
+		t.Fatalf("booking after payment: %v", got.Body)
+	}
+	if got.data()["payment_status"] == nil {
+		t.Fatalf("payment status must be visible: %v", got.Body)
+	}
+	if x := call(t, "POST", "/api/v1/dev/payments/simulate", u.Token, map[string]string{"payment_reference": ref}); x.Status != 404 {
+		t.Fatalf("an already-paid intent cannot be simulated again = %d", x.Status)
+	}
+}
+
+func TestPaymentSimulatorDoesNotExistInProduction(t *testing.T) {
+	prod := gin.New()
+	httpapi.RegisterRoutesWith(prod, db, secret, safety.Config{PaymentProvider: "mock", SupplierMode: "mock", Enabled: true, Environment: "prod"}, mockPSP)
+	w := httptest.NewRecorder()
+	prod.ServeHTTP(w, httptest.NewRequest("POST", "/api/v1/dev/payments/simulate", strings.NewReader("{}")))
+	if w.Code != 404 {
+		t.Fatalf("production must not even have the route, got %d", w.Code)
 	}
 }

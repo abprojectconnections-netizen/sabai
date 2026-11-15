@@ -33,3 +33,12 @@ const REVIEW_TYPE = { DESTINATION: 'destination', HOTEL: 'hotel', RESTAURANT: 'r
 export function toReview(r) {
   return { id: r.id, itemName: r.subject_id, itemType: REVIEW_TYPE[r.subject_type] || 'destination', rating: r.rating, comment: r.body || '', date: day(r.created_at) };
 }
+
+const CATEGORY_TYPE = { HOTEL: 'hotel', FLIGHT: 'flight', ATTRACTION: 'attraction', TOUR: 'attraction', TRANSPORT: 'attraction' };
+/** Catalogue row -> the listing shape the search screens use. `id` stays the inventory item UUID so a booking can reference it. */
+export function toListing(i) {
+  return {
+    id: i.id, inventoryItemId: i.id, type: CATEGORY_TYPE[i.category] || 'attraction', name: i.title, location: i.partner_name || '',
+    rating: 0, reviews: 0, price: num(i.from_price), serviceDate: i.next_available_date || '',
+  };
+}

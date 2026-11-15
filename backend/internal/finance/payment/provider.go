@@ -94,3 +94,10 @@ func (Mock) Refund(_ context.Context, paymentReference string, _ money.Amount, k
 func (Mock) Payout(_ context.Context, _ string, _ money.Amount, key string) (string, error) {
 	return "mock_payout_" + key, nil
 }
+
+// SignedEvent builds a webhook body and its signature, exactly as the mock provider would send it. Development/test helper:
+// it is what lets the end-to-end flow run without a real PSP.
+func (m Mock) SignedEvent(eventID, typ, reference string, amount money.Amount, currency string, at time.Time) (body []byte, signature string) {
+	body, _ = json.Marshal(mockBody{EventID: eventID, Type: typ, Reference: reference, Amount: amount.String(), Currency: currency, Timestamp: at.Unix()})
+	return body, m.Sign(body)
+}

@@ -1,4 +1,5 @@
 import { INITIAL_COMMENTS, INITIAL_COUPONS, INITIAL_POSTS, seedBookings, seedEvents, seedNotifications, seedReviews, seedWalletTransactions } from '../data/fixtures';
+import { LISTINGS } from '../data/catalog';
 import { ApiError } from './errors';
 
 const sleep = (ms) => (ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve());
@@ -54,6 +55,7 @@ export function createMockRepository({ latencyMs = 0, failLoad = false } = {}) {
         reviews: seedReviews(),
         supportTickets: [],
         events: seedEvents(),
+        listings: clone(LISTINGS),
         community: { posts: clone(INITIAL_POSTS), comments: clone(INITIAL_COMMENTS) },
       };
     },
@@ -71,6 +73,10 @@ export function createMockRepository({ latencyMs = 0, failLoad = false } = {}) {
         return issue(email, displayName || '');
       },
       logout() { session = null; },
+    },
+    checkout: {
+      supported: false,
+      async pay() { throw new ApiError({ code: 'NOT_SUPPORTED', message: 'the mock repository has no real checkout' }); },
     },
     refunds: {
       /** Mock: records the request only. It never decides or pays anything, same as the server contract. */

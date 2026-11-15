@@ -28,6 +28,7 @@ func Register(public, secured *gin.RouterGroup, d Deps) {
 	secured.POST("/bookings", user, createBooking(bs, d))
 	secured.POST("/payments/intents", user, createIntent(ps))
 	public.POST("/webhooks/payments", webhook(ps))
+	registerDev(secured, d, ps)
 	RegisterRefunds(secured, d)
 	RegisterReads(public, secured, d)
 }

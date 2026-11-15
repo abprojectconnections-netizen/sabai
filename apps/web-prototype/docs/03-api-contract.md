@@ -7,7 +7,8 @@ Base URL e.g. `http://localhost:8082/api/v1` (DEV only).
   `destination_id` accepts a catalog id or UUID (max 36 chars, not verified); empty dates mean "not set"; trips span at most 60 days.
 - Read by `loadAccountSnapshot()` in BETA/PRODUCTION: `GET /bookings`, `GET /wallet`, `GET /wallet/transactions`, `GET /notifications`, `GET /reviews/mine`. The load fails as a whole if any of them fails (no half-empty account). Amounts arrive as decimal strings and are converted to numbers for display only.
 - Cancel/refund: `POST /refunds` (with a stable `Idempotency-Key` per booking). The client sends the booking id and method only; the server computes and approves the amount. The booking is marked cancelled in the UI only after the server accepted the request.
-- Served by the backend but **not yet used by the UI**: `GET /catalog/items`, `GET /bookings/{id}`, `POST /bookings`, `POST /payments/intents`, `POST /refunds/{id}/consent`. Checkout therefore still runs on local simulated state (see 05-known-limitations).
+- Catalogue: `GET /catalog/items` feeds Search. Checkout: `POST /bookings` -> `POST /payments/intents` -> (non-production only) `POST /dev/payments/simulate` -> poll `GET /bookings/{id}`; each step uses an Idempotency-Key kept stable across retries of the same attempt.
+- Served but not yet used by the UI: `POST /refunds/{id}/consent` (needs approved consent wording).
 - Still missing on the server: coupons listing, support tickets, community, calendar events.
 - Errors: `{error:{code,message}, request_id}` with codes such as `VALIDATION_ERROR`, `UNAUTHORIZED`, `INTERNAL_ERROR`.
 Client-added codes: `NETWORK_ERROR`, `TIMEOUT`, `BAD_RESPONSE`.

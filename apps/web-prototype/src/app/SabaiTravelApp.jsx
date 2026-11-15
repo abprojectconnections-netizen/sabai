@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Wifi } from 'lucide-react';
 import { TabBar, Toast } from '../components/ui';
-import { DESTINATIONS, LISTINGS } from '../data/catalog';
+import { DESTINATIONS } from '../data/catalog';
 import { payableTotal } from '../domain/pricing';
 import { addDaysISO, fmtDate, fmtRange } from '../domain/dates';
 import { buildItinerary } from '../domain/itinerary';
@@ -88,6 +88,7 @@ export default function SabaiTravelApp({ repo, snapshot }) {
   }));
   const handleLogout = () => { repo.auth.logout(); setAuthError(''); setStack(['login']); };
 
+  const listings = snapshot.listings;
   const [walletBalance, setWalletBalance] = useState(snapshot.walletBalance);
   const [walletTransactions, setWalletTransactions] = useState(snapshot.walletTransactions);
 
@@ -187,7 +188,7 @@ export default function SabaiTravelApp({ repo, snapshot }) {
 
   const handleSelectBooking = (id) => { setSelectedBookingId(id); push('booking-detail'); };
   const handleReviewBooking = () => {
-    const match = LISTINGS.find((l) => l.name === selectedBooking.title);
+    const match = listings.find((l) => l.name === selectedBooking.title);
     if (match) setWriteReviewItem(match);
     push('write-review');
   };
@@ -254,7 +255,7 @@ export default function SabaiTravelApp({ repo, snapshot }) {
     push('booking');
   };
 
-  const filteredListings = LISTINGS.filter((l) => {
+  const filteredListings = listings.filter((l) => {
     const catMatch = searchCategory === 'ทั้งหมด' || TYPE_LABEL[l.type] === searchCategory;
     const qMatch = searchQuery === '' || l.name.includes(searchQuery) || l.location.includes(searchQuery);
     return catMatch && qMatch;
@@ -262,14 +263,41 @@ export default function SabaiTravelApp({ repo, snapshot }) {
 
   const handleSelectListing = (item) => { setSelectedListing(item); push('listing-detail'); };
   const handleBookListing = () => {
-    setBookingItem({ title: selectedListing.name, subtitle: selectedListing.location, price: selectedListing.price, type: selectedListing.type });
+    setBookingItem({ title: selectedListing.name, subtitle: selectedListing.location, price: selectedListing.price, type: selectedListing.type, inventoryItemId: selectedListing.inventoryItemId, serviceDate: selectedListing.serviceDate });
     push('booking');
   };
   const handleQuickAction = (label) => { setSearchCategory(label); setSearchQuery(''); push('search'); };
   const handleDestinationTap = (d) => { setSearchQuery(d.name); setSearchCategory('ทั้งหมด'); push('search'); };
 
   const PAYMENT_LABEL = { promptpay: 'พร้อมเพย์ (PromptPay)', card: 'บัตรเครดิต/เดบิต', wallet: 'Sabai Wallet' };
+  const API_PAYMENT_METHOD = { promptpay: 'PROMPTPAY_QR', card: 'CARD' };
+  // Real checkout: the server creates the booking, prices it and reports the payment result. Nothing is booked or credited locally.
+  const handleRealPayment = async () => {
+    if (!bookingItem.inventoryItemId) { setPaymentError('รายการนี้ยังไม่เปิดให้จองและชำระเงินจริงในสภาพแวดล้อมนี้'); return; }
+    if (!API_PAYMENT_METHOD[paymentMethod]) { setPaymentError('Sabai Wallet ใช้เก็บเครดิตเงินคืนเท่านั้น ยังใช้ชำระค่าจองไม่ได้ กรุณาเลือกวิธีชำระอื่น'); return; }
+    setPaymentError('');
+    setProcessingPayment(true);
+    try {
+      const r = await repo.checkout.pay({ inventoryItemId: bookingItem.inventoryItemId, serviceDate: bookingItem.serviceDate, quantity: 1, method: API_PAYMENT_METHOD[paymentMethod] });
+      const fresh = await repo.loadAccountSnapshot();
+      setBookings(fresh.bookings);
+      setWalletBalance(fresh.walletBalance);
+      setWalletTransactions(fresh.walletTransactions);
+      setNotifications(fresh.notifications);
+      if (r.status === 'PENDING_PAYMENT') {
+        setPaymentError('ยังไม่ได้รับการยืนยันการชำระเงินจากผู้ให้บริการ ตรวจสอบสถานะได้ที่ "การจองของฉัน" (การจองจะถูกกันไว้ชั่วคราวตามเวลาที่กำหนด)');
+        return;
+      }
+      setBookingNumber(r.bookingCode);
+      push('confirmation');
+    } catch (e) {
+      setPaymentError(describeApiErrorTh(e));
+    } finally {
+      setProcessingPayment(false);
+    }
+  };
   const handleConfirmPayment = () => {
+    if (repo.checkout.supported) { handleRealPayment(); return; }
     const total = payableTotal(bookingItem.price);
     if (paymentMethod === 'wallet' && total > walletBalance) {
       setPaymentError(`ยอด Sabai Wallet ไม่เพียงพอ (คงเหลือ ฿${walletBalance.toLocaleString()}) กรุณาเลือกวิธีชำระอื่น`);
@@ -322,6 +350,7 @@ export default function SabaiTravelApp({ repo, snapshot }) {
   } else if (screen === 'write-review') {
     content = (
       <WriteReviewScreen
+        listings={listings}
         selectedItem={writeReviewItem} onSelectItem={setWriteReviewItem}
         rating={writeReviewRating} setRating={setWriteReviewRating}
         comment={writeReviewComment} setComment={setWriteReviewComment}
@@ -331,7 +360,7 @@ export default function SabaiTravelApp({ repo, snapshot }) {
   } else if (screen === 'bookings') {
     content = <BookingsScreen bookings={bookings} onBack={pop} onSelect={handleSelectBooking} onStartSearch={() => { setSearchCategory('ทั้งหมด'); setSearchQuery(''); gotoTab('search'); }} />;
   } else if (screen === 'booking-detail') {
-    content = <BookingDetailScreen booking={selectedBooking} onBack={pop} onCancel={() => push('cancel-booking')} onReview={selectedBooking && LISTINGS.some((l) => l.name === selectedBooking.title) ? handleReviewBooking : undefined} />;
+    content = <BookingDetailScreen booking={selectedBooking} onBack={pop} onCancel={() => push('cancel-booking')} onReview={selectedBooking && listings.some((l) => l.name === selectedBooking.title) ? handleReviewBooking : undefined} />;
   } else if (screen === 'cancel-booking') {
     content = <CancelBookingScreen booking={selectedBooking} reason={cancelReason} setReason={setCancelReason} onBack={pop} onConfirm={handleConfirmCancel} />;
   } else if (screen === 'settings') {

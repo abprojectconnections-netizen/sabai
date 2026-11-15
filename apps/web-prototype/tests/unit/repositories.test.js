@@ -129,7 +129,7 @@ describe('http repository (contract tests with a fake fetch)', () => {
   });
   const routes = (over = {}) => (url) => {
     const path = new URL(url).pathname.replace('/api/v1', '');
-    const base = { '/bookings': [], '/wallet': { available_balance: '0.00', pending_balance: '0.00', currency: 'THB', balance_type: 'REFUND_CREDIT' }, '/wallet/transactions': [], '/notifications': [], '/reviews/mine': [] };
+    const base = { '/bookings': [], '/wallet': { available_balance: '0.00', pending_balance: '0.00', currency: 'THB', balance_type: 'REFUND_CREDIT' }, '/wallet/transactions': [], '/notifications': [], '/reviews/mine': [], '/catalog/items': [] };
     const data = path in over ? over[path] : base[path];
     return data === undefined ? json(404, { error: { code: 'NOT_FOUND', message: 'x' }, request_id: 'r' }) : json(200, { data, request_id: 'r' });
   };
@@ -155,6 +155,62 @@ describe('http repository (contract tests with a fake fetch)', () => {
   it('mock refunds only record the request', async () => {
     expect(await createMockRepository().refunds.request({ bookingId: 'b1' })).toMatchObject({ status: 'REQUESTED', calculatedAmount: 0, autoApproved: false });
   });
+  const checkoutFetch = ({ simulate = 'ok', statuses = ['CONFIRMED'] } = {}) => {
+    const seen = [];
+    let polls = 0;
+    const f = (url, init) => {
+      const path = new URL(url).pathname.replace('/api/v1', '');
+      seen.push({ path, init });
+      if (path === '/bookings') return json(201, { data: { id: 'bk1' }, request_id: 'r' });
+      if (path === '/payments/intents') return json(201, { data: { payment_reference: 'PAY1', qr_payload: 'QR' }, request_id: 'r' });
+      if (path === '/dev/payments/simulate') return simulate === 'ok' ? json(200, { data: { result: 'APPLIED' }, request_id: 'r' }) : json(404, { error: { code: 'NOT_FOUND', message: 'x' }, request_id: 'r' });
+      if (path === '/bookings/bk1') { const s = statuses[Math.min(polls, statuses.length - 1)]; polls += 1; return json(200, { data: { id: 'bk1', booking_code: 'SB1', status: s, payable_total: '1950.00' }, request_id: 'r' }); }
+      return json(404, { error: { code: 'NOT_FOUND', message: 'x' }, request_id: 'r' });
+    };
+    f.seen = seen;
+    return f;
+  };
+  const checkoutRepo = (f, mode = 'beta') => createHttpRepository({ baseUrl: 'https://api.test', mode, fetchImpl: f, sleepImpl: async () => {}, pollTries: 3 });
+  it('checks out through the server: sends ids only, uses idempotency keys, returns the server total', async () => {
+    const f = checkoutFetch();
+    const r = await checkoutRepo(f).checkout.pay({ inventoryItemId: 'i1', serviceDate: '2026-12-01', method: 'PROMPTPAY_QR' });
+    expect(r).toEqual({ bookingId: 'bk1', bookingCode: 'SB1', status: 'CONFIRMED', payableTotal: 1950, qrPayload: 'QR' });
+    const [bk, pi] = f.seen;
+    expect(JSON.parse(bk.init.body)).toEqual({ items: [{ inventory_item_id: 'i1', service_date: '2026-12-01', quantity: 1 }] });
+    expect(JSON.parse(pi.init.body)).toEqual({ booking_id: 'bk1', method: 'PROMPTPAY_QR' });
+    expect(bk.init.headers['Idempotency-Key']).toMatch(/^web-bk-/);
+    expect(pi.init.headers['Idempotency-Key']).toMatch(/^web-pi-/);
+    expect(JSON.stringify(f.seen.map((s) => s.init.body))).not.toMatch(/price|amount|total/i);
+  });
+  it('waits for the provider: polls until the server leaves PENDING_PAYMENT, and reports pending if it never does', async () => {
+    const ok = await checkoutRepo(checkoutFetch({ statuses: ['PENDING_PAYMENT', 'PENDING_PAYMENT', 'CONFIRMED'] })).checkout.pay({ inventoryItemId: 'i1', serviceDate: '2026-12-01' });
+    expect(ok.status).toBe('CONFIRMED');
+    const stuck = await checkoutRepo(checkoutFetch({ statuses: ['PENDING_PAYMENT'] })).checkout.pay({ inventoryItemId: 'i1', serviceDate: '2026-12-01' });
+    expect(stuck.status).toBe('PENDING_PAYMENT');
+  });
+  it('never calls the payment simulator in production, and tolerates its absence elsewhere', async () => {
+    const prod = checkoutFetch();
+    await checkoutRepo(prod, 'production').checkout.pay({ inventoryItemId: 'i1', serviceDate: '2026-12-01' });
+    expect(prod.seen.some((s) => s.path.startsWith('/dev/'))).toBe(false);
+    const noSim = await checkoutRepo(checkoutFetch({ simulate: 'missing', statuses: ['PENDING_PAYMENT'] })).checkout.pay({ inventoryItemId: 'i1', serviceDate: '2026-12-01' });
+    expect(noSim.status).toBe('PENDING_PAYMENT');
+  });
+  it('reuses the booking Idempotency-Key when an attempt is retried after a failure', async () => {
+    let fail = true;
+    const base = checkoutFetch();
+    const f = (url, init) => (new URL(url).pathname.endsWith('/payments/intents') && fail ? (fail = false, json(503, { error: { code: 'FINANCIAL_TRANSACTIONS_DISABLED', message: 'x' }, request_id: 'r' })) : base(url, init));
+    const repo = checkoutRepo(f);
+    await expect(repo.checkout.pay({ inventoryItemId: 'i1', serviceDate: '2026-12-01' })).rejects.toMatchObject({ code: 'FINANCIAL_TRANSACTIONS_DISABLED' });
+    await repo.checkout.pay({ inventoryItemId: 'i1', serviceDate: '2026-12-01' });
+    const keys = base.seen.filter((s) => s.path === '/bookings').map((s) => s.init.headers['Idempotency-Key']);
+    expect(keys).toHaveLength(2);
+    expect(keys[0]).toBe(keys[1]);
+  });
+  it('mock checkout is explicitly unsupported so the UI keeps its local simulation', async () => {
+    const repo = createMockRepository();
+    expect(repo.checkout.supported).toBe(false);
+    await expect(repo.checkout.pay({})).rejects.toMatchObject({ code: 'NOT_SUPPORTED' });
+  });
   it('never injects mock data: a new BETA/PRODUCTION account starts empty', async () => {
     const snap = await http(fakeFetch(routes())).loadAccountSnapshot();
     expect(snap).toEqual(emptyAccountSnapshot());
@@ -167,6 +223,7 @@ describe('http repository (contract tests with a fake fetch)', () => {
       '/wallet/transactions': [{ id: 'w1', type: 'REFUND_CREDIT', credit_amount: '300.00', debit_amount: '0.00', created_at: '2026-11-11T09:00:00Z' }],
       '/notifications': [{ id: 'n1', type: 'booking', title: 'หัวข้อ', body: 'ข้อความ', read: false, created_at: '2026-11-11T09:00:00Z' }],
       '/reviews/mine': [{ id: 'r1', subject_type: 'HOTEL', subject_id: 'h1', rating: 4.5, body: 'ดี', created_at: '2026-11-09T09:00:00Z', mine: true }],
+      '/catalog/items': [{ id: 'i1', title: 'ทัวร์เกาะ', category: 'TOUR', partner_name: 'ตัวอย่างทัวร์', from_price: '1200.00', next_available_date: '2026-12-01' }],
     }));
     const snap = await http(f).loadAccountSnapshot();
     expect(validateAccountSnapshot(snap)).toEqual([]);
@@ -175,6 +232,7 @@ describe('http repository (contract tests with a fake fetch)', () => {
     expect(snap.walletTransactions[0]).toMatchObject({ type: 'in', amount: 300 });
     expect(snap.notifications[0]).toMatchObject({ id: 'n1', message: 'ข้อความ', read: false });
     expect(snap.reviews[0]).toMatchObject({ itemType: 'hotel', rating: 4.5, comment: 'ดี' });
+    expect(snap.listings[0]).toMatchObject({ id: 'i1', inventoryItemId: 'i1', type: 'attraction', name: 'ทัวร์เกาะ', price: 1200, serviceDate: '2026-12-01' });
     expect(f.calls.every((c) => c.init.method === 'GET')).toBe(true);
   });
   it('fails the whole load (no half-empty account) when an endpoint breaks or returns the wrong shape', async () => {

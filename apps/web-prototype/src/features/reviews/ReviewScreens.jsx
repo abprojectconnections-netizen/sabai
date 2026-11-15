@@ -1,6 +1,5 @@
 import { Plus, Star } from 'lucide-react';
 import { PrimaryButton, TopBar } from '../../components/ui';
-import { LISTINGS } from '../../data/catalog';
 import { TYPE_GRADIENT, TYPE_ICON } from '../../ui/typeMeta';
 
 export function StarPicker({ value, onChange }) {
@@ -68,7 +67,7 @@ export function ReviewsScreen({ reviews, onBack, onWriteReview }) {
   );
 }
 
-export function WriteReviewScreen({ selectedItem, onSelectItem, rating, setRating, comment, setComment, onBack, onSubmit }) {
+export function WriteReviewScreen({ listings, selectedItem, onSelectItem, rating, setRating, comment, setComment, onBack, onSubmit }) {
   const canSubmit = selectedItem && rating > 0 && comment.trim().length > 0;
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -77,7 +76,7 @@ export function WriteReviewScreen({ selectedItem, onSelectItem, rating, setRatin
         <div>
           <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 10 }}>คุณกำลังรีวิวอะไร?</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {LISTINGS.map((item) => {
+            {listings.map((item) => {
               const Icon = TYPE_ICON[item.type];
               const active = selectedItem && selectedItem.id === item.id;
               return (
