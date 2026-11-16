@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'src/app.dart';
 import 'src/core/config/app_config.dart';
@@ -8,7 +9,7 @@ import 'src/data/repositories/http_repository.dart';
 import 'src/data/repositories/mock_repository.dart';
 import 'src/features/config/config_error_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final AppConfig config;
   try {
@@ -25,5 +26,6 @@ void main() {
           baseUrl: config.apiBaseUrl,
           mode: config.apiMode,
         );
-  runApp(SabaiApp(config: config, repository: repository));
+  final prefs = await SharedPreferences.getInstance();
+  runApp(SabaiApp(config: config, repository: repository, prefs: prefs));
 }
