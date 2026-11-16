@@ -6,7 +6,7 @@ Run locally with `go run ./cmd/api`. Copy `.env.example` to `.env` and supply pr
 
 For Flutter Web development, set `CORS_ALLOWED_ORIGINS` to a comma-separated list of exact frontend origins (for example, `http://localhost:8081,http://127.0.0.1:8081`). The API defaults to these local development origins when the variable is unset; configure the deployed web origin explicitly in production.
 
-OpenAPI is maintained at `docs/openapi.yaml` (it also lists the customer read endpoints `GET /catalog/items`, `/bookings`, `/bookings/{id}`, `/wallet`, `/wallet/transactions`). The running API exposes `GET /health`, `POST /api/v1/auth/{register,login}`, `/api/v1/trips` (CRUD plus `/{id}/activities`), `/api/v1/notifications` and `/api/v1/reviews`. All user data is scoped to the authenticated user; another user's resource is reported as 404. See `docs/openapi.yaml`.
+OpenAPI is maintained at `docs/openapi.yaml` (it also lists the customer read endpoints `GET /catalog/items`, `/bookings`, `/bookings/{id}`, `/wallet`, `/wallet/transactions`). The running API exposes `GET /health`, `POST /api/v1/auth/{register,login}`, `/api/v1/trips` (CRUD plus `/{id}/activities`), `/api/v1/notifications`, `/api/v1/reviews` and the central tagging API (`/api/v1/tags`, `/api/v1/tags/{slug}/content`, `/api/v1/content/{type}/{id}/tags`; types TRIP and REVIEW, more as their tables arrive; migration 000016). All user data is scoped to the authenticated user; another user's resource is reported as 404. See `docs/openapi.yaml`.
 
 ## Tests
 ```bash
