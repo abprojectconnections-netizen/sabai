@@ -1,5 +1,6 @@
 import '../models/models.dart';
 
+
 /// The only way the UI talks to data sources (same contract as apps/web-prototype/src/repositories/contract.js).
 /// Implementations: [MockRepository] (offline demo) and [HttpRepository] (beta/production REST).
 abstract class AppRepository {

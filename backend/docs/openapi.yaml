@@ -163,6 +163,54 @@ paths:
       responses:
         '204': { description: Deleted }
         '404': { $ref: '#/components/responses/NotFound' }
+  /tags:
+    get:
+      summary: Popular tags by public use (review tags only; private trip tags never counted)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: q, in: query, required: false, schema: { type: string }, description: "Slug prefix for autocomplete; % and _ are literal" }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: Tag[] ({slug, label, uses})" }
+  /tags/{slug}/content:
+    get:
+      summary: Ids of content carrying a tag that the caller may see (own trips; any non-deleted review)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+        - { name: type, in: query, required: true, schema: { type: string, enum: [TRIP, REVIEW] } }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: string[] }" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /content/{type}/{id}/tags:
+    get:
+      summary: "Tags of one item (trips: owner only; reviews: any signed-in user)"
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: type, in: path, required: true, schema: { type: string, enum: [TRIP, REVIEW] } }
+        - { $ref: '#/components/parameters/Id' }
+      responses:
+        '200': { description: "data: Tag[] ({slug, label})" }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      summary: Replace the tag set of one item (idempotent; owner/author only; max 10 tags of at most 30 characters)
+      description: "Tags are normalised to a lowercase slug; letters of any script (Thai included), digits, spaces and '-' are allowed, anything else is a 400. Duplicate slugs collapse; an empty list clears."
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: type, in: path, required: true, schema: { type: string, enum: [TRIP, REVIEW] } }
+        - { $ref: '#/components/parameters/Id' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [tags], properties: { tags: { type: array, maxItems: 10, items: { type: string, maxLength: 30 } } } }
+      responses:
+        '200': { description: "data: Tag[]" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /portal/queue:
     get:
       summary: Get operational queue counts for Staff or Admin

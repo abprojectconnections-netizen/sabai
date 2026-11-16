@@ -6,9 +6,6 @@ import 'package:sabai_app/src/data/repositories/mock_repository.dart';
 
 void main() {
   testWidgets('browse, sign in, pay and see the booking (mock repository)', (tester) async {
-    await tester.pumpWidget(SabaiApp(
-      config: AppConfig.parse(const {}),
-      repository: MockRepository(),
     ));
     await tester.pumpAndSettle();
 
@@ -36,9 +33,6 @@ void main() {
   });
 
   testWidgets('sold-out items cannot be booked', (tester) async {
-    await tester.pumpWidget(SabaiApp(
-      config: AppConfig.parse(const {}),
-      repository: MockRepository(),
     ));
     await tester.pumpAndSettle();
     await tester.tap(find.text('อันดามัน บีช วิลลา'));

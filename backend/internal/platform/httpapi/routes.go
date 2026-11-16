@@ -14,6 +14,7 @@ import (
 	"github.com/travel-super-app/backend/internal/notification"
 	"github.com/travel-super-app/backend/internal/portal"
 	"github.com/travel-super-app/backend/internal/review"
+	"github.com/travel-super-app/backend/internal/tag"
 	"github.com/travel-super-app/backend/internal/trip"
 )
 
@@ -41,6 +42,9 @@ func RegisterRoutesWith(router *gin.Engine, db *sql.DB, jwtSecret string, cfg sa
 	reviews := secured.Group("/reviews")
 	reviews.Use(userRoles)
 	review.RegisterRoutes(reviews, review.NewService(db))
+	tagRoutes := secured.Group("")
+	tagRoutes.Use(userRoles)
+	tag.RegisterRoutes(tagRoutes, tag.NewService(db))
 	portalRoutes := secured.Group("/portal")
 	portalRoutes.Use(auth.RequirePermission("portal.read"))
 	portal.RegisterRoutes(portalRoutes, db)
