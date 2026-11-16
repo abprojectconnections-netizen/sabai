@@ -1,5 +1,6 @@
 import '../../core/errors/api_error.dart';
 import '../models/models.dart';
+import '../models/trip_models.dart';
 import 'app_repository.dart';
 
 /// Offline demo data. Checkout is a local simulation only: no money, no server.
@@ -69,6 +70,7 @@ class MockRepository implements AppRepository {
   @override
   void logout() {
     _signedIn = false;
+    _trips.clear();
     _bookings.clear();
     _ledger.clear();
     _balance = 0;
@@ -143,5 +145,89 @@ class MockRepository implements AppRepository {
         status: 'COMPLETED',
         calculatedAmount: b.amount,
         autoApproved: true);
+  }
+
+  // ---- Trips (in memory) ----
+  final List<Trip> _trips = [];
+
+  Trip _find(String id) => _trips.firstWhere(
+        (t) => t.id == id,
+        orElse: () => throw const ApiError(code: 'NOT_FOUND', message: 'trip', status: 404),
+      );
+
+  @override
+  Future<List<Trip>> trips() async {
+    _requireSignIn();
+    return _trips.map((t) => Trip(id: t.id, name: t.name, startDate: t.startDate, endDate: t.endDate, status: t.status)).toList();
+  }
+
+  @override
+  Future<Trip> trip(String id) async {
+    _requireSignIn();
+    return _find(id);
+  }
+
+  @override
+  Future<Trip> createTrip({required String name, String startDate = '', String endDate = ''}) async {
+    _requireSignIn();
+    if (name.trim().isEmpty) throw const ApiError(code: 'VALIDATION_ERROR', message: 'trip name is required');
+    if (startDate.isNotEmpty && endDate.isNotEmpty && endDate.compareTo(startDate) < 0) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'end date must not be before start date');
+    }
+    _seq += 1;
+    final t = Trip(id: 'mock-trip-$_seq', name: name.trim(), startDate: startDate, endDate: endDate);
+    _trips.insert(0, t);
+    return t;
+  }
+
+  @override
+  Future<void> deleteTrip(String id) async {
+    _requireSignIn();
+    _trips.remove(_find(id));
+  }
+
+  @override
+  Future<Activity> addActivity({
+    required String tripId,
+    required String title,
+    required String date,
+    String startTime = '',
+    String endTime = '',
+  }) async {
+    _requireSignIn();
+    final t = _find(tripId);
+    if (title.trim().isEmpty) throw const ApiError(code: 'VALIDATION_ERROR', message: 'title is required');
+    if (endTime.isNotEmpty && startTime.isEmpty) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'start_time is required when end_time is set');
+    }
+    _seq += 1;
+    final a = Activity(id: 'mock-act-$_seq', title: title.trim(), startTime: startTime, endTime: endTime);
+    final days = [...t.days];
+    final i = days.indexWhere((d) => d.date == date);
+    if (i >= 0) {
+      days[i] = TripDay(id: days[i].id, date: date, dayNumber: days[i].dayNumber, activities: [...days[i].activities, a]);
+    } else {
+      days.add(TripDay(id: 'mock-day-$_seq', date: date, dayNumber: 0, activities: [a]));
+    }
+    days.sort((x, y) => x.date.compareTo(y.date));
+    final numbered = [
+      for (var k = 0; k < days.length; k++)
+        TripDay(id: days[k].id, date: days[k].date, dayNumber: k + 1, activities: days[k].activities),
+    ];
+    _trips[_trips.indexOf(t)] = Trip(
+        id: t.id, name: t.name, startDate: t.startDate, endDate: t.endDate, status: t.status, days: numbered);
+    return a;
+  }
+
+  @override
+  Future<void> removeActivity({required String tripId, required String activityId}) async {
+    _requireSignIn();
+    final t = _find(tripId);
+    final days = [
+      for (final d in t.days)
+        TripDay(id: d.id, date: d.date, dayNumber: d.dayNumber, activities: d.activities.where((a) => a.id != activityId).toList()),
+    ];
+    _trips[_trips.indexOf(t)] = Trip(
+        id: t.id, name: t.name, startDate: t.startDate, endDate: t.endDate, status: t.status, days: days);
   }
 }

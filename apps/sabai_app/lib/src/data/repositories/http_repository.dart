@@ -8,6 +8,7 @@ import '../../core/config/app_config.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/util/format.dart';
 import '../models/models.dart';
+import '../models/trip_models.dart';
 import 'app_repository.dart';
 
 /// REST repository for beta and production (endpoints in backend/docs/openapi.yaml).
@@ -265,5 +266,58 @@ class HttpRepository implements AppRepository {
       calculatedAmount: parseAmount(r['calculated_amount']),
       autoApproved: r['auto_approved'] == true,
     );
+  }
+
+  String _tripPath(String id) => '/trips/${Uri.encodeComponent(id)}';
+
+  Trip _toTrip(dynamic data) {
+    if (data is! Map<String, dynamic> || data['id'] is! String || (data['name'] ?? '') is! String) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: 'trip payload is invalid');
+    }
+    return Trip.fromJson(data);
+  }
+
+  @override
+  Future<List<Trip>> trips() async {
+    final data = await _request('/trips', auth: true);
+    return _rows(data, '/trips').map(Trip.fromJson).toList();
+  }
+
+  @override
+  Future<Trip> trip(String id) async => _toTrip(await _request(_tripPath(id), auth: true));
+
+  @override
+  Future<Trip> createTrip({required String name, String startDate = '', String endDate = ''}) async =>
+      _toTrip(await _request('/trips',
+          method: 'POST',
+          auth: true,
+          body: {'name': name, 'destination_id': '', 'start_date': startDate, 'end_date': endDate}));
+
+  @override
+  Future<void> deleteTrip(String id) async {
+    await _request(_tripPath(id), method: 'DELETE', auth: true);
+  }
+
+  @override
+  Future<Activity> addActivity({
+    required String tripId,
+    required String title,
+    required String date,
+    String startTime = '',
+    String endTime = '',
+  }) async {
+    final a = await _request('${_tripPath(tripId)}/activities',
+        method: 'POST',
+        auth: true,
+        body: {'title': title, 'date': date, 'start_time': startTime, 'end_time': endTime, 'destination_id': ''});
+    if (a is! Map<String, dynamic> || a['id'] is! String) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: 'activity payload is invalid');
+    }
+    return Activity.fromJson(a);
+  }
+
+  @override
+  Future<void> removeActivity({required String tripId, required String activityId}) async {
+    await _request('${_tripPath(tripId)}/activities/${Uri.encodeComponent(activityId)}', method: 'DELETE', auth: true);
   }
 }

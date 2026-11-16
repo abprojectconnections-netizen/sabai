@@ -1,4 +1,5 @@
 import '../models/models.dart';
+import '../models/trip_models.dart';
 
 /// The only way the UI talks to data sources (same contract as apps/web-prototype/src/repositories/contract.js).
 /// Implementations: [MockRepository] (offline demo) and [HttpRepository] (beta/production REST).
@@ -37,4 +38,27 @@ abstract class AppRepository {
     required String bookingId,
     String method = 'ORIGINAL_METHOD',
   });
+
+  // ---- Trips (backend: /trips; every trip belongs to the signed-in user) ----
+
+  Future<List<Trip>> trips();
+
+  /// Trip with its days and activities.
+  Future<Trip> trip(String id);
+
+  /// Dates are optional ISO `YYYY-MM-DD`; a trip spans at most 60 days (the server enforces it).
+  Future<Trip> createTrip({required String name, String startDate = '', String endDate = ''});
+
+  Future<void> deleteTrip(String id);
+
+  /// [startTime]/[endTime] are `HH:MM` or empty; an end time needs a start time.
+  Future<Activity> addActivity({
+    required String tripId,
+    required String title,
+    required String date,
+    String startTime = '',
+    String endTime = '',
+  });
+
+  Future<void> removeActivity({required String tripId, required String activityId});
 }
