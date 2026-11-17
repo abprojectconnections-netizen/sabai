@@ -1,3 +1,4 @@
+import '../models/engagement_models.dart';
 import '../models/models.dart';
 import '../models/trip_models.dart';
 
@@ -61,4 +62,32 @@ abstract class AppRepository {
   });
 
   Future<void> removeActivity({required String tripId, required String activityId});
+
+  // ---- Notifications (backend: /notifications) ----
+
+  Future<NotificationsPage> notifications();
+
+  Future<void> markNotificationRead(String id);
+
+  Future<void> markAllNotificationsRead();
+
+  // ---- Reviews (backend: /reviews) ----
+
+  /// The caller's reviews, each with its tags.
+  Future<List<Review>> myReviews();
+
+  /// One review per user per subject (a duplicate is CONFLICT). Rating 1..5 in steps of 0.5.
+  Future<Review> createReview({
+    required String subjectType,
+    required String subjectId,
+    required double rating,
+    String body = '',
+  });
+
+  Future<void> deleteReview(String id);
+
+  // ---- Tags (backend: /content/{type}/{id}/tags) ----
+
+  /// Replaces the tag set of one item the caller owns; returns the stored labels.
+  Future<List<String>> setTags({required String contentType, required String contentId, required List<String> tags});
 }
