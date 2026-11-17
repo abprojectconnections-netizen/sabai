@@ -37,7 +37,7 @@ CI (`.github/workflows/sabai-app.yml`) runs both on every change under `apps/sab
 Ported: configuration (DEV/BETA/PRODUCTION rules), catalogue, sign-in/register, booking + payment (real backend or local mock),
 my bookings with refund request, wallet (read-only).
 **Not ported yet** (still only in the web prototype): AI planner, community, coupons, help,
-maps, flights, settings, profile. See `apps/web-prototype/docs/05-known-limitations.md` for backend gaps that apply here too.
+maps, flights. See `apps/web-prototype/docs/05-known-limitations.md` for backend gaps that apply here too.
 
 ## Update: trips, profile, settings
 - **Trips** use the real `/trips` API (list, detail with days and activities, create, delete, add/remove activity); the mock repository keeps them in memory.
