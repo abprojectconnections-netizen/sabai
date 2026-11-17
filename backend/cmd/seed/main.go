@@ -113,6 +113,20 @@ func seed(db *sql.DB, days int) error {
 			}
 		}
 	}
+	// demo coupon: promotion + platform-funded 10% discount + code SABAI10 (users can save it; the app does not apply it yet)
+	promo, discount, coupon := id("promotion", "sabai10"), id("discount", "sabai10"), id("coupon", "sabai10")
+	for _, s := range []struct {
+		q    string
+		args []any
+	}{
+		{"INSERT IGNORE INTO promotions (id, created_at, updated_at, name, status) VALUES (?, ?, ?, 'ส่วนลดต้อนรับ 10% (ข้อมูลทดสอบ)', 'ACTIVE')", []any{promo, now, now}},
+		{"INSERT IGNORE INTO discounts (id, created_at, owner_type, discount_type, value, valid_from, valid_to, funded_by, status) VALUES (?, ?, 'PLATFORM', 'PERCENT', 10.00, ?, ?, 'PLATFORM', 'ACTIVE')", []any{discount, now, now.AddDate(0, 0, -1), now.AddDate(1, 0, 0)}},
+		{"INSERT IGNORE INTO coupons (id, created_at, updated_at, promotion_id, code, discount_id) VALUES (?, ?, ?, ?, 'SABAI10', ?)", []any{coupon, now, now, promo, discount}},
+	} {
+		if _, err := tx.Exec(s.q, s.args...); err != nil {
+			return err
+		}
+	}
 	if err := tx.Commit(); err != nil {
 		return err
 	}
