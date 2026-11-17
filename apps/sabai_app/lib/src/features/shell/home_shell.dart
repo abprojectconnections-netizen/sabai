@@ -6,6 +6,7 @@ import '../../state/app_state.dart';
 import '../auth/login_screen.dart';
 import '../booking/my_bookings_screen.dart';
 import '../catalog/catalog_screen.dart';
+import '../notifications/notifications_screen.dart';
 import '../profile/profile_screen.dart';
 import '../trips/trips_screen.dart';
 
@@ -34,6 +35,7 @@ class _HomeShellState extends State<HomeShell> {
       appBar: AppBar(
         title: const Text('Sabai'),
         actions: [
+          if (state.signedIn) const NotificationBell(),
           if (widget.config.appEnv != AppEnv.production)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),

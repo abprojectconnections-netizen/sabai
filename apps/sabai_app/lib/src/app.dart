@@ -7,6 +7,8 @@ import 'core/theme/app_theme.dart';
 import 'data/repositories/app_repository.dart';
 import 'features/shell/home_shell.dart';
 import 'state/app_state.dart';
+import 'state/notifications_controller.dart';
+import 'state/reviews_controller.dart';
 import 'state/settings_controller.dart';
 import 'state/trips_controller.dart';
 
@@ -30,6 +32,22 @@ class SabaiApp extends StatelessWidget {
             final c = trips ?? TripsController(repository);
             if (!app.signedIn) c.reset();
             return c;
+          },
+        ),
+        ChangeNotifierProxyProvider<AppState, NotificationsController>(
+          create: (_) => NotificationsController(repository),
+          update: (_, app, c) {
+            final n = c ?? NotificationsController(repository);
+            if (!app.signedIn) n.reset();
+            return n;
+          },
+        ),
+        ChangeNotifierProxyProvider<AppState, ReviewsController>(
+          create: (_) => ReviewsController(repository),
+          update: (_, app, c) {
+            final r = c ?? ReviewsController(repository);
+            if (!app.signedIn) r.reset();
+            return r;
           },
         ),
       ],

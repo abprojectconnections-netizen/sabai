@@ -4,9 +4,25 @@ import 'package:provider/provider.dart';
 import '../../core/util/format.dart';
 import '../../data/models/models.dart';
 import '../../state/app_state.dart';
+import '../../state/reviews_controller.dart';
+import '../reviews/review_form_screen.dart';
 
-class MyBookingsScreen extends StatelessWidget {
+class MyBookingsScreen extends StatefulWidget {
   const MyBookingsScreen({super.key});
+
+  @override
+  State<MyBookingsScreen> createState() => _MyBookingsScreenState();
+}
+
+class _MyBookingsScreenState extends State<MyBookingsScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<ReviewsController>().ensureLoaded();
+    });
+  }
+
 
   static String statusLabel(BookingStatus s) => switch (s) {
         BookingStatus.pending => 'รอชำระเงิน',
@@ -43,6 +59,7 @@ class MyBookingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
+    final reviews = context.watch<ReviewsController>();
     if (state.bookings.isEmpty) return const Center(child: Text('ยังไม่มีการจอง'));
     return RefreshIndicator(
       onRefresh: state.refreshAccount,
@@ -51,22 +68,38 @@ class MyBookingsScreen extends StatelessWidget {
         separatorBuilder: (_, __) => const Divider(height: 1),
         itemBuilder: (context, i) {
           final b = state.bookings[i];
+          final canReview = b.canRequestRefund && !reviews.hasReviewedBooking(b.id);
           return ListTile(
+            isThreeLine: b.canRequestRefund,
             title: Text(b.title),
-            subtitle: Text('${b.code} · ${statusLabel(b.status)}'),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(formatBaht(b.amount)),
+                Text('${b.code} · ${statusLabel(b.status)}'),
                 if (b.canRequestRefund)
-                  GestureDetector(
-                    onTap: () => _cancel(context, b),
-                    child: Text('ขอคืนเงิน',
-                        style: TextStyle(color: Theme.of(context).colorScheme.primary)),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      if (canReview)
+                        TextButton(
+                          key: Key('review-${b.id}'),
+                          style: TextButton.styleFrom(visualDensity: VisualDensity.compact, padding: EdgeInsets.zero),
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(builder: (_) => ReviewFormScreen(booking: b)),
+                          ),
+                          child: const Text('เขียนรีวิว'),
+                        ),
+                      TextButton(
+                        key: Key('refund-${b.id}'),
+                        style: TextButton.styleFrom(visualDensity: VisualDensity.compact, padding: EdgeInsets.zero),
+                        onPressed: () => _cancel(context, b),
+                        child: const Text('ขอคืนเงิน'),
+                      ),
+                    ],
                   ),
               ],
             ),
+            trailing: Text(formatBaht(b.amount)),
           );
         },
       ),

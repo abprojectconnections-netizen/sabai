@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import '../../core/config/app_config.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/util/format.dart';
+import '../models/engagement_models.dart';
 import '../models/models.dart';
 import '../models/trip_models.dart';
 import 'app_repository.dart';
@@ -319,5 +320,72 @@ class HttpRepository implements AppRepository {
   @override
   Future<void> removeActivity({required String tripId, required String activityId}) async {
     await _request('${_tripPath(tripId)}/activities/${Uri.encodeComponent(activityId)}', method: 'DELETE', auth: true);
+  }
+
+  @override
+  Future<NotificationsPage> notifications() async {
+    final data = await _request('/notifications?limit=100', auth: true);
+    if (data is! Map<String, dynamic> || data['items'] is! List) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: '/notifications must return {items}');
+    }
+    final u = data['unread_count'];
+    return NotificationsPage(
+      items: _rows(data, '/notifications').map(AppNotification.fromJson).toList(),
+      unreadCount: u is int ? u : 0,
+    );
+  }
+
+  @override
+  Future<void> markNotificationRead(String id) async {
+    await _request('/notifications/${Uri.encodeComponent(id)}/read', method: 'PATCH', auth: true);
+  }
+
+  @override
+  Future<void> markAllNotificationsRead() async {
+    await _request('/notifications/read-all', method: 'POST', auth: true);
+  }
+
+  @override
+  Future<List<Review>> myReviews() async {
+    final data = await _request('/reviews/mine?limit=50', auth: true);
+    final reviews = _rows(data, '/reviews/mine').map(Review.fromJson).toList();
+    // One request per review (at most 50): the tags API is per item. A failure to read tags must not hide the review.
+    return Future.wait(reviews.map((r) async {
+      try {
+        final t = await _request('/content/REVIEW/${Uri.encodeComponent(r.id)}/tags', auth: true);
+        return r.withTags(_rows(t, 'tags').map((x) => (x['label'] ?? x['slug'] ?? '').toString()).where((x) => x.isNotEmpty).toList());
+      } on ApiError {
+        return r;
+      }
+    }));
+  }
+
+  @override
+  Future<Review> createReview({
+    required String subjectType,
+    required String subjectId,
+    required double rating,
+    String body = '',
+  }) async {
+    final r = await _request('/reviews',
+        method: 'POST',
+        auth: true,
+        body: {'subject_type': subjectType, 'subject_id': subjectId, 'rating': rating, 'body': body});
+    if (r is! Map<String, dynamic> || r['id'] is! String) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: 'review payload is invalid');
+    }
+    return Review.fromJson(r);
+  }
+
+  @override
+  Future<void> deleteReview(String id) async {
+    await _request('/reviews/${Uri.encodeComponent(id)}', method: 'DELETE', auth: true);
+  }
+
+  @override
+  Future<List<String>> setTags({required String contentType, required String contentId, required List<String> tags}) async {
+    final t = await _request('/content/${Uri.encodeComponent(contentType)}/${Uri.encodeComponent(contentId)}/tags',
+        method: 'PUT', auth: true, body: {'tags': tags});
+    return _rows(t, 'tags').map((x) => (x['label'] ?? x['slug'] ?? '').toString()).where((x) => x.isNotEmpty).toList();
   }
 }

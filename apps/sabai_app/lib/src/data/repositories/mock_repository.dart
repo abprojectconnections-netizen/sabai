@@ -1,4 +1,5 @@
 import '../../core/errors/api_error.dart';
+import '../models/engagement_models.dart';
 import '../models/models.dart';
 import '../models/trip_models.dart';
 import 'app_repository.dart';
@@ -50,6 +51,7 @@ class MockRepository implements AppRepository {
       throw const ApiError(code: 'UNAUTHORIZED', message: 'invalid credentials');
     }
     _signedIn = true;
+    _welcome();
     return Session(
         accessToken: 'mock-token', userId: 'mock-user', email: email, displayName: 'ผู้ใช้ทดลอง');
   }
@@ -63,6 +65,7 @@ class MockRepository implements AppRepository {
       throw const ApiError(code: 'VALIDATION_ERROR', message: 'invalid input');
     }
     _signedIn = true;
+    _welcome();
     return Session(
         accessToken: 'mock-token', userId: 'mock-user', email: email, displayName: displayName);
   }
@@ -71,6 +74,8 @@ class MockRepository implements AppRepository {
   void logout() {
     _signedIn = false;
     _trips.clear();
+    _notifications.clear();
+    _reviews.clear();
     _bookings.clear();
     _ledger.clear();
     _balance = 0;
@@ -229,5 +234,98 @@ class MockRepository implements AppRepository {
     ];
     _trips[_trips.indexOf(t)] = Trip(
         id: t.id, name: t.name, startDate: t.startDate, endDate: t.endDate, status: t.status, days: days);
+  }
+
+  // ---- Notifications and reviews (in memory) ----
+  final List<AppNotification> _notifications = [];
+  final List<Review> _reviews = [];
+
+  void _welcome() {
+    if (_notifications.isNotEmpty) return;
+    _notifications.add(const AppNotification(
+        id: 'mock-n-1',
+        type: 'system',
+        title: 'ยินดีต้อนรับสู่ Sabai',
+        body: 'นี่คือข้อมูลทดลองในโหมดออฟไลน์',
+        read: false,
+        date: '2030-01-01'));
+  }
+
+  @override
+  Future<NotificationsPage> notifications() async {
+    _requireSignIn();
+    return NotificationsPage(
+      items: List.unmodifiable(_notifications),
+      unreadCount: _notifications.where((n) => !n.read).length,
+    );
+  }
+
+  @override
+  Future<void> markNotificationRead(String id) async {
+    _requireSignIn();
+    final i = _notifications.indexWhere((n) => n.id == id);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'notification', status: 404);
+    _notifications[i] = _notifications[i].copyWith(read: true);
+  }
+
+  @override
+  Future<void> markAllNotificationsRead() async {
+    _requireSignIn();
+    for (var i = 0; i < _notifications.length; i++) {
+      _notifications[i] = _notifications[i].copyWith(read: true);
+    }
+  }
+
+  @override
+  Future<List<Review>> myReviews() async {
+    _requireSignIn();
+    return List.unmodifiable(_reviews);
+  }
+
+  @override
+  Future<Review> createReview({
+    required String subjectType,
+    required String subjectId,
+    required double rating,
+    String body = '',
+  }) async {
+    _requireSignIn();
+    if (rating < 1 || rating > 5 || (rating * 2) % 1 != 0) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'rating must be between 1 and 5 in steps of 0.5');
+    }
+    if (_reviews.any((r) => r.subjectType == subjectType && r.subjectId == subjectId)) {
+      throw const ApiError(code: 'CONFLICT', message: 'already reviewed', status: 409);
+    }
+    _seq += 1;
+    final r = Review(
+        id: 'mock-review-$_seq', subjectType: subjectType, subjectId: subjectId, rating: rating, body: body.trim(), date: '2030-01-01');
+    _reviews.insert(0, r);
+    return r;
+  }
+
+  @override
+  Future<void> deleteReview(String id) async {
+    _requireSignIn();
+    final i = _reviews.indexWhere((r) => r.id == id);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'review', status: 404);
+    _reviews.removeAt(i);
+  }
+
+  @override
+  Future<List<String>> setTags({required String contentType, required String contentId, required List<String> tags}) async {
+    _requireSignIn();
+    if (contentType != 'REVIEW') throw const ApiError(code: 'VALIDATION_ERROR', message: 'unsupported content type');
+    final i = _reviews.indexWhere((r) => r.id == contentId);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'review', status: 404);
+    if (tags.length > 10) throw const ApiError(code: 'VALIDATION_ERROR', message: 'at most 10 tags per item');
+    final seen = <String>{};
+    final clean = <String>[];
+    for (final raw in tags) {
+      final label = raw.trim().split(RegExp(r'\s+')).join(' ');
+      if (label.isEmpty || label.length > 30) throw const ApiError(code: 'VALIDATION_ERROR', message: 'invalid tag');
+      if (seen.add(label.toLowerCase())) clean.add(label);
+    }
+    _reviews[i] = _reviews[i].withTags(clean);
+    return clean;
   }
 }
