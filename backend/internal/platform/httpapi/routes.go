@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/travel-super-app/backend/internal/admin"
 	"github.com/travel-super-app/backend/internal/auth"
+	"github.com/travel-super-app/backend/internal/community"
+	"github.com/travel-super-app/backend/internal/coupon"
 	financeapi "github.com/travel-super-app/backend/internal/finance/api"
 	"github.com/travel-super-app/backend/internal/finance/payment"
 	"github.com/travel-super-app/backend/internal/finance/safety"
@@ -42,6 +44,12 @@ func RegisterRoutesWith(router *gin.Engine, db *sql.DB, jwtSecret string, cfg sa
 	reviews := secured.Group("/reviews")
 	reviews.Use(userRoles)
 	review.RegisterRoutes(reviews, review.NewService(db))
+	communityRoutes := secured.Group("/community")
+	communityRoutes.Use(userRoles)
+	community.RegisterRoutes(communityRoutes, community.NewService(db))
+	couponRoutes := secured.Group("/coupons")
+	couponRoutes.Use(userRoles)
+	coupon.RegisterRoutes(couponRoutes, coupon.NewService(db))
 	tagRoutes := secured.Group("")
 	tagRoutes.Use(userRoles)
 	tag.RegisterRoutes(tagRoutes, tag.NewService(db))

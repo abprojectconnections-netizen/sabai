@@ -1,4 +1,4 @@
-// Package tag is the central tagging system for user content (trips, reviews; more types as their tables arrive).
+// Package tag is the central tagging system for user content (trips, reviews, community posts; more types as their tables arrive).
 //
 // Rules:
 //   - a tag is a normalised slug (lowercase, letters/digits/marks and '-') with the user's original label;
@@ -30,11 +30,12 @@ const (
 
 // Content types that may carry tags. Private ones are visible only to their owner.
 const (
-	TypeTrip   = "TRIP"
-	TypeReview = "REVIEW"
+	TypeTrip          = "TRIP"
+	TypeReview        = "REVIEW"
+	TypeCommunityPost = "COMMUNITY_POST"
 )
 
-var contentTypes = map[string]bool{TypeTrip: true, TypeReview: true}
+var contentTypes = map[string]bool{TypeTrip: true, TypeReview: true, TypeCommunityPost: true}
 
 func validationf(msg string) error { return errors.Join(ErrValidation, errors.New(msg)) }
 
@@ -80,7 +81,7 @@ func NewService(db *sql.DB) *Service { return &Service{db: db} }
 func checkType(t string) (string, error) {
 	t = strings.ToUpper(strings.TrimSpace(t))
 	if !contentTypes[t] {
-		return "", validationf("content type must be one of TRIP, REVIEW")
+		return "", validationf("content type must be one of TRIP, REVIEW, COMMUNITY_POST")
 	}
 	return t, nil
 }
@@ -97,6 +98,12 @@ func access(ctx context.Context, q querier, userID, ctype, id string, write, for
 	case TypeTrip: // private: owner only, for reads and writes
 		query = "SELECT 1 FROM trips WHERE id = ? AND user_id = ? AND deleted_at IS NULL"
 		args = append(args, userID)
+	case TypeCommunityPost: // readable by any signed-in user; only the author may change tags
+		query = "SELECT 1 FROM community_posts WHERE id = ? AND deleted_at IS NULL"
+		if write {
+			query += " AND user_id = ?"
+			args = append(args, userID)
+		}
 	case TypeReview: // readable by any signed-in user; only the author may change tags
 		query = "SELECT 1 FROM reviews WHERE id = ? AND deleted_at IS NULL"
 		if write {
@@ -206,14 +213,15 @@ func escapeLike(s string) string {
 	return strings.NewReplacer(`\`, `\\`, `%`, `\%`, `_`, `\_`).Replace(s)
 }
 
-// Popular lists tags by public usage (REVIEW content only): private trips never feed public statistics.
+// Popular lists tags by public usage (REVIEW and COMMUNITY_POST content only): private trips never feed public statistics.
 // prefix filters by slug prefix (autocomplete).
 func (s *Service) Popular(ctx context.Context, prefix string, limit, offset int) ([]Tag, error) {
 	prefix = strings.ToLower(strings.TrimSpace(prefix))
 	rows, err := s.db.QueryContext(ctx, `SELECT t.slug, t.label, COUNT(*) AS uses
 		FROM tags t JOIN content_tags ct ON ct.tag_id = t.id
-		JOIN reviews r ON ct.content_type = 'REVIEW' AND r.id = ct.content_id AND r.deleted_at IS NULL
 		WHERE t.slug LIKE ? ESCAPE '\\'
+		  AND ((ct.content_type = 'REVIEW' AND EXISTS (SELECT 1 FROM reviews r WHERE r.id = ct.content_id AND r.deleted_at IS NULL))
+		    OR (ct.content_type = 'COMMUNITY_POST' AND EXISTS (SELECT 1 FROM community_posts cp WHERE cp.id = ct.content_id AND cp.deleted_at IS NULL)))
 		GROUP BY t.id, t.slug, t.label ORDER BY uses DESC, t.slug LIMIT ? OFFSET ?`, escapeLike(prefix)+"%", limit, offset)
 	if err != nil {
 		return nil, err
@@ -231,7 +239,7 @@ func (s *Service) Popular(ctx context.Context, prefix string, limit, offset int)
 }
 
 // ContentByTag returns ids of content of one type carrying the tag, limited to what the viewer may see
-// (own trips; any non-deleted review).
+// (own trips; any non-deleted review; community posts the viewer has not reported).
 func (s *Service) ContentByTag(ctx context.Context, userID, slug, ctype string, limit, offset int) ([]string, error) {
 	ctype, err := checkType(ctype)
 	if err != nil {
@@ -247,6 +255,9 @@ func (s *Service) ContentByTag(ctx context.Context, userID, slug, ctype string, 
 	case TypeTrip:
 		q = "SELECT ct.content_id FROM content_tags ct JOIN tags t ON t.id = ct.tag_id JOIN trips x ON x.id = ct.content_id AND x.user_id = ? AND x.deleted_at IS NULL WHERE t.slug = ? AND ct.content_type = 'TRIP' ORDER BY ct.created_at DESC, ct.id LIMIT ? OFFSET ?"
 		args = []any{userID, slug}
+	case TypeCommunityPost:
+		q = "SELECT ct.content_id FROM content_tags ct JOIN tags t ON t.id = ct.tag_id JOIN community_posts x ON x.id = ct.content_id AND x.deleted_at IS NULL WHERE t.slug = ? AND ct.content_type = 'COMMUNITY_POST' AND NOT EXISTS (SELECT 1 FROM community_reports r WHERE r.post_id = x.id AND r.reporter_id = ?) ORDER BY ct.created_at DESC, ct.id LIMIT ? OFFSET ?"
+		args = []any{slug, userID}
 	default:
 		q = "SELECT ct.content_id FROM content_tags ct JOIN tags t ON t.id = ct.tag_id JOIN reviews x ON x.id = ct.content_id AND x.deleted_at IS NULL WHERE t.slug = ? AND ct.content_type = 'REVIEW' ORDER BY ct.created_at DESC, ct.id LIMIT ? OFFSET ?"
 	}
