@@ -36,10 +36,14 @@ CI (`.github/workflows/sabai-app.yml`) runs both on every change under `apps/sab
 ## Status
 Ported: configuration (DEV/BETA/PRODUCTION rules), catalogue, sign-in/register, booking + payment (real backend or local mock),
 my bookings with refund request, wallet (read-only).
-**Not ported yet** (still only in the web prototype): AI planner, community, coupons, reviews, notifications, help,
-maps, flights, settings, profile. See `apps/web-prototype/docs/05-known-limitations.md` for backend gaps that apply here too.
+**Not ported yet** (still only in the web prototype): AI planner, community, coupons, help,
+maps, flights. See `apps/web-prototype/docs/05-known-limitations.md` for backend gaps that apply here too.
 
 ## Update: trips, profile, settings
 - **Trips** use the real `/trips` API (list, detail with days and activities, create, delete, add/remove activity); the mock repository keeps them in memory.
 - **Profile** shows the signed-in user and links to the wallet and settings.
 - **Settings** are stored on this device only (theme, local reminders). Password change and account deletion are intentionally absent: the backend has no endpoints for them. Language/currency switching is not offered because the app has no localisation yet.
+
+## Update: notifications and reviews
+- **Notifications**: bell with unread count in the app bar, list, mark one/all as read (`/notifications`).
+- **Reviews**: a confirmed or completed booking can be reviewed once (rating 1-5, optional text, optional tags via the central tagging API `/content/REVIEW/{id}/tags`); "my reviews" lists and deletes them. The reviews API does not verify that a subject exists, so the app only offers the user's own bookings.

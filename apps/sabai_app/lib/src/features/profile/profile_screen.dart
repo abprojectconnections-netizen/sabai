@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../state/app_state.dart';
 import '../auth/login_screen.dart';
+import '../reviews/my_reviews_screen.dart';
 import '../settings/settings_screen.dart';
 import '../wallet/wallet_screen.dart';
 
@@ -55,6 +56,14 @@ class ProfileScreen extends StatelessWidget {
             title: const Text('กระเป๋าเงิน'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => _open(context, 'กระเป๋าเงิน', const WalletScreen()),
+          ),
+        if (state.signedIn)
+          ListTile(
+            key: const Key('myReviewsTile'),
+            leading: const Icon(Icons.star_outline),
+            title: const Text('รีวิวของฉัน'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const MyReviewsScreen())),
           ),
         ListTile(
           key: const Key('settingsTile'),
