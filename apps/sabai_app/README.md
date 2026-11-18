@@ -36,8 +36,7 @@ CI (`.github/workflows/sabai-app.yml`) runs both on every change under `apps/sab
 ## Status
 Ported: configuration (DEV/BETA/PRODUCTION rules), catalogue, sign-in/register, booking + payment (real backend or local mock),
 my bookings with refund request, wallet (read-only).
-**Not ported yet** (still only in the web prototype): AI planner,
-maps, flights. See `apps/web-prototype/docs/05-known-limitations.md` for backend gaps that apply here too.
+**Not ported yet** (still only in the web prototype): flights. See `apps/web-prototype/docs/05-known-limitations.md` for backend gaps that apply here too.
 
 ## Update: trips, profile, settings
 - **Trips** use the real `/trips` API (list, detail with days and activities, create, delete, add/remove activity); the mock repository keeps them in memory.
@@ -53,3 +52,7 @@ maps, flights. See `apps/web-prototype/docs/05-known-limitations.md` for backend
 - **Coupons** (Profile > คูปองของฉัน): save a code and see its state (ACTIVE / EXPIRED / NOT_STARTED / EXHAUSTED / UNAVAILABLE). Display only: the app never sends a coupon with a booking and says so on screen. (The backend booking API itself still accepts `coupon_code`.)
 - **Help** (Profile > ช่วยเหลือ): read-only FAQ. It states no refund windows, fees or contact channel because none is defined yet.
 - The mock repository ships demo codes `SABAI10` (active) and `OLD10` (expired).
+
+## Update: maps and trip planner
+- **Maps**: in a trip, each activity has "open in Google Maps" (a search for its title) and each day with 2+ activities has "view the whole day's route" (the last stop is the destination, up to 9 waypoints, starting from the user's current location). These are deep links opened with `url_launcher`: no API key and no map inside the app. Activities store only a title (no coordinates), so Maps searches by that text and may pick a different place.
+- **Planner**: "สร้างแผนจากแม่แบบ" on the Trips tab builds a starter itinerary from fixed templates (a curated 3-day Chiang Mai plan, a generic plan otherwise, 1-7 days) and saves it as an ordinary trip through `/trips`. It is **not AI** and says so on screen; it checks no opening hours, distances or prices. If some activities fail to save, the trip stays and the app reports how many were lost.

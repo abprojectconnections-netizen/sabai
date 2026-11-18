@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/util/dates.dart';
+import '../../core/util/external_links.dart';
+import '../../core/util/map_links.dart';
 import '../../data/models/trip_models.dart';
 import '../../state/trips_controller.dart';
 
@@ -63,6 +65,24 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     await _reload();
   }
 
+  Future<void> _open(Uri uri) async {
+    final opener = context.read<UrlOpener>();
+    final messenger = ScaffoldMessenger.of(context);
+    final ok = await opener(uri);
+    if (!ok) messenger.showSnackBar(const SnackBar(content: Text('เปิดแผนที่ไม่สำเร็จ')));
+  }
+
+  void _openRoute(TripDay d) {
+    final titles = d.activities.map((a) => a.title).toList();
+    final uri = mapsRouteUri(titles);
+    if (uri == null) return;
+    if (titles.length > maxMapWaypoints + 1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google Maps รองรับสูงสุด 10 จุดต่อเส้นทาง จึงแสดง 10 จุดแรกของวันนี้')));
+    }
+    _open(uri);
+  }
+
   Future<void> _deleteTrip() async {
     final c = context.read<TripsController>();
     final navigator = Navigator.of(context);
@@ -106,14 +126,31 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     const SizedBox(height: 16),
                     if (trip.days.isEmpty) const Text('ยังไม่มีกิจกรรม เพิ่มกิจกรรมแรกได้เลย'),
                     for (final d in trip.days) ...[
-                      Text('วันที่ ${d.dayNumber} · ${formatDate(d.date)}', style: Theme.of(context).textTheme.titleMedium),
+                      Row(children: [
+                        Expanded(child: Text('วันที่ ${d.dayNumber} · ${formatDate(d.date)}', style: Theme.of(context).textTheme.titleMedium)),
+                        if (d.activities.length >= 2)
+                          TextButton.icon(
+                            key: Key('route-day-${d.dayNumber}'),
+                            onPressed: () => _openRoute(d),
+                            icon: const Icon(Icons.alt_route),
+                            label: const Text('ดูเส้นทางทั้งวัน'),
+                          ),
+                      ]),
                       for (final a in d.activities)
                         ListTile(
                           contentPadding: EdgeInsets.zero,
                           leading: const Icon(Icons.place_outlined),
                           title: Text(a.title),
                           subtitle: a.startTime.isEmpty ? null : Text(a.endTime.isEmpty ? a.startTime : '${a.startTime} – ${a.endTime}'),
-                          trailing: IconButton(tooltip: 'ลบกิจกรรม', icon: const Icon(Icons.close), onPressed: () => _removeActivity(a)),
+                          trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                            IconButton(
+                              key: Key('map-${a.id}'),
+                              tooltip: 'เปิดใน Google Maps',
+                              icon: const Icon(Icons.map_outlined),
+                              onPressed: () => _open(mapsSearchUri(a.title)),
+                            ),
+                            IconButton(tooltip: 'ลบกิจกรรม', icon: const Icon(Icons.close), onPressed: () => _removeActivity(a)),
+                          ]),
                         ),
                       const SizedBox(height: 8),
                     ],
