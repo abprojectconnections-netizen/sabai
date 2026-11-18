@@ -1,6 +1,6 @@
 // Package community is the public feed: posts are visible to signed-in users immediately, and abuse is reported afterwards.
 // There is no pre-moderation. A user never sees posts they reported, and cannot report their own post.
-// Reports are stored for staff review; the review tooling is not part of this package.
+// Reports are stored for staff review; staff.go holds the moderation queue (list, remove, dismiss), behind support.manage and audited.
 package community
 
 import (
