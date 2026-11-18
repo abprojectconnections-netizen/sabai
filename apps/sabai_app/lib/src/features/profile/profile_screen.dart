@@ -3,7 +3,9 @@ import 'package:provider/provider.dart';
 
 import '../../state/app_state.dart';
 import '../auth/login_screen.dart';
+import '../coupons/coupons_screen.dart';
 import '../reviews/my_reviews_screen.dart';
+import '../support/help_screen.dart';
 import '../settings/settings_screen.dart';
 import '../wallet/wallet_screen.dart';
 
@@ -65,6 +67,21 @@ class ProfileScreen extends StatelessWidget {
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const MyReviewsScreen())),
           ),
+        if (state.signedIn)
+          ListTile(
+            key: const Key('couponsTile'),
+            leading: const Icon(Icons.local_offer_outlined),
+            title: const Text('คูปองของฉัน'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const CouponsScreen())),
+          ),
+        ListTile(
+          key: const Key('helpTile'),
+          leading: const Icon(Icons.help_outline),
+          title: const Text('ช่วยเหลือ'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const HelpScreen())),
+        ),
         ListTile(
           key: const Key('settingsTile'),
           leading: const Icon(Icons.settings_outlined),

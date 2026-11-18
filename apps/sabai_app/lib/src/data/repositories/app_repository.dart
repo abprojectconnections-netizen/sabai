@@ -1,3 +1,4 @@
+import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
 import '../models/trip_models.dart';
@@ -85,6 +86,26 @@ abstract class AppRepository {
   });
 
   Future<void> deleteReview(String id);
+
+  // ---- Community (backend: /community) ----
+
+  /// Newest first. Posts the caller reported are already hidden by the server.
+  Future<List<CommunityPost>> communityFeed();
+
+  /// Shown to everyone at once (no pre-moderation); 1..1000 characters.
+  Future<CommunityPost> createPost(String body);
+
+  Future<void> deletePost(String id);
+
+  /// [reason] is one of [communityReportReasons]. Reporting is idempotent.
+  Future<void> reportPost({required String id, required String reason, String detail = ''});
+
+  // ---- Coupons (backend: /coupons). Saving only: the app never applies a coupon to a price. ----
+
+  /// Saves a code to the caller's list. Errors: NOT_FOUND (unknown), CONFLICT (already saved/expired/not started/used up).
+  Future<void> claimCoupon(String code);
+
+  Future<List<SavedCoupon>> myCoupons();
 
   // ---- Tags (backend: /content/{type}/{id}/tags) ----
 
