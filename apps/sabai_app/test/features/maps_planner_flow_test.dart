@@ -60,7 +60,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('generatePlanButton')));
     await tester.pumpAndSettle();
-    expect(find.text('วันที่ 2 · ภูเก็ต'), findsOneWidget);
+    expect(find.text('วันที่ 2 · ภูเก็ต', skipOffstage: false), findsOneWidget);
+    expect(find.text('วันที่ 3 · ภูเก็ต', skipOffstage: false), findsNothing);
 
     await tester.ensureVisible(find.byKey(const Key('savePlanButton')));
     await tester.tap(find.byKey(const Key('savePlanButton')));
