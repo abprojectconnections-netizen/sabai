@@ -5,6 +5,7 @@ import '../../core/util/dates.dart';
 import '../../state/app_state.dart';
 import '../../state/trips_controller.dart';
 import '../auth/login_screen.dart';
+import '../planner/planner_screen.dart';
 import 'create_trip_screen.dart';
 import 'trip_detail_screen.dart';
 
@@ -57,7 +58,18 @@ class _TripsScreenState extends State<TripsScreen> {
       );
     }
     return Scaffold(
-      body: RefreshIndicator(onRefresh: c.load, child: body),
+      body: Column(children: [
+        ListTile(
+          key: const Key('plannerTile'),
+          leading: const Icon(Icons.auto_awesome_outlined),
+          title: const Text('สร้างแผนจากแม่แบบ'),
+          subtitle: const Text('แผนตัวอย่าง ไม่ใช่ AI'),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const PlannerScreen())),
+        ),
+        const Divider(height: 1),
+        Expanded(child: RefreshIndicator(onRefresh: c.load, child: body)),
+      ]),
       floatingActionButton: FloatingActionButton.extended(
         key: const Key('newTripButton'),
         onPressed: () => Navigator.of(context).push(

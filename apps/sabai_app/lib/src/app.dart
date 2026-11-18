@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'core/config/app_config.dart';
+import 'core/util/external_links.dart';
 import 'core/theme/app_theme.dart';
 import 'data/repositories/app_repository.dart';
 import 'features/shell/home_shell.dart';
@@ -15,16 +16,26 @@ import 'state/settings_controller.dart';
 import 'state/trips_controller.dart';
 
 class SabaiApp extends StatelessWidget {
-  const SabaiApp({super.key, required this.config, required this.repository, required this.prefs});
+  const SabaiApp({
+    super.key,
+    required this.config,
+    required this.repository,
+    required this.prefs,
+    this.urlOpener = openExternally,
+  });
 
   final AppConfig config;
   final AppRepository repository;
   final SharedPreferences prefs;
 
+  /// Opens external links (Google Maps). Tests pass a fake.
+  final UrlOpener urlOpener;
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        Provider<UrlOpener>.value(value: urlOpener),
         ChangeNotifierProvider<AppState>(create: (_) => AppState(repository)..boot()),
         ChangeNotifierProvider<SettingsController>(create: (_) => SettingsController(prefs)),
         // Trips belong to the signed-in user: clear them whenever the user signs out.
