@@ -31,6 +31,13 @@ class MockRepository implements AppRepository {
         price: 50,
         serviceDate: '2030-01-10'),
     Listing(
+        id: 'mock-hotel-2',
+        title: 'อันดามัน บีช วิลลา',
+        type: ListingType.hotel,
+        location: 'ป่าตอง, ภูเก็ต',
+        price: 2350,
+        serviceDate: ''),
+    Listing(
         id: 'mock-flight-1',
         title: 'สายการบินตัวอย่าง A XA 214 BKK→CNX ออก 07:00 (เที่ยวบินจำลอง)',
         type: ListingType.flight,
@@ -44,13 +51,6 @@ class MockRepository implements AppRepository {
         location: 'ตัวอย่างทัวร์แอนด์เทรเวล',
         price: 1980,
         serviceDate: '2030-01-11'),
-    Listing(
-        id: 'mock-hotel-2',
-        title: 'อันดามัน บีช วิลลา',
-        type: ListingType.hotel,
-        location: 'ป่าตอง, ภูเก็ต',
-        price: 2350,
-        serviceDate: ''),
   ];
 
   @override
