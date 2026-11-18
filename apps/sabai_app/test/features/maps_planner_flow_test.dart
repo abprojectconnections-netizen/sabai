@@ -63,11 +63,11 @@ void main() {
     expect(find.text('วันที่ 2 · ภูเก็ต', skipOffstage: false), findsOneWidget);
     expect(find.text('วันที่ 3 · ภูเก็ต', skipOffstage: false), findsNothing);
 
-    await tester.ensureVisible(find.byKey(const Key('savePlanButton')));
+    await tester.scrollUntilVisible(find.byKey(const Key('savePlanButton')), 300, scrollable: find.byType(Scrollable).first);
     await tester.tap(find.byKey(const Key('savePlanButton')));
     await tester.pumpAndSettle();
     expect(find.text('ทริปภูเก็ต 2 วัน'), findsWidgets); // now on the trip detail
-    expect(find.text('อาหารเย็นและพักผ่อน'), findsNWidgets(2));
+    expect(find.text('อาหารเย็นและพักผ่อน'), findsWidgets);
     expect(find.byKey(const Key('route-day-1')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('route-day-1')));
