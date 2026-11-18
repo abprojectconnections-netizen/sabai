@@ -1,4 +1,5 @@
 import '../../core/errors/api_error.dart';
+import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
 import '../models/trip_models.dart';
@@ -311,12 +312,102 @@ class MockRepository implements AppRepository {
     _reviews.removeAt(i);
   }
 
+  final List<CommunityPost> _posts = [
+    const CommunityPost(
+        id: 'mock-post-seed',
+        body: 'แนะนำคาเฟ่ริมน้ำที่เชียงใหม่ บรรยากาศดีมาก (ตัวอย่างข้อมูลออฟไลน์)',
+        authorName: 'สมาชิกตัวอย่าง',
+        date: '2030-01-01',
+        mine: false,
+        tags: ['คาเฟ่']),
+  ];
+  final Set<String> _reportedPosts = {};
+  final Set<String> _savedCoupons = {};
+
+  @override
+  Future<List<CommunityPost>> communityFeed() async {
+    _requireSignIn();
+    return List.unmodifiable(_posts.where((p) => !_reportedPosts.contains(p.id)));
+  }
+
+  @override
+  Future<CommunityPost> createPost(String body) async {
+    _requireSignIn();
+    final text = body.trim();
+    if (text.isEmpty || text.runes.length > 1000) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'body must be 1-1000 characters');
+    }
+    _seq += 1;
+    final p = CommunityPost(id: 'mock-post-$_seq', body: text, authorName: 'ฉัน', date: '2030-01-01', mine: true);
+    _posts.insert(0, p);
+    return p;
+  }
+
+  @override
+  Future<void> deletePost(String id) async {
+    _requireSignIn();
+    final i = _posts.indexWhere((p) => p.id == id && p.mine);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'post', status: 404);
+    _posts.removeAt(i);
+  }
+
+  @override
+  Future<void> reportPost({required String id, required String reason, String detail = ''}) async {
+    _requireSignIn();
+    if (!communityReportReasons.contains(reason)) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'unknown reason');
+    }
+    final i = _posts.indexWhere((p) => p.id == id);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'post', status: 404);
+    if (_posts[i].mine) throw const ApiError(code: 'VALIDATION_ERROR', message: 'cannot report your own post');
+    _reportedPosts.add(id);
+  }
+
+  static const Map<String, SavedCoupon> _couponCatalog = {
+    'SABAI10': SavedCoupon(
+        code: 'SABAI10',
+        title: 'ส่วนลดตัวอย่าง',
+        discountType: 'PERCENT',
+        value: '10.00',
+        validFrom: '2030-01-01',
+        validUntil: '2030-12-31',
+        state: 'ACTIVE'),
+    'OLD10': SavedCoupon(
+        code: 'OLD10',
+        title: 'คูปองหมดอายุ',
+        discountType: 'FIXED',
+        value: '100.00',
+        validFrom: '2020-01-01',
+        validUntil: '2020-12-31',
+        state: 'EXPIRED'),
+  };
+
+  @override
+  Future<void> claimCoupon(String code) async {
+    _requireSignIn();
+    final key = code.trim().toUpperCase();
+    if (key.isEmpty || key.length > 40) throw const ApiError(code: 'VALIDATION_ERROR', message: 'invalid code');
+    final c = _couponCatalog[key];
+    if (c == null) throw const ApiError(code: 'NOT_FOUND', message: 'coupon', status: 404);
+    if (!c.isActive) throw const ApiError(code: 'CONFLICT', message: 'coupon is not claimable', status: 409);
+    if (!_savedCoupons.add(key)) throw const ApiError(code: 'CONFLICT', message: 'already saved', status: 409);
+  }
+
+  @override
+  Future<List<SavedCoupon>> myCoupons() async {
+    _requireSignIn();
+    return _savedCoupons.map((k) => _couponCatalog[k]!).toList();
+  }
+
   @override
   Future<List<String>> setTags({required String contentType, required String contentId, required List<String> tags}) async {
     _requireSignIn();
-    if (contentType != 'REVIEW') throw const ApiError(code: 'VALIDATION_ERROR', message: 'unsupported content type');
-    final i = _reviews.indexWhere((r) => r.id == contentId);
-    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'review', status: 404);
+    if (contentType != 'REVIEW' && contentType != 'COMMUNITY_POST') {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'unsupported content type');
+    }
+    final reviewIndex = contentType == 'REVIEW' ? _reviews.indexWhere((r) => r.id == contentId) : -1;
+    final postIndex = contentType == 'COMMUNITY_POST' ? _posts.indexWhere((p) => p.id == contentId && p.mine) : -1;
+    if (reviewIndex < 0 && postIndex < 0) throw const ApiError(code: 'NOT_FOUND', message: 'content', status: 404);
     if (tags.length > 10) throw const ApiError(code: 'VALIDATION_ERROR', message: 'at most 10 tags per item');
     final seen = <String>{};
     final clean = <String>[];
@@ -325,7 +416,8 @@ class MockRepository implements AppRepository {
       if (label.isEmpty || label.length > 30) throw const ApiError(code: 'VALIDATION_ERROR', message: 'invalid tag');
       if (seen.add(label.toLowerCase())) clean.add(label);
     }
-    _reviews[i] = _reviews[i].withTags(clean);
+    if (reviewIndex >= 0) _reviews[reviewIndex] = _reviews[reviewIndex].withTags(clean);
+    if (postIndex >= 0) _posts[postIndex] = _posts[postIndex].withTags(clean);
     return clean;
   }
 }

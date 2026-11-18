@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import '../../core/config/app_config.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/util/format.dart';
+import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
 import '../models/trip_models.dart';
@@ -380,6 +381,43 @@ class HttpRepository implements AppRepository {
   @override
   Future<void> deleteReview(String id) async {
     await _request('/reviews/${Uri.encodeComponent(id)}', method: 'DELETE', auth: true);
+  }
+
+  @override
+  Future<List<CommunityPost>> communityFeed() async {
+    final data = await _request('/community/posts?limit=50', auth: true);
+    return _rows(data, '/community/posts').map(CommunityPost.fromJson).toList();
+  }
+
+  @override
+  Future<CommunityPost> createPost(String body) async {
+    final r = await _request('/community/posts', method: 'POST', auth: true, body: {'body': body});
+    if (r is! Map<String, dynamic> || r['id'] is! String) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: 'post payload is invalid');
+    }
+    return CommunityPost.fromJson(r);
+  }
+
+  @override
+  Future<void> deletePost(String id) async {
+    await _request('/community/posts/${Uri.encodeComponent(id)}', method: 'DELETE', auth: true);
+  }
+
+  @override
+  Future<void> reportPost({required String id, required String reason, String detail = ''}) async {
+    await _request('/community/posts/${Uri.encodeComponent(id)}/report',
+        method: 'POST', auth: true, body: {'reason': reason, 'detail': detail});
+  }
+
+  @override
+  Future<void> claimCoupon(String code) async {
+    await _request('/coupons/claim', method: 'POST', auth: true, body: {'code': code});
+  }
+
+  @override
+  Future<List<SavedCoupon>> myCoupons() async {
+    final data = await _request('/coupons/mine?limit=50', auth: true);
+    return _rows(data, '/coupons/mine').map(SavedCoupon.fromJson).toList();
   }
 
   @override

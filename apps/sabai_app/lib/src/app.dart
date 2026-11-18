@@ -7,6 +7,8 @@ import 'core/theme/app_theme.dart';
 import 'data/repositories/app_repository.dart';
 import 'features/shell/home_shell.dart';
 import 'state/app_state.dart';
+import 'state/community_controller.dart';
+import 'state/coupons_controller.dart';
 import 'state/notifications_controller.dart';
 import 'state/reviews_controller.dart';
 import 'state/settings_controller.dart';
@@ -48,6 +50,22 @@ class SabaiApp extends StatelessWidget {
             final r = c ?? ReviewsController(repository);
             if (!app.signedIn) r.reset();
             return r;
+          },
+        ),
+        ChangeNotifierProxyProvider<AppState, CommunityController>(
+          create: (_) => CommunityController(repository),
+          update: (_, app, c) {
+            final x = c ?? CommunityController(repository);
+            if (!app.signedIn) x.reset();
+            return x;
+          },
+        ),
+        ChangeNotifierProxyProvider<AppState, CouponsController>(
+          create: (_) => CouponsController(repository),
+          update: (_, app, c) {
+            final x = c ?? CouponsController(repository);
+            if (!app.signedIn) x.reset();
+            return x;
           },
         ),
       ],

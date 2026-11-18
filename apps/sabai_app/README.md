@@ -36,7 +36,7 @@ CI (`.github/workflows/sabai-app.yml`) runs both on every change under `apps/sab
 ## Status
 Ported: configuration (DEV/BETA/PRODUCTION rules), catalogue, sign-in/register, booking + payment (real backend or local mock),
 my bookings with refund request, wallet (read-only).
-**Not ported yet** (still only in the web prototype): AI planner, community, coupons, help,
+**Not ported yet** (still only in the web prototype): AI planner,
 maps, flights. See `apps/web-prototype/docs/05-known-limitations.md` for backend gaps that apply here too.
 
 ## Update: trips, profile, settings
@@ -47,3 +47,9 @@ maps, flights. See `apps/web-prototype/docs/05-known-limitations.md` for backend
 ## Update: notifications and reviews
 - **Notifications**: bell with unread count in the app bar, list, mark one/all as read (`/notifications`).
 - **Reviews**: a confirmed or completed booking can be reviewed once (rating 1-5, optional text, optional tags via the central tagging API `/content/REVIEW/{id}/tags`); "my reviews" lists and deletes them. The reviews API does not verify that a subject exists, so the app only offers the user's own bookings.
+
+## Update: community, coupons, help
+- **Community** (tab "ชุมชน", sign-in required): posts show immediately (no pre-moderation); you can tag your own post (central tag system, type `COMMUNITY_POST`), delete it, and report other posts. A reported post disappears for the reporter. There is no staff moderation tool yet, so reports are only stored.
+- **Coupons** (Profile > คูปองของฉัน): save a code and see its state (ACTIVE / EXPIRED / NOT_STARTED / EXHAUSTED / UNAVAILABLE). Display only: the app never sends a coupon with a booking and says so on screen. (The backend booking API itself still accepts `coupon_code`.)
+- **Help** (Profile > ช่วยเหลือ): read-only FAQ. It states no refund windows, fees or contact channel because none is defined yet.
+- The mock repository ships demo codes `SABAI10` (active) and `OLD10` (expired).

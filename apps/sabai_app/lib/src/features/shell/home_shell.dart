@@ -6,6 +6,7 @@ import '../../state/app_state.dart';
 import '../auth/login_screen.dart';
 import '../booking/my_bookings_screen.dart';
 import '../catalog/catalog_screen.dart';
+import '../community/community_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../profile/profile_screen.dart';
 import '../trips/trips_screen.dart';
@@ -28,6 +29,7 @@ class _HomeShellState extends State<HomeShell> {
     final pages = <Widget>[
       const CatalogScreen(),
       const TripsScreen(),
+      state.signedIn ? const CommunityScreen() : const SignInPrompt(),
       state.signedIn ? const MyBookingsScreen() : const SignInPrompt(),
       const ProfileScreen(),
     ];
@@ -52,6 +54,7 @@ class _HomeShellState extends State<HomeShell> {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.search), label: 'ค้นหา'),
           NavigationDestination(icon: Icon(Icons.luggage_outlined), label: 'ทริป'),
+          NavigationDestination(icon: Icon(Icons.forum_outlined), label: 'ชุมชน'),
           NavigationDestination(icon: Icon(Icons.confirmation_number_outlined), label: 'การจอง'),
           NavigationDestination(icon: Icon(Icons.person_outline), label: 'โปรไฟล์'),
         ],
