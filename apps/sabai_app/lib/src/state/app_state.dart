@@ -89,11 +89,11 @@ class AppState extends ChangeNotifier {
   Future<bool> refreshAccount() => _run(_refreshAccount);
 
   /// Pays for [listing]. On success [result] receives the server-reported outcome.
-  Future<CheckoutResult?> pay(Listing listing) async {
+  Future<CheckoutResult?> pay(Listing listing, {bool simulateFailure = false}) async {
     CheckoutResult? result;
     await _run(() async {
       result = await repository.pay(
-          inventoryItemId: listing.id, serviceDate: listing.serviceDate);
+          inventoryItemId: listing.id, serviceDate: listing.serviceDate, simulateFailure: simulateFailure);
       await _refreshAccount();
     });
     return result;

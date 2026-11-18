@@ -9,6 +9,9 @@ abstract class AppRepository {
   /// True when checkout talks to the real backend. The mock repository only simulates it locally.
   bool get isRealCheckout;
 
+  /// True when this build may ask the sandbox provider to simulate a failed payment (never in production).
+  bool get canSimulatePayment;
+
   /// Public catalogue (no sign-in needed).
   Future<List<Listing>> listings();
 
@@ -33,6 +36,7 @@ abstract class AppRepository {
     required String serviceDate,
     int quantity = 1,
     String method = 'PROMPTPAY_QR',
+    bool simulateFailure = false,
   });
 
   /// A refund is a REQUEST: the server computes the amount from the booking's price snapshot and decides approval.

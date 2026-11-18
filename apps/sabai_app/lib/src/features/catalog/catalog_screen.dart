@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../core/util/format.dart';
 import '../../data/models/models.dart';
 import '../../state/app_state.dart';
-import '../flights/flights_demo_screen.dart';
+import '../flights/flights_screen.dart';
 import 'listing_detail_screen.dart';
 
 class CatalogScreen extends StatelessWidget {
@@ -42,9 +42,9 @@ class CatalogScreen extends StatelessWidget {
         key: const Key('flightsDemoTile'),
         leading: const Icon(Icons.flight_takeoff),
         title: const Text('ค้นหาเที่ยวบิน'),
-        subtitle: const Text('ข้อมูลตัวอย่าง จองไม่ได้'),
+        subtitle: const Text('ระบบทดสอบ ไม่ใช่ตั๋วจริง'),
         trailing: const Icon(Icons.chevron_right),
-        onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const FlightsDemoScreen())),
+        onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const FlightsScreen())),
       ),
       const Divider(height: 1),
       Expanded(child: list),
