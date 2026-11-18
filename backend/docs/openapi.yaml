@@ -276,6 +276,43 @@ paths:
         - { $ref: '#/components/parameters/Offset' }
       responses:
         '200': { description: "data: { items: Coupon[] } where Coupon = {code, title, discount_type: FIXED|PERCENT, value (decimal string), valid_from, valid_until, state: ACTIVE|EXPIRED|NOT_STARTED|EXHAUSTED|UNAVAILABLE, saved_at}" }
+  /portal/community/reports:
+    get:
+      summary: "STAFF: open moderation queue of reported community posts (most reported first)"
+      description: Needs permission support.manage. Only live posts with at least one unreviewed report appear.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: [{id, body, author_name, created_at, report_count, reasons: string[]}] }" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /portal/community/posts/{id}/remove:
+    post:
+      summary: "STAFF: delete a reported post and close its reports (audited)"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, properties: { note: { type: string } } }
+      responses:
+        '200': { description: "data: { action: remove }" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /portal/community/posts/{id}/dismiss:
+    post:
+      summary: "STAFF: keep a reported post and close its reports (audited)"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, properties: { note: { type: string } } }
+      responses:
+        '200': { description: "data: { action: dismiss }" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
   /portal/queue:
     get:
       summary: Get operational queue counts for Staff or Admin
