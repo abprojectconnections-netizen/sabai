@@ -36,7 +36,7 @@ CI (`.github/workflows/sabai-app.yml`) runs both on every change under `apps/sab
 ## Status
 Ported: configuration (DEV/BETA/PRODUCTION rules), catalogue, sign-in/register, booking + payment (real backend or local mock),
 my bookings with refund request, wallet (read-only).
-**Not ported yet:** real flights (the prototype's flights are simulated; see the flights update below). See `apps/web-prototype/docs/05-known-limitations.md` for backend gaps that apply here too.
+**Not built yet:** real flight inventory and a real payment provider (both simulated, see the flights and sandbox update below). See `apps/web-prototype/docs/05-known-limitations.md` for backend gaps that apply here too.
 
 ## Update: trips, profile, settings
 - **Trips** use the real `/trips` API (list, detail with days and activities, create, delete, add/remove activity); the mock repository keeps them in memory.
@@ -57,5 +57,7 @@ my bookings with refund request, wallet (read-only).
 - **Maps**: in a trip, each activity has "open in Google Maps" (a search for its title) and each day with 2+ activities has "view the whole day's route" (the last stop is the destination, up to 9 waypoints, starting from the user's current location). These are deep links opened with `url_launcher`: no API key and no map inside the app. Activities store only a title (no coordinates), so Maps searches by that text and may pick a different place.
 - **Planner**: "สร้างแผนจากแม่แบบ" on the Trips tab builds a starter itinerary from fixed templates (a curated 3-day Chiang Mai plan, a generic plan otherwise, 1-7 days) and saves it as an ordinary trip through `/trips`. It is **not AI** and says so on screen; it checks no opening hours, distances or prices. If some activities fail to save, the trip stays and the app reports how many were lost.
 
-## Update: flights (demo only)
-- "ค้นหาเที่ยวบิน" on the home tab is a **simulated** search: fictional carriers, deterministic times and prices (`lib/src/domain/demo_flights.dart`). It is labelled "ตัวอย่าง" and "(จำลอง)", cannot be booked, and its prices must never enter a booking or payment flow. Real airline names, fares and baggage rules were deliberately left out of this port. A real flights feature needs a provider decision first (inventory, pricing, ticketing, refunds).
+## Update: flights and sandbox payments
+- **Flights** ("ค้นหาเที่ยวบิน" on the Search tab) are ordinary catalogue products of category `FLIGHT`, listed from `/catalog` and booked through the normal checkout and server-side pricing. The seeded flights are **simulated** (fictional carriers, generated times and prices; see `backend/cmd/seed`). No ticket is issued by anyone. Route and departure time are read from the listing title for filtering (display only; there are no structured flight fields yet).
+- **Sandbox payments**: in `dev`/`beta` the checkout shows a SANDBOX notice, and a "simulate failed payment" button asks the server's mock provider for a `CHARGE_FAILED` event (`POST /dev/payments/simulate {outcome: FAILED}`). The booking then stays unpaid and expires on its own; the app says so and offers a retry (which creates a new booking). In `production` the button does not exist, the client refuses the call, and the server route is absent.
+- Real flights still need a provider decision first (inventory, pricing, ticketing, refunds).

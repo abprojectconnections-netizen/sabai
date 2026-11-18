@@ -46,6 +46,9 @@ class HttpRepository implements AppRepository {
   @override
   bool get isRealCheckout => true;
 
+  @override
+  bool get canSimulatePayment => mode != ApiMode.production;
+
   String _newId() {
     String hex(int n) =>
         List.generate(n, (_) => _random.nextInt(16).toRadixString(16)).join();
@@ -190,7 +193,11 @@ class HttpRepository implements AppRepository {
     required String serviceDate,
     int quantity = 1,
     String method = 'PROMPTPAY_QR',
+    bool simulateFailure = false,
   }) async {
+    if (simulateFailure && mode == ApiMode.production) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'payment simulation is not available in production');
+    }
     // One Idempotency-Key per (item, date, quantity) attempt, so a retry after a timeout cannot create a second booking.
     final attempt = '$inventoryItemId|$serviceDate|$quantity';
     final key = _attemptKeys.putIfAbsent(attempt, _newId);
@@ -222,7 +229,12 @@ class HttpRepository implements AppRepository {
       // Development simulator: absent (404) when the server runs a real provider.
       try {
         await _request('/dev/payments/simulate',
-            method: 'POST', auth: true, body: {'payment_reference': intent['payment_reference']});
+            method: 'POST',
+            auth: true,
+            body: {
+              'payment_reference': intent['payment_reference'],
+              if (simulateFailure) 'outcome': 'FAILED',
+            });
       } on ApiError catch (e) {
         if (e.code != 'NOT_FOUND') rethrow;
       }
@@ -235,7 +247,7 @@ class HttpRepository implements AppRepository {
         throw const ApiError(code: 'BAD_RESPONSE', message: 'booking detail is invalid');
       }
       detail = d;
-      if (d['status'] != 'PENDING_PAYMENT') break;
+      if (d['status'] != 'PENDING_PAYMENT' || d['payment_status'] == 'FAILED') break;
       if (i < pollTries - 1) await Future<void>.delayed(pollDelay);
     }
     _attemptKeys.remove(attempt);
@@ -245,6 +257,7 @@ class HttpRepository implements AppRepository {
       status: (detail['status'] ?? '').toString(),
       payableTotal: parseAmount(detail['payable_total']),
       qrPayload: (intent['qr_payload'] ?? '').toString(),
+      paymentStatus: (detail['payment_status'] ?? '').toString(),
     );
   }
 

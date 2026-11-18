@@ -17,9 +17,14 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   CheckoutResult? _result;
 
-  Future<void> _pay() async {
-    final r = await context.read<AppState>().pay(widget.listing);
+  Future<void> _pay({bool simulateFailure = false}) async {
+    final r = await context.read<AppState>().pay(widget.listing, simulateFailure: simulateFailure);
     if (mounted) setState(() => _result = r);
+  }
+
+  Future<void> _retry({bool simulateFailure = false}) {
+    setState(() => _result = null);
+    return _pay(simulateFailure: simulateFailure);
   }
 
   @override
@@ -42,7 +47,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               const Padding(
                 padding: EdgeInsets.only(top: 8),
                 child: Text('โหมดทดลอง: การชำระเงินเป็นการจำลองในเครื่อง ไม่มีการตัดเงิน'),
+              )
+            else if (state.repository.canSimulatePayment)
+              const Padding(
+                padding: EdgeInsets.only(top: 8),
+                child: Text('SANDBOX: ผู้ให้บริการชำระเงินเป็นระบบจำลองบนเซิร์ฟเวอร์ทดสอบ ไม่มีการตัดเงินจริง',
+                    key: Key('sandboxNotice')),
               ),
+          ] else if (result.paymentFailed) ...[
+            Text('การชำระเงินไม่สำเร็จ', key: const Key('paymentFailed'), style: Theme.of(context).textTheme.headlineSmall),
+            Text('รหัสการจอง ${result.bookingCode}'),
+            const Text('การจองนี้ยังไม่ได้ชำระและจะหมดอายุเอง ไม่มีการตัดเงิน ลองชำระใหม่ได้ (จะสร้างรายการจองใหม่)'),
           ] else if (result.isPaid) ...[
             Text('จองสำเร็จ', style: Theme.of(context).textTheme.headlineSmall),
             Text('รหัสการจอง ${result.bookingCode}', key: const Key('bookingCode')),
@@ -61,12 +76,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: result == null
-              ? FilledButton(
-                  key: const Key('payButton'),
-                  onPressed: state.busy ? null : _pay,
-                  child: Text(state.busy ? 'กำลังดำเนินการ…' : 'ชำระเงิน'),
-                )
+          child: result == null || result.paymentFailed
+              ? Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  FilledButton(
+                    key: const Key('payButton'),
+                    onPressed: state.busy ? null : () => _retry(),
+                    child: Text(state.busy ? 'กำลังดำเนินการ…' : (result == null ? 'ชำระเงิน' : 'ลองชำระใหม่')),
+                  ),
+                  if (state.repository.canSimulatePayment)
+                    TextButton(
+                      key: const Key('simulateFailButton'),
+                      onPressed: state.busy ? null : () => _retry(simulateFailure: true),
+                      child: const Text('ทดสอบ: จำลองชำระเงินไม่สำเร็จ'),
+                    ),
+                ])
               : FilledButton(
                   onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
                   child: const Text('กลับหน้าหลัก'),

@@ -37,10 +37,27 @@ class MockRepository implements AppRepository {
         location: 'ป่าตอง, ภูเก็ต',
         price: 2350,
         serviceDate: ''),
+    Listing(
+        id: 'mock-flight-1',
+        title: 'สายการบินตัวอย่าง A XA 214 BKK→CNX ออก 07:00 (เที่ยวบินจำลอง)',
+        type: ListingType.flight,
+        location: 'ตัวอย่างทัวร์แอนด์เทรเวล',
+        price: 2210,
+        serviceDate: '2030-01-10'),
+    Listing(
+        id: 'mock-flight-2',
+        title: 'สายการบินตัวอย่าง C XC 581 BKK→HKT ออก 18:15 (เที่ยวบินจำลอง)',
+        type: ListingType.flight,
+        location: 'ตัวอย่างทัวร์แอนด์เทรเวล',
+        price: 1980,
+        serviceDate: '2030-01-11'),
   ];
 
   @override
   bool get isRealCheckout => false;
+
+  @override
+  bool get canSimulatePayment => true;
 
   @override
   Future<List<Listing>> listings() async => _catalog;
@@ -106,6 +123,7 @@ class MockRepository implements AppRepository {
     required String serviceDate,
     int quantity = 1,
     String method = 'PROMPTPAY_QR',
+    bool simulateFailure = false,
   }) async {
     _requireSignIn();
     final item = _catalog.firstWhere(
@@ -114,6 +132,25 @@ class MockRepository implements AppRepository {
     );
     _seq += 1;
     final code = 'MOCK-${_seq.toString().padLeft(4, '0')}';
+    if (simulateFailure) {
+      // Like the real server: the booking exists but stays unpaid.
+      _bookings.insert(
+          0,
+          Booking(
+              id: 'mock-booking-$_seq',
+              code: code,
+              title: item.title,
+              amount: item.price * quantity,
+              status: BookingStatus.pending,
+              serverStatus: 'PENDING_PAYMENT',
+              date: serviceDate));
+      return CheckoutResult(
+          bookingId: 'mock-booking-$_seq',
+          bookingCode: code,
+          status: 'PENDING_PAYMENT',
+          payableTotal: item.price * quantity,
+          paymentStatus: 'FAILED');
+    }
     _bookings.insert(
         0,
         Booking(
@@ -128,7 +165,8 @@ class MockRepository implements AppRepository {
         bookingId: 'mock-booking-$_seq',
         bookingCode: code,
         status: 'CONFIRMED',
-        payableTotal: item.price * quantity);
+        payableTotal: item.price * quantity,
+        paymentStatus: 'SUCCEEDED');
   }
 
   @override
