@@ -381,7 +381,7 @@ paths:
         '503': { $ref: '#/components/responses/FinancialDisabled' }
   /dev/payments/simulate:
     post:
-      summary: "DEVELOPMENT ONLY: deliver a signed CHARGE_SUCCEEDED event for the caller's own pending intent"
+      summary: "SANDBOX ONLY: deliver a signed CHARGE_SUCCEEDED (default) or CHARGE_FAILED event for the caller's own pending intent"
       description: Exists only when the payment provider is the mock and APP_ENV is not `prod`; otherwise the route is absent (404). It goes through the same webhook handler as a real provider (signature, replay window, amount check) and uses the intent's exact amount. Never available in production.
       security: [{ bearerAuth: [] }]
       requestBody:
@@ -391,9 +391,9 @@ paths:
             schema:
               type: object
               required: [payment_reference]
-              properties: { payment_reference: { type: string } }
+              properties: { payment_reference: { type: string }, outcome: { type: string, enum: [SUCCEEDED, FAILED], description: "Simulated provider result; default SUCCEEDED. FAILED leaves the booking PENDING_PAYMENT with payment_status FAILED." } }
       responses:
-        '200': { description: "data.result is the webhook result (APPLIED, IGNORED_DUPLICATE, ...)" }
+        '200': { description: "data: {result: webhook result (APPLIED, IGNORED_DUPLICATE, ...), sandbox: true, outcome: the event type sent}" }
         '400': { $ref: '#/components/responses/ValidationError' }
         '404': { description: "Not your intent, not pending, or the simulator does not exist in this environment" }
         '503': { $ref: '#/components/responses/FinancialDisabled' }

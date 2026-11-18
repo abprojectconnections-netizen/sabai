@@ -422,6 +422,30 @@ func TestSimulatedPaymentGoesThroughTheRealWebhookPath(t *testing.T) {
 	}
 }
 
+func TestSimulatedFailedPaymentLeavesTheBookingUnpaidAndIsLabelledSandbox(t *testing.T) {
+	i := newInventory(t, 3, "1000.00")
+	u := newUser(t)
+	b := idem(t, "POST", "/api/v1/bookings", u.Token, "simf-"+uuid.NewString(), i.body(1, ""))
+	bid := b.data()["id"].(string)
+	in := idem(t, "POST", "/api/v1/payments/intents", u.Token, "simfi-"+uuid.NewString(), map[string]any{"booking_id": bid, "method": "PROMPTPAY_QR"})
+	ref := in.data()["payment_reference"].(string)
+
+	if x := call(t, "POST", "/api/v1/dev/payments/simulate", u.Token, map[string]string{"payment_reference": ref, "outcome": "PAID"}); x.Status != 400 {
+		t.Fatalf("unknown outcome = %d", x.Status)
+	}
+	x := call(t, "POST", "/api/v1/dev/payments/simulate", u.Token, map[string]string{"payment_reference": ref, "outcome": "FAILED"})
+	if x.Status != 200 || x.data()["result"] != "APPLIED" || x.data()["sandbox"] != true || x.data()["outcome"] != "CHARGE_FAILED" {
+		t.Fatalf("simulate failure: %d %v", x.Status, x.Body)
+	}
+	got := call(t, "GET", "/api/v1/bookings/"+bid, u.Token, nil)
+	if got.data()["status"] != "PENDING_PAYMENT" {
+		t.Fatalf("a failed payment must not confirm the booking: %v", got.Body)
+	}
+	if got.data()["payment_status"] != "FAILED" {
+		t.Fatalf("payment status must show FAILED: %v", got.Body)
+	}
+}
+
 func TestPaymentSimulatorDoesNotExistInProduction(t *testing.T) {
 	prod := gin.New()
 	httpapi.RegisterRoutesWith(prod, db, secret, safety.Config{PaymentProvider: "mock", SupplierMode: "mock", Enabled: true, Environment: "prod"}, mockPSP)
