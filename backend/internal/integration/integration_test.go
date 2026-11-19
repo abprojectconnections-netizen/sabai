@@ -50,6 +50,8 @@ func TestMain(m *testing.M) {
 		fmt.Println("cannot connect:", err)
 		os.Exit(1)
 	}
+	// Tests register hundreds of users from one address; the sign-in limiter has its own tests.
+	os.Setenv("AUTH_RATE_LIMIT_PER_MIN", "0")
 	gin.SetMode(gin.TestMode)
 	router = gin.New()
 	httpapi.RegisterRoutesWith(router, db, secret, safety.Config{PaymentProvider: "mock", SupplierMode: "mock", Enabled: true, Environment: "dev"}, mockPSP)
