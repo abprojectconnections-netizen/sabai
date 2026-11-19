@@ -122,3 +122,52 @@ String couponStateTh(String state) {
       return 'ไม่พร้อมใช้งาน';
   }
 }
+
+/// What the signed-in user may do, from GET /me. Used only to decide which screens to offer; the server enforces
+/// every action regardless.
+class AccountInfo {
+  const AccountInfo({this.roles = const [], this.permissions = const []});
+
+  final List<String> roles;
+  final List<String> permissions;
+
+  bool get canModerateCommunity => permissions.contains('portal.read') && permissions.contains('support.manage');
+
+  factory AccountInfo.fromJson(Map<String, dynamic> j) {
+    List<String> strings(Object? v) => v is List ? v.map((e) => e.toString()).toList() : const [];
+    return AccountInfo(roles: strings(j['roles']), permissions: strings(j['permissions']));
+  }
+}
+
+/// A live post with open reports, as shown to staff.
+class ReportedPost {
+  const ReportedPost({
+    required this.id,
+    required this.body,
+    required this.authorName,
+    required this.date,
+    required this.reportCount,
+    required this.reasons,
+  });
+
+  final String id;
+  final String body;
+  final String authorName;
+  final String date;
+  final int reportCount;
+  final List<String> reasons;
+
+  factory ReportedPost.fromJson(Map<String, dynamic> j) {
+    final created = (j['created_at'] ?? '').toString();
+    final r = j['reasons'];
+    final count = j['report_count'];
+    return ReportedPost(
+      id: (j['id'] ?? '').toString(),
+      body: (j['body'] ?? '').toString(),
+      authorName: (j['author_name'] ?? '').toString(),
+      date: created.length >= 10 ? created.substring(0, 10) : '',
+      reportCount: count is num ? count.toInt() : 0,
+      reasons: r is List ? r.map((e) => e.toString()).toList() : const [],
+    );
+  }
+}

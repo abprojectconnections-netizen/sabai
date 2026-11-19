@@ -5,6 +5,7 @@ import '../../state/app_state.dart';
 import '../auth/login_screen.dart';
 import '../coupons/coupons_screen.dart';
 import '../reviews/my_reviews_screen.dart';
+import '../staff/moderation_screen.dart';
 import '../support/help_screen.dart';
 import '../settings/settings_screen.dart';
 import '../wallet/wallet_screen.dart';
@@ -66,6 +67,14 @@ class ProfileScreen extends StatelessWidget {
             title: const Text('รีวิวของฉัน'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const MyReviewsScreen())),
+          ),
+        if (state.signedIn && state.account.canModerateCommunity)
+          ListTile(
+            key: const Key('moderationTile'),
+            leading: const Icon(Icons.shield_outlined),
+            title: const Text('ตรวจสอบรายงานชุมชน (เจ้าหน้าที่)'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const ModerationScreen())),
           ),
         if (state.signedIn)
           ListTile(

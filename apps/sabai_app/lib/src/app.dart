@@ -10,6 +10,7 @@ import 'features/shell/home_shell.dart';
 import 'state/app_state.dart';
 import 'state/community_controller.dart';
 import 'state/coupons_controller.dart';
+import 'state/moderation_controller.dart';
 import 'state/notifications_controller.dart';
 import 'state/reviews_controller.dart';
 import 'state/settings_controller.dart';
@@ -75,6 +76,14 @@ class SabaiApp extends StatelessWidget {
           create: (_) => CouponsController(repository),
           update: (_, app, c) {
             final x = c ?? CouponsController(repository);
+            if (!app.signedIn) x.reset();
+            return x;
+          },
+        ),
+        ChangeNotifierProxyProvider<AppState, ModerationController>(
+          create: (_) => ModerationController(repository),
+          update: (_, app, c) {
+            final x = c ?? ModerationController(repository);
             if (!app.signedIn) x.reset();
             return x;
           },
