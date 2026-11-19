@@ -61,7 +61,8 @@ void main() {
     );
     expect((await r.accountInfo()).canModerateCommunity, isTrue);
     final q = await r.reportedPosts();
-    expect((q.single.reportCount, q.single.reasons), (2, ['SPAM', 'ABUSE']));
+    expect(q.single.reportCount, 2);
+    expect(q.single.reasons, ['SPAM', 'ABUSE']);
     await r.moderatePost(id: 'p1', action: 'remove', note: 'spam');
     await r.moderatePost(id: 'p1', action: 'dismiss');
     expect(() => r.moderatePost(id: 'p1', action: 'ban'), throwsA(anything));

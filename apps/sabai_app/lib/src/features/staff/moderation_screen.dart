@@ -27,32 +27,10 @@ class _ModerationScreenState extends State<ModerationScreen> {
 
   Future<void> _act(ReportedPost p, String action) async {
     final c = context.read<ModerationController>();
-    final note = TextEditingController();
     final remove = action == 'remove';
-    final go = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(remove ? 'ลบโพสต์นี้?' : 'ปัดตกรายงาน (คงโพสต์ไว้)?'),
-        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(remove ? 'โพสต์จะหายจากชุมชนของทุกคน การกระทำนี้ถูกบันทึกในประวัติตรวจสอบ' : 'โพสต์ยังแสดงอยู่ และรายงานทั้งหมดของโพสต์นี้จะถูกปิด'),
-          const SizedBox(height: 12),
-          TextField(
-            key: const Key('moderationNote'),
-            controller: note,
-            maxLength: 200,
-            decoration: const InputDecoration(labelText: 'หมายเหตุ (ไม่บังคับ)', border: OutlineInputBorder()),
-          ),
-        ]),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('ยกเลิก')),
-          FilledButton(key: const Key('confirmModeration'), onPressed: () => Navigator.pop(ctx, true), child: Text(remove ? 'ลบโพสต์' : 'ปัดตก')),
-        ],
-      ),
-    );
-    final text = note.text;
-    note.dispose();
-    if (go != true) return;
-    final ok = await c.act(p.id, action, note: text);
+    final note = await showDialog<String>(context: context, builder: (_) => _NoteDialog(remove: remove));
+    if (note == null) return;
+    final ok = await c.act(p.id, action, note: note);
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(ok ? (remove ? 'ลบโพสต์แล้ว' : 'ปัดตกรายงานแล้ว') : (c.error ?? 'ดำเนินการไม่สำเร็จ'))));
   }
@@ -125,7 +103,10 @@ class _ReportCard extends StatelessWidget {
             return Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Expanded(child: info),
               const SizedBox(width: 16),
-              Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in actions) Padding(padding: const EdgeInsets.only(bottom: 8), child: a)]),
+              SizedBox(
+                width: 180,
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [for (final a in actions) Padding(padding: const EdgeInsets.only(bottom: 8), child: a)]),
+              ),
             ]);
           }
           return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -135,6 +116,54 @@ class _ReportCard extends StatelessWidget {
           ]);
         }),
       ),
+    );
+  }
+}
+
+/// Owns its text controller so it is disposed together with the dialog (after the close animation), and returns the
+/// note on confirm or null on cancel.
+class _NoteDialog extends StatefulWidget {
+  const _NoteDialog({required this.remove});
+
+  final bool remove;
+
+  @override
+  State<_NoteDialog> createState() => _NoteDialogState();
+}
+
+class _NoteDialogState extends State<_NoteDialog> {
+  final _note = TextEditingController();
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.remove ? 'ลบโพสต์นี้?' : 'ปัดตกรายงาน (คงโพสต์ไว้)?'),
+      content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text(widget.remove
+            ? 'โพสต์จะหายจากชุมชนของทุกคน การกระทำนี้ถูกบันทึกในประวัติตรวจสอบ'
+            : 'โพสต์ยังแสดงอยู่ และรายงานทั้งหมดของโพสต์นี้จะถูกปิด'),
+        const SizedBox(height: 12),
+        TextField(
+          key: const Key('moderationNote'),
+          controller: _note,
+          maxLength: 200,
+          decoration: const InputDecoration(labelText: 'หมายเหตุ (ไม่บังคับ)', border: OutlineInputBorder()),
+        ),
+      ]),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: const Text('ยกเลิก')),
+        FilledButton(
+          key: const Key('confirmModeration'),
+          onPressed: () => Navigator.pop(context, _note.text),
+          child: Text(widget.remove ? 'ลบโพสต์' : 'ปัดตก'),
+        ),
+      ],
     );
   }
 }
