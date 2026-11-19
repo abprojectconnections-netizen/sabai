@@ -153,3 +153,27 @@ func TestCommunityPostTagsUseTheCentralTagSystem(t *testing.T) {
 		t.Fatalf("a deleted post is still counted: %v", got)
 	}
 }
+
+func TestCommunityWritesAreRateLimitedPerUser(t *testing.T) {
+	a, b := newUser(t), newUser(t)
+	limited := false
+	for i := 0; i < 15; i++ {
+		r := call(t, "POST", "/api/v1/community/posts", a.Token, map[string]any{"body": "สแปม " + uuid.NewString()[:6]})
+		if r.Status == 429 {
+			limited = r.code() == "RATE_LIMITED"
+			break
+		}
+		if r.Status != 201 {
+			t.Fatalf("post %d = %d", i, r.Status)
+		}
+	}
+	if !limited {
+		t.Fatal("a burst of posts must hit 429 RATE_LIMITED")
+	}
+	if r := call(t, "POST", "/api/v1/community/posts", b.Token, map[string]any{"body": "คนอื่นยังโพสต์ได้"}); r.Status != 201 {
+		t.Fatalf("another user must not be affected: %d", r.Status)
+	}
+	if r := call(t, "GET", "/api/v1/community/posts", a.Token, nil); r.Status != 200 {
+		t.Fatalf("reading stays allowed: %d", r.Status)
+	}
+}
