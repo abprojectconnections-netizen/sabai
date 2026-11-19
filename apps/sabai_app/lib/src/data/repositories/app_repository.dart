@@ -1,3 +1,5 @@
+import '../models/community_models.dart';
+import '../models/engagement_models.dart';
 import '../models/models.dart';
 import '../models/trip_models.dart';
 
@@ -6,6 +8,9 @@ import '../models/trip_models.dart';
 abstract class AppRepository {
   /// True when checkout talks to the real backend. The mock repository only simulates it locally.
   bool get isRealCheckout;
+
+  /// True when this build may ask the sandbox provider to simulate a failed payment (never in production).
+  bool get canSimulatePayment;
 
   /// Public catalogue (no sign-in needed).
   Future<List<Listing>> listings();
@@ -31,6 +36,7 @@ abstract class AppRepository {
     required String serviceDate,
     int quantity = 1,
     String method = 'PROMPTPAY_QR',
+    bool simulateFailure = false,
   });
 
   /// A refund is a REQUEST: the server computes the amount from the booking's price snapshot and decides approval.
@@ -61,4 +67,62 @@ abstract class AppRepository {
   });
 
   Future<void> removeActivity({required String tripId, required String activityId});
+
+  // ---- Notifications (backend: /notifications) ----
+
+  Future<NotificationsPage> notifications();
+
+  Future<void> markNotificationRead(String id);
+
+  Future<void> markAllNotificationsRead();
+
+  // ---- Reviews (backend: /reviews) ----
+
+  /// The caller's reviews, each with its tags.
+  Future<List<Review>> myReviews();
+
+  /// One review per user per subject (a duplicate is CONFLICT). Rating 1..5 in steps of 0.5.
+  Future<Review> createReview({
+    required String subjectType,
+    required String subjectId,
+    required double rating,
+    String body = '',
+  });
+
+  Future<void> deleteReview(String id);
+
+  // ---- Community (backend: /community) ----
+
+  /// Newest first. Posts the caller reported are already hidden by the server.
+  Future<List<CommunityPost>> communityFeed();
+
+  /// Shown to everyone at once (no pre-moderation); 1..1000 characters.
+  Future<CommunityPost> createPost(String body);
+
+  Future<void> deletePost(String id);
+
+  /// [reason] is one of [communityReportReasons]. Reporting is idempotent.
+  Future<void> reportPost({required String id, required String reason, String detail = ''});
+
+  // ---- Account and staff moderation (backend: /me, /portal/community) ----
+
+  Future<AccountInfo> accountInfo();
+
+  /// STAFF (support.manage): live posts with open reports, most reported first. 403 for everyone else.
+  Future<List<ReportedPost>> reportedPosts();
+
+  /// [action] is `remove` (delete the post) or `dismiss` (keep it); both close the post's open reports.
+  Future<void> moderatePost({required String id, required String action, String note = ''});
+
+  // ---- Coupons (backend: /coupons). Saving only: the app never applies a coupon to a price. ----
+
+  /// Saves a code to the caller's list. Errors: NOT_FOUND (unknown), CONFLICT (already saved/expired/not started/used up).
+  Future<void> claimCoupon(String code);
+
+  Future<List<SavedCoupon>> myCoupons();
+
+  // ---- Tags (backend: /content/{type}/{id}/tags) ----
+
+  /// Replaces the tag set of one item the caller owns; returns the stored labels.
+  Future<List<String>> setTags({required String contentType, required String contentId, required List<String> tags});
 }

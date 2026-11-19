@@ -46,6 +46,7 @@ void main() {
       prefs: await SharedPreferences.getInstance(),
     ));
     await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('อันดามัน บีช วิลลา'), 200, scrollable: find.byType(Scrollable).first);
     await tester.tap(find.text('อันดามัน บีช วิลลา'));
     await tester.pumpAndSettle();
     final button = tester.widget<FilledButton>(find.byKey(const Key('bookButton')));

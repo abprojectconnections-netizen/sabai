@@ -179,7 +179,7 @@ paths:
       security: [{ bearerAuth: [] }]
       parameters:
         - { name: slug, in: path, required: true, schema: { type: string } }
-        - { name: type, in: query, required: true, schema: { type: string, enum: [TRIP, REVIEW] } }
+        - { name: type, in: query, required: true, schema: { type: string, enum: [TRIP, REVIEW, COMMUNITY_POST] } }
         - { $ref: '#/components/parameters/Limit' }
         - { $ref: '#/components/parameters/Offset' }
       responses:
@@ -187,10 +187,10 @@ paths:
         '400': { $ref: '#/components/responses/ValidationError' }
   /content/{type}/{id}/tags:
     get:
-      summary: "Tags of one item (trips: owner only; reviews: any signed-in user)"
+      summary: "Tags of one item (trips: owner only; reviews and community posts: any signed-in user)"
       security: [{ bearerAuth: [] }]
       parameters:
-        - { name: type, in: path, required: true, schema: { type: string, enum: [TRIP, REVIEW] } }
+        - { name: type, in: path, required: true, schema: { type: string, enum: [TRIP, REVIEW, COMMUNITY_POST] } }
         - { $ref: '#/components/parameters/Id' }
       responses:
         '200': { description: "data: Tag[] ({slug, label})" }
@@ -200,7 +200,7 @@ paths:
       description: "Tags are normalised to a lowercase slug; letters of any script (Thai included), digits, spaces and '-' are allowed, anything else is a 400. Duplicate slugs collapse; an empty list clears."
       security: [{ bearerAuth: [] }]
       parameters:
-        - { name: type, in: path, required: true, schema: { type: string, enum: [TRIP, REVIEW] } }
+        - { name: type, in: path, required: true, schema: { type: string, enum: [TRIP, REVIEW, COMMUNITY_POST] } }
         - { $ref: '#/components/parameters/Id' }
       requestBody:
         required: true
@@ -210,6 +210,116 @@ paths:
       responses:
         '200': { description: "data: Tag[]" }
         '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /me:
+    get:
+      summary: "Who the caller is and what they may do (roles and permissions, read from the database)"
+      description: Clients use this only to decide which screens to offer. The server still checks every action.
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: "data: { id, email, roles: string[], permissions: string[] }" }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /community/posts:
+    get:
+      summary: "Community feed, newest first (posts the caller reported are hidden from the caller only)"
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: Post[] } where Post = {id, body, created_at, author: {display_name}, mine, tags: string[]}; e-mail addresses are never returned" }
+    post:
+      summary: "Publish a post immediately (no pre-moderation; max 1000 characters). Tag it afterwards with PUT /content/COMMUNITY_POST/{id}/tags."
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [body], properties: { body: { type: string, minLength: 1, maxLength: 1000 } } }
+      responses:
+        '201': { description: Post created }
+        '400': { $ref: '#/components/responses/ValidationError' }
+  /community/posts/{id}:
+    delete:
+      summary: Delete one of the caller's own posts (soft delete)
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      responses:
+        '204': { description: Deleted }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /community/posts/{id}/report:
+    post:
+      summary: "Report a post (idempotent per user and post). The post disappears from the reporter's feed; reports are stored for staff review."
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [reason], properties: { reason: { type: string, enum: [SPAM, ABUSE, MISLEADING, OTHER] }, detail: { type: string, maxLength: 500 } } }
+      responses:
+        '200': { description: "data: { reported: true }" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /coupons/claim:
+    post:
+      summary: "Save a coupon code to the caller's list (case-insensitive). Does not change any price and does not use a redemption."
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [code], properties: { code: { type: string, maxLength: 40 } } }
+      responses:
+        '201': { description: "data: { saved: true }" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { description: "Already saved, expired, not valid yet, or fully redeemed" }
+  /coupons/mine:
+    get:
+      summary: "The caller's saved coupons with their current state"
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: Coupon[] } where Coupon = {code, title, discount_type: FIXED|PERCENT, value (decimal string), valid_from, valid_until, state: ACTIVE|EXPIRED|NOT_STARTED|EXHAUSTED|UNAVAILABLE, saved_at}" }
+  /portal/community/reports:
+    get:
+      summary: "STAFF: open moderation queue of reported community posts (most reported first)"
+      description: Needs permission support.manage. Only live posts with at least one unreviewed report appear.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: [{id, body, author_name, created_at, report_count, reasons: string[]}] }" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /portal/community/posts/{id}/remove:
+    post:
+      summary: "STAFF: delete a reported post and close its reports (audited)"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, properties: { note: { type: string } } }
+      responses:
+        '200': { description: "data: { action: remove }" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /portal/community/posts/{id}/dismiss:
+    post:
+      summary: "STAFF: keep a reported post and close its reports (audited)"
+      security: [{ bearerAuth: [] }]
+      parameters: [{ $ref: '#/components/parameters/Id' }]
+      requestBody:
+        content:
+          application/json:
+            schema: { type: object, properties: { note: { type: string } } }
+      responses:
+        '200': { description: "data: { action: dismiss }" }
+        '403': { $ref: '#/components/responses/Forbidden' }
         '404': { $ref: '#/components/responses/NotFound' }
   /portal/queue:
     get:
@@ -316,7 +426,7 @@ paths:
         '503': { $ref: '#/components/responses/FinancialDisabled' }
   /dev/payments/simulate:
     post:
-      summary: "DEVELOPMENT ONLY: deliver a signed CHARGE_SUCCEEDED event for the caller's own pending intent"
+      summary: "SANDBOX ONLY: deliver a signed CHARGE_SUCCEEDED (default) or CHARGE_FAILED event for the caller's own pending intent"
       description: Exists only when the payment provider is the mock and APP_ENV is not `prod`; otherwise the route is absent (404). It goes through the same webhook handler as a real provider (signature, replay window, amount check) and uses the intent's exact amount. Never available in production.
       security: [{ bearerAuth: [] }]
       requestBody:
@@ -326,9 +436,9 @@ paths:
             schema:
               type: object
               required: [payment_reference]
-              properties: { payment_reference: { type: string } }
+              properties: { payment_reference: { type: string }, outcome: { type: string, enum: [SUCCEEDED, FAILED], description: "Simulated provider result; default SUCCEEDED. FAILED leaves the booking PENDING_PAYMENT with payment_status FAILED." } }
       responses:
-        '200': { description: "data.result is the webhook result (APPLIED, IGNORED_DUPLICATE, ...)" }
+        '200': { description: "data: {result: webhook result (APPLIED, IGNORED_DUPLICATE, ...), sandbox: true, outcome: the event type sent}" }
         '400': { $ref: '#/components/responses/ValidationError' }
         '404': { description: "Not your intent, not pending, or the simulator does not exist in this environment" }
         '503': { $ref: '#/components/responses/FinancialDisabled' }

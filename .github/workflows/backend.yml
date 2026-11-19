@@ -45,6 +45,22 @@ jobs:
             CONFIRM_DESTRUCTIVE=yes bash database/migrate.sh down || break
           done
           bash database/migrate.sh up
+      - name: Seed data loads and is idempotent (separate database)
+        working-directory: backend
+        env:
+          APP_ENV: development
+          MYSQL_DSN: root:root@tcp(127.0.0.1:3306)/seed_ci?parseTime=true
+        run: |
+          set -e
+          mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE seed_ci CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+          MYSQL_DATABASE=seed_ci bash ../database/migrate.sh up
+          go run ./cmd/seed -yes -days 5
+          go run ./cmd/seed -yes -days 5
+          count() { mysql -h 127.0.0.1 -uroot -proot -N -B seed_ci -e "$1"; }
+          [ "$(count "SELECT COUNT(*) FROM supplier_products WHERE category = 'FLIGHT'")" = 24 ]
+          [ "$(count "SELECT COUNT(*) FROM coupons")" = 4 ]
+          [ "$(count "SELECT COUNT(*) FROM community_posts")" = 4 ]
+          [ "$(count "SELECT COUNT(*) FROM content_tags WHERE content_type = 'COMMUNITY_POST'")" = 6 ]
       - name: Integration tests
         working-directory: backend
         env:

@@ -44,6 +44,9 @@ func Internal(c *gin.Context) {
 func Conflict(c *gin.Context, message string) {
 	c.JSON(http.StatusConflict, envelope{Error: &errorBody{Code: "CONFLICT", Message: message}, RequestID: c.GetString("request_id")})
 }
+func TooManyRequests(c *gin.Context, message string) {
+	c.JSON(http.StatusTooManyRequests, envelope{Error: &errorBody{Code: "RATE_LIMITED", Message: message}, RequestID: c.GetString("request_id")})
+}
 func NoContent(c *gin.Context) { c.Status(http.StatusNoContent) }
 
 // Page reads ?limit (1..100, default 50) and ?offset (>=0, default 0); on invalid input it writes a 400 and returns ok=false.

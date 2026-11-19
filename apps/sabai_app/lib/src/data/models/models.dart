@@ -150,6 +150,7 @@ class CheckoutResult {
     required this.status,
     required this.payableTotal,
     this.qrPayload = '',
+    this.paymentStatus = '',
   });
 
   final String bookingId;
@@ -158,7 +159,13 @@ class CheckoutResult {
   final num payableTotal;
   final String qrPayload;
 
+  /// Server payment status (e.g. SUCCEEDED, PENDING, FAILED); empty when the server did not report one.
+  final String paymentStatus;
+
   bool get isPaid => status != 'PENDING_PAYMENT';
+
+  /// The provider reported a failure. The booking stays unpaid and its hold expires on its own.
+  bool get paymentFailed => paymentStatus == 'FAILED';
 }
 
 class RefundResult {

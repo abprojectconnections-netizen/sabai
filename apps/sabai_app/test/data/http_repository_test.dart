@@ -114,6 +114,40 @@ void main() {
       });
     }
 
+    test('simulateFailure asks the sandbox for FAILED and reports a failed payment without polling on', () async {
+      final log = <String>[];
+      Object? simBody;
+      final client = MockClient((req) async {
+        log.add('${req.method} ${req.url.path}');
+        switch ('${req.method} ${req.url.path}') {
+          case 'POST /bookings':
+            return json(201, {'data': {'id': 'bk-1'}});
+          case 'POST /payments/intents':
+            return json(201, {'data': {'payment_reference': 'pay-1', 'qr_payload': 'QR'}});
+          case 'POST /dev/payments/simulate':
+            simBody = jsonDecode(req.body);
+            return json(200, {'data': {'result': 'APPLIED', 'sandbox': true}});
+          case 'GET /bookings/bk-1':
+            return json(200, {'data': {'id': 'bk-1', 'booking_code': 'SB-42', 'status': 'PENDING_PAYMENT', 'payment_status': 'FAILED', 'payable_total': '1490.00'}});
+        }
+        return json(500, {'error': {'code': 'INTERNAL_ERROR', 'message': 'unexpected'}});
+      });
+      final r = repo(client);
+      expect(r.canSimulatePayment, isTrue);
+      final res = await r.pay(inventoryItemId: 'item-1', serviceDate: '2030-01-10', simulateFailure: true);
+      expect(simBody, {'payment_reference': 'pay-1', 'outcome': 'FAILED'});
+      expect(res.paymentFailed, isTrue);
+      expect(res.isPaid, isFalse);
+      expect(log.where((l) => l == 'GET /bookings/bk-1').length, 1);
+    });
+
+    test('production cannot simulate: no sandbox flag and the failure request is refused', () async {
+      final r = repo(MockClient((_) async => json(500, {})), mode: ApiMode.production);
+      expect(r.canSimulatePayment, isFalse);
+      expect(() => r.pay(inventoryItemId: 'item-1', serviceDate: '2030-01-10', simulateFailure: true),
+          throwsA(isA<ApiError>().having((e) => e.code, 'code', 'VALIDATION_ERROR')));
+    });
+
     test('beta: creates booking, intent, simulates, then polls until the server confirms', () async {
       final log = <String>[];
       final res = await repo(payClient(log)).pay(inventoryItemId: 'item-1', serviceDate: '2030-01-10');

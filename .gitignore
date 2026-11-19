@@ -167,3 +167,6 @@ app.*.symbols
 # AI related
 .agents/skills/personal-*
 node_modules
+node_modules
+node_modules
+node_modules
