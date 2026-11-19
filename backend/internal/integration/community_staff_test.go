@@ -93,3 +93,26 @@ func TestStaffModerationQueueRemoveAndDismiss(t *testing.T) {
 		t.Fatalf("unknown post = %d", x.Status)
 	}
 }
+
+func TestMeReportsRolesAndPermissions(t *testing.T) {
+	customer, staff := newUser(t), newUser(t, "STAFF")
+	if r := call(t, "GET", "/api/v1/me", "", nil); r.Status != 401 {
+		t.Fatalf("anonymous /me = %d", r.Status)
+	}
+	has := func(r resp, key, want string) bool {
+		for _, x := range r.data()[key].([]any) {
+			if x == want {
+				return true
+			}
+		}
+		return false
+	}
+	c := call(t, "GET", "/api/v1/me", customer.Token, nil)
+	if c.Status != 200 || c.data()["id"] != customer.ID || !has(c, "roles", "CUSTOMER") || has(c, "permissions", "support.manage") {
+		t.Fatalf("customer /me = %d %v", c.Status, c.Body)
+	}
+	s := call(t, "GET", "/api/v1/me", staff.Token, nil)
+	if s.Status != 200 || !has(s, "roles", "STAFF") || !has(s, "permissions", "support.manage") || !has(s, "permissions", "portal.read") {
+		t.Fatalf("staff /me = %d %v", s.Status, s.Body)
+	}
+}
