@@ -38,6 +38,7 @@ func RegisterRoutesWith(router *gin.Engine, db *sql.DB, jwtSecret string, cfg sa
 	auth.RegisterRoutes(authRoutes, auth.NewService(db, jwtSecret))
 	secured := v1.Group("")
 	secured.Use(auth.Authenticate(db, jwtSecret))
+	secured.GET("/me", auth.Me())
 	financeapi.Register(v1, secured, financeapi.Deps{DB: db, Cfg: cfg, Provider: provider})
 	trips := secured.Group("/trips")
 	trips.Use(auth.RequireRoles("CUSTOMER", "PARTNER", "STAFF", "ADMIN"))

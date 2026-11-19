@@ -211,6 +211,14 @@ paths:
         '200': { description: "data: Tag[]" }
         '400': { $ref: '#/components/responses/ValidationError' }
         '404': { $ref: '#/components/responses/NotFound' }
+  /me:
+    get:
+      summary: "Who the caller is and what they may do (roles and permissions, read from the database)"
+      description: Clients use this only to decide which screens to offer. The server still checks every action.
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: "data: { id, email, roles: string[], permissions: string[] }" }
+        '401': { $ref: '#/components/responses/Unauthorized' }
   /community/posts:
     get:
       summary: "Community feed, newest first (posts the caller reported are hidden from the caller only)"
