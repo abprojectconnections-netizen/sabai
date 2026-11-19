@@ -69,6 +69,7 @@ class MockRepository implements AppRepository {
       throw const ApiError(code: 'UNAUTHORIZED', message: 'invalid credentials');
     }
     _signedIn = true;
+    _email = email.trim().toLowerCase();
     _welcome();
     return Session(
         accessToken: 'mock-token', userId: 'mock-user', email: email, displayName: 'ผู้ใช้ทดลอง');
@@ -83,6 +84,7 @@ class MockRepository implements AppRepository {
       throw const ApiError(code: 'VALIDATION_ERROR', message: 'invalid input');
     }
     _signedIn = true;
+    _email = email.trim().toLowerCase();
     _welcome();
     return Session(
         accessToken: 'mock-token', userId: 'mock-user', email: email, displayName: displayName);
@@ -91,6 +93,7 @@ class MockRepository implements AppRepository {
   @override
   void logout() {
     _signedIn = false;
+    _email = '';
     _trips.clear();
     _notifications.clear();
     _reviews.clear();
@@ -435,6 +438,52 @@ class MockRepository implements AppRepository {
   Future<List<SavedCoupon>> myCoupons() async {
     _requireSignIn();
     return _savedCoupons.map((k) => _couponCatalog[k]!).toList();
+  }
+
+  String _email = '';
+  final List<ReportedPost> _queue = [
+    const ReportedPost(
+        id: 'mock-report-1',
+        body: 'โปรโมชันสุดคุ้ม ทักไลน์ด่วน (ตัวอย่างข้อมูลออฟไลน์)',
+        authorName: 'สมาชิกตัวอย่าง',
+        date: '2030-01-01',
+        reportCount: 2,
+        reasons: ['ABUSE', 'SPAM']),
+    const ReportedPost(
+        id: 'mock-report-2',
+        body: 'ร้านนี้ราคาแพงเกินจริงทุกอย่าง (ตัวอย่างข้อมูลออฟไลน์)',
+        authorName: 'สมาชิกตัวอย่าง',
+        date: '2030-01-02',
+        reportCount: 1,
+        reasons: ['MISLEADING']),
+  ];
+
+  /// In the offline mock, signing in with an address that starts with "staff@" simulates a moderator.
+  @override
+  Future<AccountInfo> accountInfo() async {
+    _requireSignIn();
+    return _email.startsWith('staff@')
+        ? const AccountInfo(roles: ['STAFF'], permissions: ['portal.read', 'support.manage'])
+        : const AccountInfo(roles: ['CUSTOMER']);
+  }
+
+  @override
+  Future<List<ReportedPost>> reportedPosts() async {
+    _requireSignIn();
+    if (!_email.startsWith('staff@')) throw const ApiError(code: 'FORBIDDEN', message: 'forbidden', status: 403);
+    return List.unmodifiable(_queue);
+  }
+
+  @override
+  Future<void> moderatePost({required String id, required String action, String note = ''}) async {
+    _requireSignIn();
+    if (!_email.startsWith('staff@')) throw const ApiError(code: 'FORBIDDEN', message: 'forbidden', status: 403);
+    if (action != 'remove' && action != 'dismiss') {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'unknown moderation action');
+    }
+    final i = _queue.indexWhere((p) => p.id == id);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'post', status: 404);
+    _queue.removeAt(i);
   }
 
   @override

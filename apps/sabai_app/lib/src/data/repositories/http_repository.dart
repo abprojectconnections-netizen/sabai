@@ -434,6 +434,28 @@ class HttpRepository implements AppRepository {
   }
 
   @override
+  Future<AccountInfo> accountInfo() async {
+    final r = await _request('/me', auth: true);
+    if (r is! Map<String, dynamic>) throw const ApiError(code: 'BAD_RESPONSE', message: 'account payload is invalid');
+    return AccountInfo.fromJson(r);
+  }
+
+  @override
+  Future<List<ReportedPost>> reportedPosts() async {
+    final data = await _request('/portal/community/reports?limit=50', auth: true);
+    return _rows(data, '/portal/community/reports').map(ReportedPost.fromJson).toList();
+  }
+
+  @override
+  Future<void> moderatePost({required String id, required String action, String note = ''}) async {
+    if (action != 'remove' && action != 'dismiss') {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'unknown moderation action');
+    }
+    await _request('/portal/community/posts/${Uri.encodeComponent(id)}/$action',
+        method: 'POST', auth: true, body: {'note': note});
+  }
+
+  @override
   Future<List<String>> setTags({required String contentType, required String contentId, required List<String> tags}) async {
     final t = await _request('/content/${Uri.encodeComponent(contentType)}/${Uri.encodeComponent(contentId)}/tags',
         method: 'PUT', auth: true, body: {'tags': tags});

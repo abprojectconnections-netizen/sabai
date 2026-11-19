@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../core/errors/api_error.dart';
+import '../data/models/community_models.dart';
 import '../data/models/models.dart';
 import '../data/repositories/app_repository.dart';
 
@@ -12,6 +13,9 @@ class AppState extends ChangeNotifier {
   final AppRepository repository;
 
   Session? session;
+
+  /// What the user may do (from /me). Only decides which screens are offered; the server enforces every action.
+  AccountInfo account = const AccountInfo();
   List<Listing> listings = const [];
   List<Booking> bookings = const [];
   Wallet wallet = const Wallet();
@@ -61,6 +65,7 @@ class AppState extends ChangeNotifier {
 
   Future<bool> login(String email, String password) => _run(() async {
         session = await repository.login(email: email, password: password);
+        await _loadPermissions();
         await _refreshAccount();
       });
 
@@ -68,16 +73,27 @@ class AppState extends ChangeNotifier {
       _run(() async {
         session = await repository.register(
             email: email, password: password, displayName: displayName);
+        await _loadPermissions();
         await _refreshAccount();
       });
 
   void logout() {
     repository.logout();
     session = null;
+    account = const AccountInfo();
     bookings = const [];
     wallet = const Wallet();
     error = null;
     notifyListeners();
+  }
+
+  /// Best effort: if /me fails the user simply gets no staff screens; sign-in itself still succeeds.
+  Future<void> _loadPermissions() async {
+    try {
+      account = await repository.accountInfo();
+    } catch (_) {
+      account = const AccountInfo();
+    }
   }
 
   Future<void> _refreshAccount() async {

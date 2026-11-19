@@ -104,6 +104,16 @@ abstract class AppRepository {
   /// [reason] is one of [communityReportReasons]. Reporting is idempotent.
   Future<void> reportPost({required String id, required String reason, String detail = ''});
 
+  // ---- Account and staff moderation (backend: /me, /portal/community) ----
+
+  Future<AccountInfo> accountInfo();
+
+  /// STAFF (support.manage): live posts with open reports, most reported first. 403 for everyone else.
+  Future<List<ReportedPost>> reportedPosts();
+
+  /// [action] is `remove` (delete the post) or `dismiss` (keep it); both close the post's open reports.
+  Future<void> moderatePost({required String id, required String action, String note = ''});
+
   // ---- Coupons (backend: /coupons). Saving only: the app never applies a coupon to a price. ----
 
   /// Saves a code to the caller's list. Errors: NOT_FOUND (unknown), CONFLICT (already saved/expired/not started/used up).
