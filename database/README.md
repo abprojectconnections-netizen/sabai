@@ -1,6 +1,6 @@
 # Database
 
-The MySQL 8.0 core schema contains 95 tables, deliberately scoped for the first production release. It covers identity, catalog, trip planning, booking, payments, wallet and coin, partners, marketing, support and chat, AI, and operations.
+The MySQL core schema has 139 tables after 19 migrations (counted on a real MySQL after applying every migration; 95 at the first release). It covers identity, catalog, trip planning, booking, payments, wallet and coin, partners, marketing, support and chat, AI, and operations.
 
 ## Applying migrations
 
@@ -19,3 +19,16 @@ Never edit an applied migration; add a new numbered one. 000002 is intentionally
 Verification status: all migrations were applied, rolled back and re-applied on MySQL 8.0.46 locally, and CI repeats this on MySQL 8.4 (the version docker-compose uses) before running the integration tests.
 
 `tools/generate_core_schema.mjs` is the source for the migration. It supersedes the earlier 223-table blueprint so the application, API, and operations team can ship in manageable phases.
+
+## Backup and restore
+
+```bash
+MYSQL_DATABASE=travel_super_app MYSQL_USER=root MYSQL_PASSWORD=... database/backup.sh [file.sql.gz]   # read-only, consistent snapshot
+CONFIRM_DESTRUCTIVE=yes MYSQL_DATABASE=<new empty db> ... database/restore.sh file.sql.gz
+```
+
+`restore.sh` is non-destructive by design: it restores **only into an empty database** and refuses when the target already has
+tables, when `APP_ENV` is `prod`/`production`, or without `CONFIRM_DESTRUCTIVE=yes`. To replace a database, restore into a new
+one and switch over (or have an operator drop the old one deliberately). CI backs up a seeded database, restores it into a new
+one, compares table and row counts, and checks all three refusals. Verified locally on MySQL 8.0.46 (139 tables,
+61 triggers identical after restore). `scripts/local.sh backup|restore` wraps both for the local Docker database.

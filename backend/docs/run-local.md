@@ -56,3 +56,10 @@ Registers a user, books a tour 5 days out, pays through the simulator and reques
 - The web app books the **next available date**, which is tomorrow in the seed data: cancelling it is refused with "no refund is due under the cancellation policy" because the free-cancellation window is 48 hours.
 - The wallet stays at 0.00 after a refund: refunds go back to the original payment method; the wallet only receives refund credit with the customer's recorded consent (needs approved legal wording, see design 0004).
 - Ratings and review counts of catalogue items show 0 (no data source yet).
+
+## Shortcut (scripts/local.sh)
+
+`scripts/local.sh up | seed | api | smoke | test | backup | restore <file> | status | down` wraps the steps above using
+`config/env/local.env` (or `local.env.example` when you have no private copy). `make local-up`, `local-seed`, `local-api`
+work the same. It refuses to run with `APP_ENV=prod|production`. Environment templates for local/test/staging/production and
+their rules are in `config/env/README.md`.

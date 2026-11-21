@@ -46,6 +46,14 @@ services:
       MYSQL_DSN: travel:travel@tcp(mysql:3306)/travel_super_app?parseTime=true
       REDIS_ADDR: redis:6379
       JWT_SECRET: development-only-change-before-production
+      # Local sandbox only (see config/env/local.env.example). Nothing here can move real money.
+      APP_ENV: development
+      FINANCIAL_TRANSACTIONS_ENABLED: "true"
+      PAYMENT_PROVIDER: mock
+      SUPPLIER_MODE: mock
+      MOCK_PSP_SECRET: dev-psp-secret
+      CORS_ALLOWED_ORIGINS: http://localhost:5173,http://localhost:8080
+    # Published on 8082 (OpenAPI servers and older clients use it). `go run ./cmd/api` uses APP_PORT=8088 instead.
     ports: ["8082:8080"]
     restart: unless-stopped
     depends_on:
