@@ -12,6 +12,9 @@ jobs:
       - run: go build ./...
       - run: go vet ./...
       - run: go test -race ./...
+      - name: Environment templates follow the separation rules
+        working-directory: .
+        run: bash scripts/check-config.sh && bash -n database/backup.sh database/restore.sh scripts/local.sh
       - run: npx --yes @apidevtools/swagger-cli@4 validate docs/openapi.yaml docs/openapi-financial-draft.yaml
 
   integration:
@@ -61,6 +64,28 @@ jobs:
           [ "$(count "SELECT COUNT(*) FROM coupons")" = 4 ]
           [ "$(count "SELECT COUNT(*) FROM community_posts")" = 4 ]
           [ "$(count "SELECT COUNT(*) FROM content_tags WHERE content_type = 'COMMUNITY_POST'")" = 6 ]
+      - name: Backup and restore round-trip (restore refuses a non-empty database)
+        env:
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_PORT: '3306'
+          MYSQL_USER: root
+          MYSQL_PASSWORD: root
+        run: |
+          set -e
+          count() { mysql -h 127.0.0.1 -uroot -proot -N -B "$1" -e "$2"; }
+          MYSQL_DATABASE=seed_ci bash database/backup.sh /tmp/seed_ci.sql.gz
+          mysql -h 127.0.0.1 -uroot -proot -e "CREATE DATABASE restore_ci CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+          MYSQL_DATABASE=restore_ci CONFIRM_DESTRUCTIVE=yes bash database/restore.sh /tmp/seed_ci.sql.gz
+          for q in "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE()" \
+                   "SELECT COUNT(*) FROM schema_migrations" "SELECT COUNT(*) FROM supplier_products" \
+                   "SELECT COUNT(*) FROM coupons" "SELECT COUNT(*) FROM community_posts"; do
+            a="$(count seed_ci "$q")"; b="$(count restore_ci "$q")"
+            echo "$q -> $a / $b"; [ "$a" = "$b" ] && [ "$a" != 0 ]
+          done
+          # a second restore into the now non-empty database must be refused, and APP_ENV=production must be refused
+          if MYSQL_DATABASE=restore_ci CONFIRM_DESTRUCTIVE=yes bash database/restore.sh /tmp/seed_ci.sql.gz; then echo "restore overwrote a non-empty database"; exit 1; fi
+          if APP_ENV=production MYSQL_DATABASE=restore_ci CONFIRM_DESTRUCTIVE=yes bash database/restore.sh /tmp/seed_ci.sql.gz; then echo "restore ran in production mode"; exit 1; fi
+          if MYSQL_DATABASE=restore_ci bash database/restore.sh /tmp/seed_ci.sql.gz; then echo "restore ran without confirmation"; exit 1; fi
       - name: Integration tests
         working-directory: backend
         env:

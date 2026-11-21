@@ -2,7 +2,7 @@
 
 Go/Gin API starter organized by domain. The vertical slices so far are health, authentication, trips (with itinerary), notifications and reviews; each future domain follows controller → service → repository with database transactions in services.
 
-Run locally with `go run ./cmd/api`. Copy `.env.example` to `.env` and supply production secrets through your deployment secret manager. Docker exposes the API at `http://localhost:8082` to avoid conflicting with an existing local service.
+Run locally with `go run ./cmd/api`. Copy `.env.example` to `.env` and supply production secrets through your deployment secret manager. Docker exposes the API at `http://localhost:8082` to avoid conflicting with an existing local service; `go run ./cmd/api` uses `APP_PORT` (8088 in `config/env/local.env.example`). Per-environment templates: `config/env/`.
 
 For Flutter Web development, set `CORS_ALLOWED_ORIGINS` to a comma-separated list of exact frontend origins (for example, `http://localhost:8081,http://127.0.0.1:8081`). The API defaults to these local development origins when the variable is unset; configure the deployed web origin explicitly in production.
 
