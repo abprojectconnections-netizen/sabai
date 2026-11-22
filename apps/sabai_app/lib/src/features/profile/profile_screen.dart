@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../state/app_state.dart';
+import '../admin/admin_console_screen.dart';
 import '../auth/login_screen.dart';
 import '../coupons/coupons_screen.dart';
 import '../reviews/my_reviews_screen.dart';
@@ -67,6 +68,15 @@ class ProfileScreen extends StatelessWidget {
             title: const Text('รีวิวของฉัน'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const MyReviewsScreen())),
+          ),
+        if (state.signedIn && state.account.hasAdminConsole)
+          ListTile(
+            key: const Key('adminConsoleTile'),
+            leading: const Icon(Icons.admin_panel_settings_outlined),
+            title: const Text('คอนโซลผู้ดูแล'),
+            subtitle: const Text('ผู้ใช้ ประวัติตรวจสอบ ภาพรวมระบบ'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AdminConsoleScreen())),
           ),
         if (state.signedIn && state.account.canModerateCommunity)
           ListTile(

@@ -1,4 +1,5 @@
 import '../../core/errors/api_error.dart';
+import '../models/admin_models.dart';
 import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
@@ -458,13 +459,16 @@ class MockRepository implements AppRepository {
         reasons: ['MISLEADING']),
   ];
 
-  /// In the offline mock, signing in with an address that starts with "staff@" simulates a moderator.
+  /// In the offline mock, an address starting with "staff@" simulates a moderator, "admin@" a System Admin and "auditor@" an Auditor.
   @override
   Future<AccountInfo> accountInfo() async {
     _requireSignIn();
-    return _email.startsWith('staff@')
-        ? const AccountInfo(roles: ['STAFF'], permissions: ['portal.read', 'support.manage'])
-        : const AccountInfo(roles: ['CUSTOMER']);
+    if (_email.startsWith('staff@')) return const AccountInfo(roles: ['STAFF'], permissions: ['portal.read', 'support.manage']);
+    if (_email.startsWith('admin@')) {
+      return const AccountInfo(roles: ['ADMIN'], permissions: ['user.manage', 'config.manage', 'role.request', 'role.approve']);
+    }
+    if (_email.startsWith('auditor@')) return const AccountInfo(roles: ['AUDITOR'], permissions: ['audit.read', 'portal.read']);
+    return const AccountInfo(roles: ['CUSTOMER']);
   }
 
   @override
@@ -484,6 +488,102 @@ class MockRepository implements AppRepository {
     final i = _queue.indexWhere((p) => p.id == id);
     if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'post', status: 404);
     _queue.removeAt(i);
+  }
+
+  // ---- Admin console (offline fixtures; the real rules live in the backend) ----
+
+  final List<AdminUser> _adminUsers = [
+    const AdminUser(id: 'mock-admin', email: 'admin@example.com', status: 'ACTIVE', roles: ['ADMIN', 'CUSTOMER'], createdAt: '2030-01-01T00:00:00Z', lastLoginAt: '2030-01-09T08:00:00Z'),
+    const AdminUser(id: 'mock-user-1', email: 'somchai@example.com', status: 'ACTIVE', roles: ['CUSTOMER'], createdAt: '2030-01-02T00:00:00Z', lastLoginAt: '2030-01-08T10:30:00Z', displayName: 'สมชาย ใจดี'),
+    const AdminUser(id: 'mock-user-2', email: 'mali@example.com', status: 'ACTIVE', roles: ['CUSTOMER', 'PARTNER'], createdAt: '2030-01-03T00:00:00Z', displayName: 'มาลี รักเที่ยว', pendingRoles: ['PARTNER_FINANCE']),
+    const AdminUser(id: 'mock-user-3', email: 'banned@example.com', status: 'SUSPENDED', roles: ['CUSTOMER'], createdAt: '2030-01-04T00:00:00Z'),
+  ];
+
+  final List<AuditEntry> _auditLog = [
+    const AuditEntry(
+        id: 'mock-audit-1',
+        createdAt: '2030-01-05T09:00:00Z',
+        actorEmail: 'admin@example.com',
+        action: 'user.status.changed',
+        subjectType: 'user',
+        subjectId: 'mock-user-3',
+        before: {'status': 'ACTIVE'},
+        after: {'status': 'SUSPENDED', 'reason': 'โพสต์สแปมซ้ำ'}),
+  ];
+
+  void _requireAdmin() {
+    _requireSignIn();
+    if (!_email.startsWith('admin@')) throw const ApiError(code: 'FORBIDDEN', message: 'forbidden', status: 403);
+  }
+
+  @override
+  Future<DashboardStats> adminDashboard() async {
+    _requireSignIn();
+    if (!(_email.startsWith('admin@') || _email.startsWith('auditor@') || _email.startsWith('staff@'))) {
+      throw const ApiError(code: 'FORBIDDEN', message: 'forbidden', status: 403);
+    }
+    return DashboardStats(
+      usersTotal: _adminUsers.length,
+      usersActive: _adminUsers.where((u) => !u.suspended).length,
+      usersSuspended: _adminUsers.where((u) => u.suspended).length,
+      usersNew7: 2,
+      bookingsByStatus: const {'CONFIRMED': 3, 'PENDING': 1},
+      bookingsNew7: 2,
+      paymentsByStatus: const {'SUCCEEDED': 3},
+      queues: {'community_reports_open': _queue.length, 'tickets_open': 0, 'disputes_open': 0, 'refunds_open': 0, 'partners_pending': 0, 'role_requests_pending': 1},
+    );
+  }
+
+  @override
+  Future<AdminUsersPage> adminUsers({String query = '', String status = '', int offset = 0, int limit = 20}) async {
+    _requireAdmin();
+    final q = query.trim().toLowerCase();
+    final all = _adminUsers.where((u) => (q.isEmpty || u.email.toLowerCase().contains(q)) && (status.isEmpty || u.status == status)).toList();
+    final end = offset + limit > all.length ? all.length : offset + limit;
+    return AdminUsersPage(items: offset >= all.length ? const [] : all.sublist(offset, end), total: all.length);
+  }
+
+  @override
+  Future<AdminUser> adminUser(String id) async {
+    _requireAdmin();
+    final i = _adminUsers.indexWhere((u) => u.id == id);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'user', status: 404);
+    return _adminUsers[i];
+  }
+
+  @override
+  Future<void> setUserStatus({required String id, required String status, String reason = ''}) async {
+    _requireAdmin();
+    if (status != 'ACTIVE' && status != 'SUSPENDED') throw const ApiError(code: 'VALIDATION_ERROR', message: 'unknown status');
+    if (status == 'SUSPENDED' && reason.trim().length < 3) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'a reason is required to suspend an account');
+    }
+    final i = _adminUsers.indexWhere((u) => u.id == id);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'user', status: 404);
+    final user = _adminUsers[i];
+    if (user.email == _email) throw const ApiError(code: 'FORBIDDEN', message: 'you cannot change your own account status', status: 403);
+    if (user.status == status) return; // same as the server: repeating a status writes and audits nothing
+    _adminUsers[i] = user.copyWith(status: status);
+    _auditLog.insert(
+        0,
+        AuditEntry(
+            id: 'mock-audit-${_auditLog.length + 1}',
+            createdAt: '2030-01-10T00:00:00Z',
+            actorEmail: _email,
+            action: 'user.status.changed',
+            subjectType: 'user',
+            subjectId: id,
+            before: {'status': user.status},
+            after: {'status': status, if (reason.trim().isNotEmpty) 'reason': reason.trim()}));
+  }
+
+  @override
+  Future<AuditPage> auditLogs({String action = '', int offset = 0, int limit = 20}) async {
+    _requireSignIn();
+    if (!_email.startsWith('auditor@')) throw const ApiError(code: 'FORBIDDEN', message: 'forbidden', status: 403);
+    final all = _auditLog.where((e) => action.trim().isEmpty || e.action == action.trim()).toList();
+    final end = offset + limit > all.length ? all.length : offset + limit;
+    return AuditPage(items: offset >= all.length ? const [] : all.sublist(offset, end), total: all.length);
   }
 
   @override
