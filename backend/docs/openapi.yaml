@@ -219,6 +219,45 @@ paths:
       responses:
         '200': { description: "data: { id, email, roles: string[], permissions: string[] }" }
         '401': { $ref: '#/components/responses/Unauthorized' }
+  /portal/bookings:
+    get:
+      summary: "STAFF: booking work queue (needs booking.manage)"
+      description: Newest first. Every row has next_statuses from the server's transition rules; financial statuses such as PAID offer none.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string, pattern: '^[A-Za-z_]{1,30}$' } }
+        - { name: q, in: query, description: Booking code contains (max 40), schema: { type: string, maxLength: 40 } }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: [{id, booking_code, status, currency, total_amount, customer_email, created_at, next_statuses}], total, limit, offset }" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /portal/disputes:
+    get:
+      summary: "STAFF: dispute work queue (needs support.manage)"
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string, pattern: '^[A-Za-z_]{1,30}$' } }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: [{id, booking_id, booking_code, reason, description, status, opened_by_email, assigned_staff_id, resolution, created_at, next_statuses}], total, limit, offset }" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /portal/partners:
+    get:
+      summary: "STAFF: partner applications and partners (needs partner.review)"
+      description: Oldest first so the longest-waiting application is on top.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string, pattern: '^[A-Za-z_]{1,30}$' } }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: [{id, legal_name, status, owner_email, created_at, next_statuses}], total, limit, offset }" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
   /admin/dashboard:
     get:
       summary: "ADMIN/STAFF/AUDITOR: live counts from the database (users, bookings and payments by status, open work queues)"
