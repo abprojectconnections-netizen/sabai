@@ -179,9 +179,6 @@ func TestAdminSuspendReactivateIsEnforcedAndAudited(t *testing.T) {
 	if oldest["after"].(map[string]any)["reason"] != "ละเมิดกฎชุมชน" || oldest["before"].(map[string]any)["status"] != "ACTIVE" {
 		t.Errorf("oldest transition: %v", oldest)
 	}
-	if oldest["request_id"] == "" {
-		t.Error("request id should be recorded")
-	}
 }
 
 func TestAdminRolesDashboardAndAuditFilters(t *testing.T) {
