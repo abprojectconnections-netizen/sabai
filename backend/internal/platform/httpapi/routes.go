@@ -67,6 +67,7 @@ func RegisterRoutesWith(router *gin.Engine, db *sql.DB, jwtSecret string, cfg sa
 	adminRoutes := secured.Group("/admin")
 	adminRoutes.Use(auth.RequirePermission("role.request", "role.approve", "role.approve.financial"))
 	admin.RegisterRoutes(adminRoutes, db)
+	admin.RegisterConsoleRoutes(secured.Group("/admin"), db)
 }
 
 // envInt reads a non-negative integer from the environment, falling back to def when it is unset or invalid.
