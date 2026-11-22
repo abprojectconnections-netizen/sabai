@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import '../../core/config/app_config.dart';
 import '../../core/errors/api_error.dart';
 import '../../core/util/format.dart';
+import '../models/admin_models.dart';
 import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
@@ -453,6 +454,50 @@ class HttpRepository implements AppRepository {
     }
     await _request('/portal/community/posts/${Uri.encodeComponent(id)}/$action',
         method: 'POST', auth: true, body: {'note': note});
+  }
+
+  @override
+  Future<DashboardStats> adminDashboard() async {
+    final r = await _request('/admin/dashboard', auth: true);
+    if (r is! Map<String, dynamic>) throw const ApiError(code: 'BAD_RESPONSE', message: 'dashboard payload is invalid');
+    return DashboardStats.fromJson(r);
+  }
+
+  @override
+  Future<AdminUsersPage> adminUsers({String query = '', String status = '', int offset = 0, int limit = 20}) async {
+    final params = <String, String>{'limit': '$limit', 'offset': '$offset'};
+    if (query.trim().isNotEmpty) params['q'] = query.trim();
+    if (status.isNotEmpty) params['status'] = status;
+    final data = await _request('/admin/users?${Uri(queryParameters: params).query}', auth: true);
+    final rows = _rows(data, '/admin/users').map(AdminUser.fromJson).toList();
+    final total = data is Map<String, dynamic> && data['total'] is num ? (data['total'] as num).toInt() : rows.length;
+    return AdminUsersPage(items: rows, total: total);
+  }
+
+  @override
+  Future<AdminUser> adminUser(String id) async {
+    final r = await _request('/admin/users/${Uri.encodeComponent(id)}', auth: true);
+    if (r is! Map<String, dynamic>) throw const ApiError(code: 'BAD_RESPONSE', message: 'user payload is invalid');
+    return AdminUser.fromJson(r);
+  }
+
+  @override
+  Future<void> setUserStatus({required String id, required String status, String reason = ''}) async {
+    if (status != 'ACTIVE' && status != 'SUSPENDED') {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'unknown status');
+    }
+    await _request('/admin/users/${Uri.encodeComponent(id)}/status',
+        method: 'PATCH', auth: true, body: {'status': status, 'reason': reason});
+  }
+
+  @override
+  Future<AuditPage> auditLogs({String action = '', int offset = 0, int limit = 20}) async {
+    final params = <String, String>{'limit': '$limit', 'offset': '$offset'};
+    if (action.trim().isNotEmpty) params['action'] = action.trim();
+    final data = await _request('/admin/audit-logs?${Uri(queryParameters: params).query}', auth: true);
+    final rows = _rows(data, '/admin/audit-logs').map(AuditEntry.fromJson).toList();
+    final total = data is Map<String, dynamic> && data['total'] is num ? (data['total'] as num).toInt() : rows.length;
+    return AuditPage(items: rows, total: total);
   }
 
   @override

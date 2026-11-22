@@ -133,6 +133,17 @@ class AccountInfo {
 
   bool get canModerateCommunity => permissions.contains('portal.read') && permissions.contains('support.manage');
 
+  /// user.manage: list, inspect and suspend accounts (System Admin).
+  bool get canManageUsers => permissions.contains('user.manage');
+
+  /// audit.read: read the audit trail (Auditor, CFO). System Admin deliberately does not have it.
+  bool get canReadAudit => permissions.contains('audit.read');
+
+  bool get canViewDashboard => canManageUsers || canReadAudit || permissions.contains('portal.read');
+
+  /// Whether the admin console has anything to show this person.
+  bool get hasAdminConsole => canManageUsers || canReadAudit;
+
   factory AccountInfo.fromJson(Map<String, dynamic> j) {
     List<String> strings(Object? v) => v is List ? v.map((e) => e.toString()).toList() : const [];
     return AccountInfo(roles: strings(j['roles']), permissions: strings(j['permissions']));

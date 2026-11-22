@@ -66,3 +66,13 @@ my bookings with refund request, wallet (read-only).
 - Users whose `GET /me` shows both `portal.read` and `support.manage` get "ตรวจสอบรายงานชุมชน (เจ้าหน้าที่)" in Profile. It lists posts with open reports (most reported first); staff can **dismiss** (keep the post) or **remove** it, with an optional note. Both are audited by the server. The menu is only a convenience: the server enforces the permission on every call, and a customer who somehow opens the screen gets 403.
 - The layout adapts: one column on phones, and on wide windows (desktop/tablet) a centred column up to 900 px with the actions beside each post. Desktop runners (Windows, web) use the same screens.
 - Offline mock: signing in with an address starting `staff@` simulates a moderator with two sample reports.
+
+## Update: admin console (phones and desktop)
+
+Profile → **คอนโซลผู้ดูแล** appears only when `GET /me` reports `user.manage` (System Admin) or `audit.read` (Auditor, CFO). The server still checks every call; the app only hides what you cannot use.
+
+- **Dashboard** (`GET /admin/dashboard`): live counts of users, bookings, payments by status and open work queues. Counts only, no money figures.
+- **Users** (`user.manage`): search by e-mail, filter active/suspended, page through the list, open one account and **suspend** (a reason of at least 3 characters is required) or **reactivate** it. You cannot change your own account. Every change is audited by the server and takes effect on the next request.
+- **Audit trail** (`audit.read`): read-only, newest first, filter by event name, expand a row to see before/after. System Admin deliberately cannot read it.
+- Offline mock: sign in as `admin@…` (System Admin), `auditor@…` (Auditor) or `staff@…` (moderator) to try each role. The mock enforces the same rules (reason required, no self-change, no-op on repeat).
+- Not included yet: role approval, work queues (bookings, tickets, disputes), partner approval and system settings.

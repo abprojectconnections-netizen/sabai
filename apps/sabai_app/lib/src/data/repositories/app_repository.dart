@@ -1,3 +1,4 @@
+import '../models/admin_models.dart';
 import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
@@ -113,6 +114,23 @@ abstract class AppRepository {
 
   /// [action] is `remove` (delete the post) or `dismiss` (keep it); both close the post's open reports.
   Future<void> moderatePost({required String id, required String action, String note = ''});
+
+  // ---- Admin console (backend: /admin). Each call is checked by the server; the app only hides what you cannot use. ----
+
+  /// user.manage, portal.read or audit.read.
+  Future<DashboardStats> adminDashboard();
+
+  /// user.manage. [query] is a literal e-mail substring; [status] is '' (all), ACTIVE or SUSPENDED.
+  Future<AdminUsersPage> adminUsers({String query = '', String status = '', int offset = 0, int limit = 20});
+
+  /// user.manage. Includes display name and pending role requests.
+  Future<AdminUser> adminUser(String id);
+
+  /// user.manage. [status] is ACTIVE or SUSPENDED; a reason is required to suspend. You cannot change your own account.
+  Future<void> setUserStatus({required String id, required String status, String reason = ''});
+
+  /// audit.read. Newest first. [action] filters on the exact action name (empty = all).
+  Future<AuditPage> auditLogs({String action = '', int offset = 0, int limit = 20});
 
   // ---- Coupons (backend: /coupons). Saving only: the app never applies a coupon to a price. ----
 

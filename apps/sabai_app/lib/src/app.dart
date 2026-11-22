@@ -7,6 +7,7 @@ import 'core/util/external_links.dart';
 import 'core/theme/app_theme.dart';
 import 'data/repositories/app_repository.dart';
 import 'features/shell/home_shell.dart';
+import 'state/admin_controller.dart';
 import 'state/app_state.dart';
 import 'state/community_controller.dart';
 import 'state/coupons_controller.dart';
@@ -76,6 +77,14 @@ class SabaiApp extends StatelessWidget {
           create: (_) => CouponsController(repository),
           update: (_, app, c) {
             final x = c ?? CouponsController(repository);
+            if (!app.signedIn) x.reset();
+            return x;
+          },
+        ),
+        ChangeNotifierProxyProvider<AppState, AdminController>(
+          create: (_) => AdminController(repository),
+          update: (_, app, c) {
+            final x = c ?? AdminController(repository);
             if (!app.signedIn) x.reset();
             return x;
           },
