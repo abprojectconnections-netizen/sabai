@@ -40,6 +40,7 @@ var (
 
 func RegisterRoutes(group *gin.RouterGroup, db *sql.DB) {
 	group.GET("/queue", queue(db))
+	registerLists(group, db)
 	group.PATCH("/bookings/:id/status", auth.RequirePermission("booking.manage"), statusChange(db, "bookings", "booking", "booking.status.changed", bookingTransitions))
 	group.PATCH("/partners/:id/approval", auth.RequirePermission("partner.review"), statusChange(db, "partners", "partner", "partner.approval.changed", partnerTransitions))
 	group.PATCH("/tickets/:id/assign", auth.RequirePermission("support.manage"), ticketAssign(db))
