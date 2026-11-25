@@ -2,8 +2,10 @@ package httpapi
 
 import (
 	"database/sql"
+	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -14,7 +16,9 @@ import (
 	financeapi "github.com/travel-super-app/backend/internal/finance/api"
 	"github.com/travel-super-app/backend/internal/finance/payment"
 	"github.com/travel-super-app/backend/internal/finance/safety"
+	"github.com/travel-super-app/backend/internal/flags"
 	"github.com/travel-super-app/backend/internal/notification"
+	"github.com/travel-super-app/backend/internal/platform/apiresponse"
 	"github.com/travel-super-app/backend/internal/platform/ratelimit"
 	"github.com/travel-super-app/backend/internal/portal"
 	"github.com/travel-super-app/backend/internal/review"
@@ -39,6 +43,14 @@ func RegisterRoutesWith(router *gin.Engine, db *sql.DB, jwtSecret string, cfg sa
 	secured := v1.Group("")
 	secured.Use(auth.Authenticate(db, jwtSecret))
 	secured.GET("/me", auth.Me())
+	secured.GET("/config/flags", func(c *gin.Context) { // lets a client hide the controls of a disabled feature; the server still enforces it
+		all, err := flags.All(c.Request.Context(), db)
+		if err != nil {
+			apiresponse.Internal(c)
+			return
+		}
+		apiresponse.OK(c, gin.H{"flags": all})
+	})
 	financeapi.Register(v1, secured, financeapi.Deps{DB: db, Cfg: cfg, Provider: provider})
 	trips := secured.Group("/trips")
 	trips.Use(auth.RequireRoles("CUSTOMER", "PARTNER", "STAFF", "ADMIN"))
@@ -52,9 +64,15 @@ func RegisterRoutesWith(router *gin.Engine, db *sql.DB, jwtSecret string, cfg sa
 	review.RegisterRoutes(reviews, review.NewService(db))
 	communityRoutes := secured.Group("/community")
 	communityRoutes.Use(userRoles, ratelimit.New(10, time.Minute).PerUserWrites()) // posts, deletes and reports share one budget
+	communityRoutes.Use(flags.RequireWhen(db, "community.posting", "การโพสต์ในชุมชนถูกปิดชั่วคราว", func(c *gin.Context) bool {
+		return c.Request.Method == http.MethodPost && strings.HasSuffix(c.FullPath(), "/community/posts")
+	}))
 	community.RegisterRoutes(communityRoutes, community.NewService(db))
 	couponRoutes := secured.Group("/coupons")
 	couponRoutes.Use(userRoles, ratelimit.New(10, time.Minute).PerUserWrites()) // slows down guessing coupon codes
+	couponRoutes.Use(flags.RequireWhen(db, "coupons.claiming", "การเก็บคูปองถูกปิดชั่วคราว", func(c *gin.Context) bool {
+		return c.Request.Method == http.MethodPost && strings.HasSuffix(c.FullPath(), "/coupons/claim")
+	}))
 	coupon.RegisterRoutes(couponRoutes, coupon.NewService(db))
 	tagRoutes := secured.Group("")
 	tagRoutes.Use(userRoles)

@@ -335,6 +335,43 @@ paths:
         '200': { description: "data: { items: [{id, created_at, actor_user_id, actor_email, action, subject_type, subject_id, before, after, ip_address, request_id}], total, limit, offset }" }
         '400': { $ref: '#/components/responses/ValidationError' }
         '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/feature-flags:
+    get:
+      summary: "ADMIN: list runtime feature flags"
+      description: Needs config.manage. Flags are kill switches; a missing flag or a failed lookup counts as enabled.
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: "data: { items: [{key, description, enabled, updated_at, updated_by}] }" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /admin/feature-flags/{key}:
+    patch:
+      summary: "ADMIN: switch one feature flag (audited)"
+      description: Needs config.manage. A reason is required when turning a feature off. Repeating the current value is a no-op with no audit row. Currently guarded - community.posting (POST /community/posts) and coupons.claiming (POST /coupons/claim); a disabled feature answers 503 FEATURE_DISABLED.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: key, in: path, required: true, schema: { type: string, maxLength: 80 } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled: { type: boolean }
+                reason: { type: string, maxLength: 500 }
+      responses:
+        '200': { description: "data: { key, enabled }" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { description: Unknown flag }
+  /config/flags:
+    get:
+      summary: "Any signed-in user: current flag states, so a client can hide controls of a disabled feature"
+      description: The server still enforces every flag; hiding a control is only a courtesy.
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: "data: { flags: { <key>: boolean } }" }
   /community/posts:
     get:
       summary: "Community feed, newest first (posts the caller reported are hidden from the caller only)"

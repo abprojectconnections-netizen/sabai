@@ -16,5 +16,7 @@ func RegisterConsoleRoutes(group *gin.RouterGroup, db *sql.DB) {
 	group.GET("/users/:id", auth.RequirePermission("user.manage"), getUser(db))
 	group.PATCH("/users/:id/status", auth.RequirePermission("user.manage"), setUserStatus(db))
 	group.GET("/roles", auth.RequirePermission("user.manage", "audit.read"), listRoles(db))
+	group.GET("/feature-flags", auth.RequirePermission("config.manage"), listFlags(db))
+	group.PATCH("/feature-flags/:key", auth.RequirePermission("config.manage"), setFlag(db))
 	group.GET("/audit-logs", auth.RequirePermission("audit.read"), listAuditLogs(db))
 }
