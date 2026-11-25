@@ -3,6 +3,7 @@ import '../models/admin_models.dart';
 import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
+import '../models/staff_models.dart';
 import '../models/trip_models.dart';
 import 'app_repository.dart';
 
@@ -459,11 +460,20 @@ class MockRepository implements AppRepository {
         reasons: ['MISLEADING']),
   ];
 
-  /// In the offline mock, an address starting with "staff@" simulates a moderator, "admin@" a System Admin and "auditor@" an Auditor.
+  /// In the offline mock, an address starting with "staff@" simulates a Staff member (moderation and all work queues), "officer@" a Booking Officer (bookings and disputes), "admin@" a System Admin and "auditor@" an Auditor.
   @override
   Future<AccountInfo> accountInfo() async {
     _requireSignIn();
-    if (_email.startsWith('staff@')) return const AccountInfo(roles: ['STAFF'], permissions: ['portal.read', 'support.manage']);
+    return _account();
+  }
+
+  AccountInfo _account() {
+    if (_email.startsWith('staff@')) {
+      return const AccountInfo(roles: ['STAFF'], permissions: ['portal.read', 'support.manage', 'booking.manage', 'partner.review']);
+    }
+    if (_email.startsWith('officer@')) {
+      return const AccountInfo(roles: ['BOOKING_OFFICER'], permissions: ['portal.read', 'booking.manage', 'support.manage']);
+    }
     if (_email.startsWith('admin@')) {
       return const AccountInfo(roles: ['ADMIN'], permissions: ['user.manage', 'config.manage', 'role.request', 'role.approve']);
     }
@@ -488,6 +498,108 @@ class MockRepository implements AppRepository {
     final i = _queue.indexWhere((p) => p.id == id);
     if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'post', status: 404);
     _queue.removeAt(i);
+  }
+
+  // ---- Staff work queues (offline fixtures; same transition rules as the backend) ----
+
+  static const _bookingTransitions = <String, List<String>>{'PENDING': ['CONFIRMED', 'CANCELLED'], 'CONFIRMED': ['CANCELLED']};
+  static const _disputeTransitions = <String, List<String>>{'OPEN': ['IN_REVIEW'], 'IN_REVIEW': ['RESOLVED', 'REJECTED']};
+  static const _partnerTransitions = <String, List<String>>{'PENDING': ['APPROVED', 'REJECTED'], 'APPROVED': ['SUSPENDED'], 'SUSPENDED': ['APPROVED']};
+
+  QueueBooking _qb(String id, String code, String status, String total, String email) => QueueBooking(
+      id: id, code: code, status: status, currency: 'THB', total: total, customerEmail: email, createdAt: '2030-01-08T09:00:00Z', nextStatuses: _bookingTransitions[status] ?? const []);
+
+  QueueDispute _qd(String id, String bookingId, String code, String reason, String description, String status, String by) => QueueDispute(
+      id: id, bookingId: bookingId, bookingCode: code, reason: reason, description: description, status: status, openedBy: by, createdAt: '2030-01-09T09:00:00Z', nextStatuses: _disputeTransitions[status] ?? const []);
+
+  QueuePartner _qp(String id, String name, String status, String owner) => QueuePartner(
+      id: id, legalName: name, status: status, ownerEmail: owner, createdAt: '2030-01-07T09:00:00Z', nextStatuses: _partnerTransitions[status] ?? const []);
+
+  late final List<QueueBooking> _queueBookings = [
+    _qb('mock-qb-1', 'SB-1001', 'PENDING', '3200.00', 'somchai@example.com'),
+    _qb('mock-qb-2', 'SB-1002', 'CONFIRMED', '1800.00', 'mali@example.com'),
+    _qb('mock-qb-3', 'SB-1003', 'PAID', '5400.00', 'somchai@example.com'),
+  ];
+  late final List<QueueDispute> _queueDisputes = [
+    _qd('mock-qd-1', 'mock-qb-2', 'SB-1002', 'NO_SHOW', 'ลูกค้าแจ้งว่าไม่มีผู้รับที่จุดนัดพบ', 'OPEN', 'staff@example.com'),
+  ];
+  late final List<QueuePartner> _queuePartners = [
+    _qp('mock-qp-1', 'ร้านอาหารริมทะเล', 'PENDING', 'owner1@example.com'),
+    _qp('mock-qp-2', 'ทัวร์เกาะสวย', 'APPROVED', 'owner2@example.com'),
+  ];
+
+  void _requirePerm(String permission) {
+    _requireSignIn();
+    if (!_account().permissions.contains(permission)) throw const ApiError(code: 'FORBIDDEN', message: 'forbidden', status: 403);
+  }
+
+  StaffPage<T> _page<T>(List<T> all, int offset, int limit) {
+    final end = offset + limit > all.length ? all.length : offset + limit;
+    return StaffPage(items: offset >= all.length ? <T>[] : all.sublist(offset, end), total: all.length);
+  }
+
+  @override
+  Future<StaffPage<QueueBooking>> staffBookings({String status = '', String query = '', int offset = 0, int limit = 20}) async {
+    _requirePerm('booking.manage');
+    final q = query.trim().toLowerCase();
+    return _page(_queueBookings.where((b) => (status.isEmpty || b.status == status) && (q.isEmpty || b.code.toLowerCase().contains(q))).toList(), offset, limit);
+  }
+
+  @override
+  Future<StaffPage<QueueDispute>> staffDisputes({String status = '', int offset = 0, int limit = 20}) async {
+    _requirePerm('support.manage');
+    return _page(_queueDisputes.where((d) => status.isEmpty || d.status == status).toList(), offset, limit);
+  }
+
+  @override
+  Future<StaffPage<QueuePartner>> staffPartners({String status = '', int offset = 0, int limit = 20}) async {
+    _requirePerm('partner.review');
+    return _page(_queuePartners.where((p) => status.isEmpty || p.status == status).toList(), offset, limit);
+  }
+
+  /// Applies the same rule as the server: the target must be allowed from the current status, otherwise CONFLICT.
+  String _nextStatus(Map<String, List<String>> rules, String from, String to) {
+    if (!rules.values.any((targets) => targets.contains(to))) throw const ApiError(code: 'VALIDATION_ERROR', message: 'invalid status');
+    if (!(rules[from] ?? const <String>[]).contains(to)) throw const ApiError(code: 'CONFLICT', message: 'status change is not allowed from the current status', status: 409);
+    return to;
+  }
+
+  @override
+  Future<void> changeBookingStatus({required String id, required String to, String note = ''}) async {
+    _requirePerm('booking.manage');
+    final i = _queueBookings.indexWhere((b) => b.id == id);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'booking', status: 404);
+    final b = _queueBookings[i];
+    _queueBookings[i] = _qb(b.id, b.code, _nextStatus(_bookingTransitions, b.status, to), b.total, b.customerEmail);
+  }
+
+  @override
+  Future<void> changeDisputeStatus({required String id, required String to, String note = ''}) async {
+    _requirePerm('support.manage');
+    final i = _queueDisputes.indexWhere((d) => d.id == id);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'dispute', status: 404);
+    final d = _queueDisputes[i];
+    _queueDisputes[i] = _qd(d.id, d.bookingId, d.bookingCode, d.reason, d.description, _nextStatus(_disputeTransitions, d.status, to), d.openedBy);
+  }
+
+  @override
+  Future<void> changePartnerStatus({required String id, required String to, String note = ''}) async {
+    _requirePerm('partner.review');
+    final i = _queuePartners.indexWhere((p) => p.id == id);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'partner', status: 404);
+    final p = _queuePartners[i];
+    _queuePartners[i] = _qp(p.id, p.legalName, _nextStatus(_partnerTransitions, p.status, to), p.ownerEmail);
+  }
+
+  @override
+  Future<void> openDispute({required String bookingId, required String reason, String description = ''}) async {
+    _requirePerm('support.manage');
+    if (reason.trim().isEmpty || reason.trim().length > 100) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'reason is required (max 100 characters)');
+    }
+    final b = _queueBookings.where((x) => x.id == bookingId).toList();
+    if (b.isEmpty) throw const ApiError(code: 'NOT_FOUND', message: 'booking', status: 404);
+    _queueDisputes.insert(0, _qd('mock-qd-${_queueDisputes.length + 1}', b.first.id, b.first.code, reason.trim(), description.trim(), 'OPEN', _email));
   }
 
   // ---- Admin console (offline fixtures; the real rules live in the backend) ----

@@ -11,6 +11,7 @@ import '../models/admin_models.dart';
 import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
+import '../models/staff_models.dart';
 import '../models/trip_models.dart';
 import 'app_repository.dart';
 
@@ -498,6 +499,58 @@ class HttpRepository implements AppRepository {
     final rows = _rows(data, '/admin/audit-logs').map(AuditEntry.fromJson).toList();
     final total = data is Map<String, dynamic> && data['total'] is num ? (data['total'] as num).toInt() : rows.length;
     return AuditPage(items: rows, total: total);
+  }
+
+  Future<StaffPage<T>> _staffPage<T>(String path, Map<String, String> params, T Function(Map<String, dynamic>) parse) async {
+    final data = await _request('$path?${Uri(queryParameters: params).query}', auth: true);
+    final rows = _rows(data, path).map(parse).toList();
+    final total = data is Map<String, dynamic> && data['total'] is num ? (data['total'] as num).toInt() : rows.length;
+    return StaffPage(items: rows, total: total);
+  }
+
+  @override
+  Future<StaffPage<QueueBooking>> staffBookings({String status = '', String query = '', int offset = 0, int limit = 20}) {
+    final params = <String, String>{'limit': '$limit', 'offset': '$offset'};
+    if (status.isNotEmpty) params['status'] = status;
+    if (query.trim().isNotEmpty) params['q'] = query.trim();
+    return _staffPage('/portal/bookings', params, QueueBooking.fromJson);
+  }
+
+  @override
+  Future<StaffPage<QueueDispute>> staffDisputes({String status = '', int offset = 0, int limit = 20}) {
+    final params = <String, String>{'limit': '$limit', 'offset': '$offset'};
+    if (status.isNotEmpty) params['status'] = status;
+    return _staffPage('/portal/disputes', params, QueueDispute.fromJson);
+  }
+
+  @override
+  Future<StaffPage<QueuePartner>> staffPartners({String status = '', int offset = 0, int limit = 20}) {
+    final params = <String, String>{'limit': '$limit', 'offset': '$offset'};
+    if (status.isNotEmpty) params['status'] = status;
+    return _staffPage('/portal/partners', params, QueuePartner.fromJson);
+  }
+
+  @override
+  Future<void> changeBookingStatus({required String id, required String to, String note = ''}) async {
+    await _request('/portal/bookings/${Uri.encodeComponent(id)}/status', method: 'PATCH', auth: true, body: {'status': to, 'note': note});
+  }
+
+  @override
+  Future<void> changeDisputeStatus({required String id, required String to, String note = ''}) async {
+    await _request('/portal/disputes/${Uri.encodeComponent(id)}/status', method: 'PATCH', auth: true, body: {'status': to, 'note': note});
+  }
+
+  @override
+  Future<void> changePartnerStatus({required String id, required String to, String note = ''}) async {
+    await _request('/portal/partners/${Uri.encodeComponent(id)}/approval', method: 'PATCH', auth: true, body: {'status': to, 'note': note});
+  }
+
+  @override
+  Future<void> openDispute({required String bookingId, required String reason, String description = ''}) async {
+    if (reason.trim().isEmpty || reason.trim().length > 100) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'reason is required (max 100 characters)');
+    }
+    await _request('/portal/disputes', method: 'POST', auth: true, body: {'booking_id': bookingId, 'reason': reason.trim(), 'description': description.trim()});
   }
 
   @override

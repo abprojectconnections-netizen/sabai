@@ -7,6 +7,7 @@ import '../auth/login_screen.dart';
 import '../coupons/coupons_screen.dart';
 import '../reviews/my_reviews_screen.dart';
 import '../staff/moderation_screen.dart';
+import '../staff/staff_queues_screen.dart';
 import '../support/help_screen.dart';
 import '../settings/settings_screen.dart';
 import '../wallet/wallet_screen.dart';
@@ -77,6 +78,15 @@ class ProfileScreen extends StatelessWidget {
             subtitle: const Text('ผู้ใช้ ประวัติตรวจสอบ ภาพรวมระบบ'),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AdminConsoleScreen())),
+          ),
+        if (state.signedIn && state.account.hasStaffQueues)
+          ListTile(
+            key: const Key('staffQueuesTile'),
+            leading: const Icon(Icons.assignment_outlined),
+            title: const Text('คิวงานเจ้าหน้าที่'),
+            subtitle: const Text('การจอง ข้อพิพาท พาร์ตเนอร์'),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const StaffQueuesScreen())),
           ),
         if (state.signedIn && state.account.canModerateCommunity)
           ListTile(

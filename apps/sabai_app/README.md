@@ -76,3 +76,14 @@ Profile → **คอนโซลผู้ดูแล** appears only when `GET /
 - **Audit trail** (`audit.read`): read-only, newest first, filter by event name, expand a row to see before/after. System Admin deliberately cannot read it.
 - Offline mock: sign in as `admin@…` (System Admin), `auditor@…` (Auditor) or `staff@…` (moderator) to try each role. The mock enforces the same rules (reason required, no self-change, no-op on repeat).
 - Not included yet: role approval, work queues (bookings, tickets, disputes), partner approval and system settings.
+
+## Update: staff work queues (phones and desktop)
+
+Profile → **คิวงานเจ้าหน้าที่** appears when `/me` reports `booking.manage`, `support.manage` or `partner.review`; each tab appears only for its own permission (a Booking Officer sees bookings and disputes, not partners).
+
+- **Bookings:** search by booking code, filter by status, confirm or cancel (with an optional note), open a dispute (reason required).
+- **Disputes:** start review, then resolve or reject.
+- **Partners:** approve or reject applications; suspend and reactivate approved partners.
+- Every row shows only the actions the server lists in `next_statuses` (a PAID booking offers none), every change asks for confirmation and is audited by the server, and the list refreshes afterwards (also after a conflict, since the usual cause is a row someone else just moved).
+- Offline mock: `staff@…` (all queues) or `officer@…` (bookings and disputes) with the same transition rules as the backend.
+- Not included: support tickets (customers cannot open tickets yet), refunds and settlements (finance permissions, separate screens), role approval.

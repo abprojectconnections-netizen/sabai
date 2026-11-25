@@ -141,6 +141,12 @@ class AccountInfo {
 
   bool get canViewDashboard => canManageUsers || canReadAudit || permissions.contains('portal.read');
 
+  /// booking.manage / support.manage / partner.review: the staff work queues (a role may hold only some of them).
+  bool get canManageBookings => permissions.contains('booking.manage');
+  bool get canManageDisputes => permissions.contains('support.manage');
+  bool get canReviewPartners => permissions.contains('partner.review');
+  bool get hasStaffQueues => canManageBookings || canManageDisputes || canReviewPartners;
+
   /// Whether the admin console has anything to show this person.
   bool get hasAdminConsole => canManageUsers || canReadAudit;
 
