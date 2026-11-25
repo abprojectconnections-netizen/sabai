@@ -15,6 +15,7 @@ import 'state/moderation_controller.dart';
 import 'state/notifications_controller.dart';
 import 'state/reviews_controller.dart';
 import 'state/settings_controller.dart';
+import 'state/staff_queues_controller.dart';
 import 'state/trips_controller.dart';
 
 class SabaiApp extends StatelessWidget {
@@ -85,6 +86,14 @@ class SabaiApp extends StatelessWidget {
           create: (_) => AdminController(repository),
           update: (_, app, c) {
             final x = c ?? AdminController(repository);
+            if (!app.signedIn) x.reset();
+            return x;
+          },
+        ),
+        ChangeNotifierProxyProvider<AppState, StaffQueuesController>(
+          create: (_) => StaffQueuesController(repository),
+          update: (_, app, c) {
+            final x = c ?? StaffQueuesController(repository);
             if (!app.signedIn) x.reset();
             return x;
           },

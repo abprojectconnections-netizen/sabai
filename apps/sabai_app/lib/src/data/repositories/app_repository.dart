@@ -2,6 +2,7 @@ import '../models/admin_models.dart';
 import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
+import '../models/staff_models.dart';
 import '../models/trip_models.dart';
 
 /// The only way the UI talks to data sources (same contract as apps/web-prototype/src/repositories/contract.js).
@@ -131,6 +132,29 @@ abstract class AppRepository {
 
   /// audit.read. Newest first. [action] filters on the exact action name (empty = all).
   Future<AuditPage> auditLogs({String action = '', int offset = 0, int limit = 20});
+
+  // ---- Staff work queues (backend: /portal). The server lists the allowed next statuses with every row. ----
+
+  /// booking.manage. [status] and [query] (booking code contains) are optional filters.
+  Future<StaffPage<QueueBooking>> staffBookings({String status = '', String query = '', int offset = 0, int limit = 20});
+
+  /// support.manage.
+  Future<StaffPage<QueueDispute>> staffDisputes({String status = '', int offset = 0, int limit = 20});
+
+  /// partner.review. Oldest first.
+  Future<StaffPage<QueuePartner>> staffPartners({String status = '', int offset = 0, int limit = 20});
+
+  /// booking.manage. [to] must be one of the row's nextStatuses (CONFLICT otherwise).
+  Future<void> changeBookingStatus({required String id, required String to, String note = ''});
+
+  /// support.manage.
+  Future<void> changeDisputeStatus({required String id, required String to, String note = ''});
+
+  /// partner.review.
+  Future<void> changePartnerStatus({required String id, required String to, String note = ''});
+
+  /// support.manage. Opens a dispute on a booking; [reason] is required (max 100 characters).
+  Future<void> openDispute({required String bookingId, required String reason, String description = ''});
 
   // ---- Coupons (backend: /coupons). Saving only: the app never applies a coupon to a price. ----
 
