@@ -18,6 +18,7 @@ func registerLists(group *gin.RouterGroup, db *sql.DB) {
 	group.GET("/bookings", auth.RequirePermission("booking.manage"), listBookings(db))
 	group.GET("/disputes", auth.RequirePermission("support.manage"), listDisputes(db))
 	group.GET("/partners", auth.RequirePermission("partner.review"), listPartners(db))
+	registerTickets(group, db)
 }
 
 var statusFormat = regexp.MustCompile(`^[A-Z_]{1,30}$`)

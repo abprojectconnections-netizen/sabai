@@ -22,6 +22,7 @@ import (
 	"github.com/travel-super-app/backend/internal/platform/ratelimit"
 	"github.com/travel-super-app/backend/internal/portal"
 	"github.com/travel-super-app/backend/internal/review"
+	"github.com/travel-super-app/backend/internal/support"
 	"github.com/travel-super-app/backend/internal/tag"
 	"github.com/travel-super-app/backend/internal/trip"
 )
@@ -74,6 +75,9 @@ func RegisterRoutesWith(router *gin.Engine, db *sql.DB, jwtSecret string, cfg sa
 		return c.Request.Method == http.MethodPost && strings.HasSuffix(c.FullPath(), "/coupons/claim")
 	}))
 	coupon.RegisterRoutes(couponRoutes, coupon.NewService(db))
+	supportRoutes := secured.Group("/support")
+	supportRoutes.Use(userRoles, ratelimit.New(10, time.Minute).PerUserWrites()) // opening tickets and replies share one budget
+	support.RegisterRoutes(supportRoutes, db)
 	tagRoutes := secured.Group("")
 	tagRoutes.Use(userRoles)
 	tag.RegisterRoutes(tagRoutes, tag.NewService(db))
