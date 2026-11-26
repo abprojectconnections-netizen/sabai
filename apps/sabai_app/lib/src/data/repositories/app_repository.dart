@@ -130,6 +130,12 @@ abstract class AppRepository {
   /// user.manage. [status] is ACTIVE or SUSPENDED; a reason is required to suspend. You cannot change your own account.
   Future<void> setUserStatus({required String id, required String status, String reason = ''});
 
+  /// config.manage. Every feature flag, by key.
+  Future<List<FeatureFlag>> featureFlags();
+
+  /// config.manage. A reason is required when turning a feature off; repeating the current value changes nothing.
+  Future<void> setFeatureFlag({required String key, required bool enabled, String reason = ''});
+
   /// audit.read. Newest first. [action] filters on the exact action name (empty = all).
   Future<AuditPage> auditLogs({String action = '', int offset = 0, int limit = 20});
 

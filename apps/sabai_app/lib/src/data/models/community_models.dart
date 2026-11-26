@@ -139,6 +139,9 @@ class AccountInfo {
   /// audit.read: read the audit trail (Auditor, CFO). System Admin deliberately does not have it.
   bool get canReadAudit => permissions.contains('audit.read');
 
+  /// config.manage: switch runtime feature flags (System Admin).
+  bool get canManageConfig => permissions.contains('config.manage');
+
   bool get canViewDashboard => canManageUsers || canReadAudit || permissions.contains('portal.read');
 
   /// booking.manage / support.manage / partner.review: the staff work queues (a role may hold only some of them).
@@ -148,7 +151,7 @@ class AccountInfo {
   bool get hasStaffQueues => canManageBookings || canManageDisputes || canReviewPartners;
 
   /// Whether the admin console has anything to show this person.
-  bool get hasAdminConsole => canManageUsers || canReadAudit;
+  bool get hasAdminConsole => canManageUsers || canReadAudit || canManageConfig;
 
   factory AccountInfo.fromJson(Map<String, dynamic> j) {
     List<String> strings(Object? v) => v is List ? v.map((e) => e.toString()).toList() : const [];

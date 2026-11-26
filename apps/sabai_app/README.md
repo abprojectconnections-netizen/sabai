@@ -87,3 +87,13 @@ Profile → **คิวงานเจ้าหน้าที่** appears when
 - Every row shows only the actions the server lists in `next_statuses` (a PAID booking offers none), every change asks for confirmation and is audited by the server, and the list refreshes afterwards (also after a conflict, since the usual cause is a row someone else just moved).
 - Offline mock: `staff@…` (all queues) or `officer@…` (bookings and disputes) with the same transition rules as the backend.
 - Not included: support tickets (customers cannot open tickets yet), refunds and settlements (finance permissions, separate screens), role approval.
+
+## Update: feature switches (admin console)
+
+Console → **ฟีเจอร์ที่ปิดเปิดได้** appears when `/me` reports `config.manage` (System Admin). It lists the runtime flags from `GET /admin/feature-flags` (`community.posting`, `coupons.claiming`) as switches.
+
+- Turning a flag **off** asks for a reason (at least 3 characters), which the server writes to the audit trail; turning it back on needs none. Repeating the current value changes nothing.
+- While a flag is off the server answers `503 FEATURE_DISABLED` for that one action (posting, or claiming a coupon); reading and everything else keeps working. The app shows "ฟีเจอร์นี้ถูกปิดชั่วคราวโดยผู้ดูแลระบบ".
+- After every switch the list is reloaded, so it always shows what the server holds, even after a failure.
+- Offline mock: sign in as `admin@…`. Auditors and staff do not see the entry.
+- Not included: hiding the post box or coupon field when a flag is off (`GET /config/flags` exists for that and is not used by the app yet), and system settings (no setting is read by anything yet).

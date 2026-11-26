@@ -32,6 +32,8 @@ String describeApiErrorTh(Object error) {
       return 'ไม่สามารถทำรายการนี้ได้ในสถานะปัจจุบันของการจอง';
     case 'FINANCIAL_TRANSACTIONS_DISABLED':
       return 'ระบบการเงินยังไม่เปิดใช้งานในสภาพแวดล้อมนี้';
+    case 'FEATURE_DISABLED':
+      return 'ฟีเจอร์นี้ถูกปิดชั่วคราวโดยผู้ดูแลระบบ';
     case 'NETWORK_ERROR':
       return 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้ ตรวจสอบอินเทอร์เน็ตแล้วลองอีกครั้ง';
     case 'TIMEOUT':
