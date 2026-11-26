@@ -3,6 +3,7 @@ import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
 import '../models/staff_models.dart';
+import '../models/support_models.dart';
 import '../models/trip_models.dart';
 
 /// The only way the UI talks to data sources (same contract as apps/web-prototype/src/repositories/contract.js).
@@ -129,6 +130,21 @@ abstract class AppRepository {
 
   /// user.manage. [status] is ACTIVE or SUSPENDED; a reason is required to suspend. You cannot change your own account.
   Future<void> setUserStatus({required String id, required String status, String reason = ''});
+
+  /// Signed in. Your own support tickets, newest first.
+  Future<TicketsPage> myTickets({int offset = 0, int limit = 20});
+
+  /// Signed in. One of your tickets with its conversation; someone else's is NOT_FOUND.
+  Future<SupportTicketDetail> myTicket(String id);
+
+  /// Signed in. Subject 3-120 characters, description 1-2000, category one of [supportCategoriesTh]. At most 5 tickets may be
+  /// open at once (CONFLICT). Returns the new ticket's id.
+  Future<String> createTicket({required String subject, required String category, required String description});
+
+  /// Signed in. A CLOSED ticket is a CONFLICT; a reply to a RESOLVED one reopens it.
+  Future<void> replyToMyTicket({required String id, required String body});
+
+  Future<void> closeMyTicket(String id);
 
   /// config.manage. Every feature flag, by key.
   Future<List<FeatureFlag>> featureFlags();

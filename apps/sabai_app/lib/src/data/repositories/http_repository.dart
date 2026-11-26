@@ -12,6 +12,7 @@ import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
 import '../models/staff_models.dart';
+import '../models/support_models.dart';
 import '../models/trip_models.dart';
 import 'app_repository.dart';
 
@@ -489,6 +490,41 @@ class HttpRepository implements AppRepository {
     }
     await _request('/admin/users/${Uri.encodeComponent(id)}/status',
         method: 'PATCH', auth: true, body: {'status': status, 'reason': reason});
+  }
+
+  @override
+  Future<TicketsPage> myTickets({int offset = 0, int limit = 20}) async {
+    final data = await _request('/support/tickets?limit=$limit&offset=$offset', auth: true);
+    final rows = _rows(data, '/support/tickets').map(SupportTicket.fromJson).toList();
+    final total = data is Map<String, dynamic> && data['total'] is num ? (data['total'] as num).toInt() : rows.length;
+    return TicketsPage(items: rows, total: total);
+  }
+
+  @override
+  Future<SupportTicketDetail> myTicket(String id) async {
+    final r = await _request('/support/tickets/${Uri.encodeComponent(id)}', auth: true);
+    if (r is! Map<String, dynamic>) throw const ApiError(code: 'BAD_RESPONSE', message: 'ticket payload is invalid');
+    return SupportTicketDetail.fromJson(r);
+  }
+
+  @override
+  Future<String> createTicket({required String subject, required String category, required String description}) async {
+    final r = await _request('/support/tickets',
+        method: 'POST', auth: true, body: {'subject': subject, 'category': category, 'description': description});
+    if (r is! Map<String, dynamic> || (r['id'] ?? '').toString().isEmpty) {
+      throw const ApiError(code: 'BAD_RESPONSE', message: 'ticket payload is invalid');
+    }
+    return r['id'].toString();
+  }
+
+  @override
+  Future<void> replyToMyTicket({required String id, required String body}) async {
+    await _request('/support/tickets/${Uri.encodeComponent(id)}/messages', method: 'POST', auth: true, body: {'body': body});
+  }
+
+  @override
+  Future<void> closeMyTicket(String id) async {
+    await _request('/support/tickets/${Uri.encodeComponent(id)}/close', method: 'POST', auth: true);
   }
 
   @override

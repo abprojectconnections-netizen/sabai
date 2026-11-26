@@ -4,6 +4,7 @@ import '../models/community_models.dart';
 import '../models/engagement_models.dart';
 import '../models/models.dart';
 import '../models/staff_models.dart';
+import '../models/support_models.dart';
 import '../models/trip_models.dart';
 import 'app_repository.dart';
 
@@ -689,6 +690,69 @@ class MockRepository implements AppRepository {
             after: {'status': status, if (reason.trim().isNotEmpty) 'reason': reason.trim()}));
   }
 
+  // ---- Support tickets (same rules as the backend: own tickets only, max 5 open, closed means closed) ----
+
+  final List<_MockTicket> _tickets = [];
+
+  List<_MockTicket> get _mine => _tickets.where((t) => t.owner == _email).toList();
+
+  _MockTicket _ownTicket(String id) {
+    _requireSignIn();
+    final i = _tickets.indexWhere((t) => t.id == id && t.owner == _email);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'ticket not found', status: 404); // someone else's looks the same
+    return _tickets[i];
+  }
+
+  @override
+  Future<TicketsPage> myTickets({int offset = 0, int limit = 20}) async {
+    _requireSignIn();
+    final all = _mine.reversed.map((t) => t.summary).toList(); // newest first
+    final end = offset + limit > all.length ? all.length : offset + limit;
+    return TicketsPage(items: offset >= all.length ? const [] : all.sublist(offset, end), total: all.length);
+  }
+
+  @override
+  Future<SupportTicketDetail> myTicket(String id) async => _ownTicket(id).detail;
+
+  @override
+  Future<String> createTicket({required String subject, required String category, required String description}) async {
+    _requireSignIn();
+    final s = subject.trim();
+    final d = description.trim();
+    if (s.runes.length < 3 || s.runes.length > 120) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'subject must be 3 to 120 characters');
+    }
+    if (d.isEmpty || d.runes.length > 2000) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'description must be 1 to 2000 characters');
+    }
+    if (!supportCategoriesTh.containsKey(category)) throw const ApiError(code: 'VALIDATION_ERROR', message: 'unknown category');
+    if (_mine.where((t) => t.status == 'OPEN' || t.status == 'IN_PROGRESS').length >= 5) {
+      throw const ApiError(code: 'CONFLICT', message: 'too many open tickets', status: 409);
+    }
+    final t = _MockTicket(id: 'mock-t-${_tickets.length + 1}', owner: _email, subject: s, category: category, description: d);
+    _tickets.add(t);
+    return t.id;
+  }
+
+  @override
+  Future<void> replyToMyTicket({required String id, required String body}) async {
+    final t = _ownTicket(id);
+    final b = body.trim();
+    if (b.isEmpty || b.runes.length > 2000) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'body must be 1 to 2000 characters');
+    }
+    if (t.status == 'CLOSED') throw const ApiError(code: 'CONFLICT', message: 'this ticket is closed', status: 409);
+    t.messages.add(SupportMessage(id: '${t.id}-m${t.messages.length + 1}', authorKind: 'CUSTOMER', body: b, createdAt: '2030-01-10T00:00:00Z'));
+    if (t.status == 'RESOLVED') t.status = 'IN_PROGRESS'; // same as the server: a reply reopens a resolved ticket
+  }
+
+  @override
+  Future<void> closeMyTicket(String id) async {
+    final t = _ownTicket(id);
+    if (t.status == 'CLOSED') throw const ApiError(code: 'CONFLICT', message: 'already closed', status: 409);
+    t.status = 'CLOSED';
+  }
+
   final List<FeatureFlag> _flags = [
     const FeatureFlag(key: 'community.posting', enabled: true, description: 'อนุญาตให้ผู้ใช้โพสต์ใหม่ในชุมชน'),
     const FeatureFlag(key: 'coupons.claiming', enabled: true, description: 'อนุญาตให้ผู้ใช้เก็บคูปองด้วยโค้ด'),
@@ -758,4 +822,28 @@ class MockRepository implements AppRepository {
     if (postIndex >= 0) _posts[postIndex] = _posts[postIndex].withTags(clean);
     return clean;
   }
+}
+
+class _MockTicket {
+  _MockTicket({required this.id, required this.owner, required this.subject, required this.category, required this.description});
+
+  final String id;
+  final String owner;
+  final String subject;
+  final String category;
+  final String description;
+  String status = 'OPEN';
+  final List<SupportMessage> messages = [];
+
+  SupportTicket get summary => SupportTicket(
+        id: id,
+        subject: subject,
+        category: category,
+        status: status,
+        createdAt: '2030-01-10T00:00:00Z',
+        updatedAt: '2030-01-10T00:00:00Z',
+        replyCount: messages.where((m) => m.fromStaff).length,
+      );
+
+  SupportTicketDetail get detail => SupportTicketDetail(ticket: summary, description: description, messages: List.of(messages));
 }
