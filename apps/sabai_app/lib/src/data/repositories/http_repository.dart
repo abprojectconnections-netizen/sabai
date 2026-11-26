@@ -492,6 +492,18 @@ class HttpRepository implements AppRepository {
   }
 
   @override
+  Future<List<FeatureFlag>> featureFlags() async {
+    final data = await _request('/admin/feature-flags', auth: true);
+    return _rows(data, '/admin/feature-flags').map(FeatureFlag.fromJson).toList();
+  }
+
+  @override
+  Future<void> setFeatureFlag({required String key, required bool enabled, String reason = ''}) async {
+    await _request('/admin/feature-flags/${Uri.encodeComponent(key)}',
+        method: 'PATCH', auth: true, body: {'enabled': enabled, if (reason.trim().isNotEmpty) 'reason': reason.trim()});
+  }
+
+  @override
   Future<AuditPage> auditLogs({String action = '', int offset = 0, int limit = 20}) async {
     final params = <String, String>{'limit': '$limit', 'offset': '$offset'};
     if (action.trim().isNotEmpty) params['action'] = action.trim();

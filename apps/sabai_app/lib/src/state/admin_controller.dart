@@ -38,6 +38,11 @@ class AdminController extends ChangeNotifier {
   String? auditError;
   int _auditGen = 0;
 
+  // Feature flags
+  List<FeatureFlag> flags = const [];
+  bool flagsLoading = false;
+  String? flagsError;
+
   /// Message from the last failed action (for example a suspension), cleared at the start of the next one.
   String? actionError;
 
@@ -55,7 +60,7 @@ class AdminController extends ChangeNotifier {
   }
 
   void reset() {
-    if (stats == null && users.isEmpty && audit.isEmpty && !statsLoading && !usersLoading && !auditLoading && statsError == null && usersError == null && auditError == null) {
+    if (stats == null && users.isEmpty && audit.isEmpty && flags.isEmpty && flagsError == null && !statsLoading && !usersLoading && !auditLoading && statsError == null && usersError == null && auditError == null) {
       return;
     }
     stats = null;
@@ -73,6 +78,9 @@ class AdminController extends ChangeNotifier {
     auditLoading = false;
     auditError = null;
     actionError = null;
+    flags = const [];
+    flagsLoading = false;
+    flagsError = null;
     _usersGen++;
     _auditGen++;
     scheduleMicrotask(_notify);
@@ -163,6 +171,40 @@ class AdminController extends ChangeNotifier {
       _notify();
       return false;
     }
+  }
+
+  Future<void> loadFlags() async {
+    flagsLoading = true;
+    flagsError = null;
+    notifyListeners();
+    try {
+      flags = await _repo.featureFlags();
+    } catch (e) {
+      flags = const [];
+      flagsError = describeApiErrorTh(e);
+    }
+    flagsLoading = false;
+    _notify();
+  }
+
+  /// Switches one flag. The list is reloaded afterwards so it always shows what the server holds, even after a failure.
+  Future<bool> setFlag(String key, bool enabled, {String reason = ''}) async {
+    actionError = null;
+    var ok = true;
+    try {
+      await _repo.setFeatureFlag(key: key, enabled: enabled, reason: reason.trim());
+    } catch (e) {
+      ok = false;
+      actionError = describeApiErrorTh(e);
+    }
+    try {
+      flags = await _repo.featureFlags();
+      flagsError = null;
+    } catch (e) {
+      flagsError = describeApiErrorTh(e);
+    }
+    _notify();
+    return ok;
   }
 
   Future<void> loadAudit({String? action}) async {

@@ -151,3 +151,25 @@ class DashboardStats {
     );
   }
 }
+
+/// A runtime feature flag (GET /admin/feature-flags). Switching one off stops that feature for every user at once.
+class FeatureFlag {
+  const FeatureFlag({required this.key, required this.enabled, this.description = '', this.updatedBy});
+
+  final String key;
+  final bool enabled;
+  final String description;
+
+  /// E-mail of whoever last changed it, if anyone has.
+  final String? updatedBy;
+
+  FeatureFlag copyWith({bool? enabled}) =>
+      FeatureFlag(key: key, enabled: enabled ?? this.enabled, description: description, updatedBy: updatedBy);
+
+  factory FeatureFlag.fromJson(Map<String, dynamic> j) => FeatureFlag(
+        key: (j['key'] ?? '').toString(),
+        enabled: j['enabled'] != false, // an absent value means on, like the server
+        description: (j['description'] ?? '').toString(),
+        updatedBy: j['updated_by']?.toString(),
+      );
+}

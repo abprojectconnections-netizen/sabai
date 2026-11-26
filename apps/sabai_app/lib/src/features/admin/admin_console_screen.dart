@@ -7,6 +7,7 @@ import '../../state/app_state.dart';
 import '../staff/moderation_screen.dart';
 import 'admin_users_screen.dart';
 import 'audit_screen.dart';
+import 'feature_flags_screen.dart';
 
 /// Landing page of the admin console: live counts from the backend and links to the tools this person may use.
 /// The server checks every request; the links are only shown when /me says the permission is held.
@@ -59,6 +60,15 @@ class _AdminConsoleScreenState extends State<AdminConsoleScreen> {
                     subtitle: const Text('ค้นหา ดูรายละเอียด ระงับหรือเปิดใช้งานบัญชี'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => _push(const AdminUsersScreen()),
+                  ),
+                if (account.canManageConfig)
+                  ListTile(
+                    key: const Key('flagsTile'),
+                    leading: const Icon(Icons.toggle_on_outlined),
+                    title: const Text('ฟีเจอร์ที่ปิดเปิดได้'),
+                    subtitle: const Text('ปิดโพสต์ชุมชนหรือการเก็บคูปองชั่วคราว'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _push(const FeatureFlagsScreen()),
                   ),
                 if (account.canReadAudit)
                   ListTile(

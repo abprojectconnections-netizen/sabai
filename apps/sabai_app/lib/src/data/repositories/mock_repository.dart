@@ -689,6 +689,45 @@ class MockRepository implements AppRepository {
             after: {'status': status, if (reason.trim().isNotEmpty) 'reason': reason.trim()}));
   }
 
+  final List<FeatureFlag> _flags = [
+    const FeatureFlag(key: 'community.posting', enabled: true, description: 'อนุญาตให้ผู้ใช้โพสต์ใหม่ในชุมชน'),
+    const FeatureFlag(key: 'coupons.claiming', enabled: true, description: 'อนุญาตให้ผู้ใช้เก็บคูปองด้วยโค้ด'),
+  ];
+
+  void _requireConfig() {
+    _requireSignIn();
+    if (!_account().canManageConfig) throw const ApiError(code: 'FORBIDDEN', message: 'forbidden', status: 403);
+  }
+
+  @override
+  Future<List<FeatureFlag>> featureFlags() async {
+    _requireConfig();
+    return List.of(_flags);
+  }
+
+  @override
+  Future<void> setFeatureFlag({required String key, required bool enabled, String reason = ''}) async {
+    _requireConfig();
+    if (!enabled && reason.trim().isEmpty) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'reason is required when turning a feature off');
+    }
+    final i = _flags.indexWhere((f) => f.key == key);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'feature flag', status: 404);
+    if (_flags[i].enabled == enabled) return; // same as the server: no change, no audit row
+    _flags[i] = FeatureFlag(key: key, enabled: enabled, description: _flags[i].description, updatedBy: _email);
+    _auditLog.insert(
+        0,
+        AuditEntry(
+            id: 'mock-audit-${_auditLog.length + 1}',
+            createdAt: '2030-01-10T00:00:00Z',
+            actorEmail: _email,
+            action: 'feature_flag.changed',
+            subjectType: 'feature_flag',
+            subjectId: key,
+            before: {'key': key, 'enabled': !enabled},
+            after: {'key': key, 'enabled': enabled, if (reason.trim().isNotEmpty) 'reason': reason.trim()}));
+  }
+
   @override
   Future<AuditPage> auditLogs({String action = '', int offset = 0, int limit = 20}) async {
     _requireSignIn();
