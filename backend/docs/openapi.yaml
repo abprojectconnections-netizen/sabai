@@ -372,6 +372,110 @@ paths:
       security: [{ bearerAuth: [] }]
       responses:
         '200': { description: "data: { flags: { <key>: boolean } }" }
+  /support/tickets:
+    post:
+      summary: "Open a support ticket (optionally about one of your bookings)"
+      description: "subject 3-120 characters, description 1-2000, category BOOKING|PAYMENT|REFUND|ACCOUNT|OTHER (default OTHER). A booking_id that is not yours answers 404. At most 5 tickets may be OPEN or IN_PROGRESS per user (409). Writes share a per-user rate limit."
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject, description]
+              properties:
+                subject: { type: string, minLength: 3, maxLength: 120 }
+                category: { type: string, enum: [BOOKING, PAYMENT, REFUND, ACCOUNT, OTHER] }
+                description: { type: string, minLength: 1, maxLength: 2000 }
+                booking_id: { type: string, maxLength: 36 }
+      responses:
+        '201': { description: "data: { id, status, category, subject }" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { description: booking_id is not one of your bookings }
+        '409': { description: Too many open tickets }
+    get:
+      summary: "Your own tickets, newest first"
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [OPEN, IN_PROGRESS, RESOLVED, CLOSED] } }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: [{id, subject, category, status, booking_code, created_at, updated_at, reply_count}], total, limit, offset }" }
+  /support/tickets/{id}:
+    get:
+      summary: "One of your tickets with its conversation"
+      description: "Messages carry only id, author_kind (CUSTOMER|STAFF), body and created_at; the staff member's identity is never exposed. Another user's ticket answers 404."
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: "data: { id, subject, category, status, booking_code, description, created_at, updated_at, messages: [] }" }
+        '404': { description: Not found or not yours }
+  /support/tickets/{id}/messages:
+    post:
+      summary: "Add a reply to your ticket (1-2000 characters)"
+      description: A reply to a RESOLVED ticket puts it back to IN_PROGRESS. A CLOSED ticket answers 409.
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [body], properties: { body: { type: string, minLength: 1, maxLength: 2000 } } }
+      responses:
+        '201': { description: "data: { id }" }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { description: Not found or not yours }
+        '409': { description: Ticket is closed }
+  /support/tickets/{id}/close:
+    post:
+      summary: "Close your own ticket"
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: "data: { id, status: CLOSED }" }
+        '404': { description: Not found or not yours }
+        '409': { description: Already closed }
+  /portal/tickets:
+    get:
+      summary: "STAFF: ticket queue (needs support.manage)"
+      description: "Tickets that still need work first, oldest first, then closed ones. Each row carries next_statuses from the server's transition rules."
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string, pattern: '^[A-Z_]{1,30}$' } }
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200': { description: "data: { items: [{id, subject, category, priority, status, customer_email, booking_code, assigned_staff_id, created_at, message_count, next_statuses}], total, limit, offset }" }
+        '403': { $ref: '#/components/responses/Forbidden' }
+  /portal/tickets/{id}:
+    get:
+      summary: "STAFF: one ticket with description and all messages"
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      responses:
+        '200': { description: "data: ticket row plus description, messages and next_statuses" }
+        '404': { description: Not found }
+  /portal/tickets/{id}/messages:
+    post:
+      summary: "STAFF: reply to a ticket (audited)"
+      description: "The first reply to an OPEN ticket moves it to IN_PROGRESS and assigns it to the replier if nobody owns it. A CLOSED ticket answers 409."
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, required: [body], properties: { body: { type: string, minLength: 1, maxLength: 2000 } } }
+      responses:
+        '201': { description: "data: { id, status }" }
+        '409': { description: Ticket is closed }
   /community/posts:
     get:
       summary: "Community feed, newest first (posts the caller reported are hidden from the caller only)"
