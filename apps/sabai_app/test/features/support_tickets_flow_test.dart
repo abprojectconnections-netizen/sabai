@@ -252,6 +252,10 @@ void main() {
     expect(find.text('รบกวนช่วยตรวจสอบด้วยค่ะ'), findsOneWidget);
     expect(find.byKey(const Key('noMessages')), findsNothing);
 
+    // The 'request sent' snackbar from the list is still queued and would cover the button at the bottom edge.
+    await tester.pump(const Duration(seconds: 6));
+    await tester.pumpAndSettle();
+
     // Cancelling the confirmation keeps it open; confirming closes it and removes the reply box.
     await tester.tap(find.byKey(const Key('closeTicketButton')));
     await tester.pumpAndSettle();
