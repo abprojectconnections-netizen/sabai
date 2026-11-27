@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-/// Read-only FAQ. Every answer describes what this app and its server actually do today.
-/// It states no policy numbers (refund windows, fees) and offers no contact channel, because none is defined yet.
+import '../../state/app_state.dart';
+import 'my_tickets_screen.dart';
+
+/// FAQ plus, once signed in, the customer's support requests. Every answer describes what this app and its server actually do
+/// today and states no policy numbers (refund windows, fees), because none is defined yet.
 class HelpScreen extends StatelessWidget {
   const HelpScreen({super.key});
 
@@ -38,10 +42,20 @@ class HelpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final signedIn = context.watch<AppState>().signedIn;
     return Scaffold(
       appBar: AppBar(title: const Text('ช่วยเหลือ')),
       body: ListView(
         children: [
+          if (signedIn)
+            ListTile(
+              key: const Key('myTicketsTile'),
+              leading: const Icon(Icons.support_agent_outlined),
+              title: const Text('คำขอความช่วยเหลือของฉัน'),
+              subtitle: const Text('แจ้งปัญหากับเจ้าหน้าที่ และติดตามคำตอบ'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const MyTicketsScreen())),
+            ),
           for (var i = 0; i < faqs.length; i++)
             ExpansionTile(
               key: Key('faq-$i'),
@@ -50,9 +64,9 @@ class HelpScreen extends StatelessWidget {
               expandedCrossAxisAlignment: CrossAxisAlignment.start,
               children: [Text(faqs[i].a)],
             ),
-          const Padding(
-            padding: EdgeInsets.all(16),
-            child: Text('หน้านี้เป็นคำถามที่พบบ่อยแบบอ่านอย่างเดียว ยังไม่มีช่องทางติดต่อฝ่ายสนับสนุนในแอป'),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(signedIn ? 'ไม่พบคำตอบที่ต้องการ? แจ้งปัญหาได้ที่ "คำขอความช่วยเหลือของฉัน" ด้านบน' : 'ไม่พบคำตอบที่ต้องการ? เข้าสู่ระบบเพื่อแจ้งปัญหากับเจ้าหน้าที่', key: const Key('helpFooter')),
           ),
         ],
       ),
