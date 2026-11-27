@@ -148,6 +148,9 @@ class AccountInfo {
   bool get canManageBookings => permissions.contains('booking.manage');
   bool get canManageDisputes => permissions.contains('support.manage');
   bool get canReviewPartners => permissions.contains('partner.review');
+  /// support.manage also covers the ticket queue.
+  bool get canManageTickets => permissions.contains('support.manage');
+
   bool get hasStaffQueues => canManageBookings || canManageDisputes || canReviewPartners;
 
   /// Whether the admin console has anything to show this person.

@@ -574,6 +574,66 @@ class MockRepository implements AppRepository {
     _queueBookings[i] = _qb(b.id, b.code, _nextStatus(_bookingTransitions, b.status, to), b.total, b.customerEmail);
   }
 
+  static const _ticketTransitions = <String, List<String>>{
+    'OPEN': ['IN_PROGRESS', 'CLOSED'],
+    'IN_PROGRESS': ['RESOLVED', 'CLOSED'],
+    'RESOLVED': ['IN_PROGRESS', 'CLOSED'],
+  };
+
+  QueueTicket _qt(_MockTicket t) => QueueTicket(
+        id: t.id,
+        subject: t.subject,
+        category: t.category,
+        status: t.status,
+        customerEmail: t.owner,
+        priority: 'NORMAL',
+        assignedStaffId: t.assignedTo,
+        createdAt: '2030-01-10T00:00:00Z',
+        messageCount: t.messages.length,
+        nextStatuses: _ticketTransitions[t.status] ?? const [],
+      );
+
+  _MockTicket _anyTicket(String id) {
+    _requirePerm('support.manage');
+    final i = _tickets.indexWhere((t) => t.id == id);
+    if (i < 0) throw const ApiError(code: 'NOT_FOUND', message: 'ticket not found', status: 404);
+    return _tickets[i];
+  }
+
+  @override
+  Future<StaffPage<QueueTicket>> staffTickets({String status = '', int offset = 0, int limit = 20}) async {
+    _requirePerm('support.manage');
+    final rows = _tickets.where((t) => status.isEmpty || t.status == status).toList();
+    // Same order as the server: tickets that still need work first (oldest first), closed ones last.
+    final ordered = [...rows.where((t) => t.status != 'CLOSED'), ...rows.where((t) => t.status == 'CLOSED')];
+    return _page(ordered.map(_qt).toList(), offset, limit);
+  }
+
+  @override
+  Future<StaffTicketDetail> staffTicket(String id) async {
+    final t = _anyTicket(id);
+    return StaffTicketDetail(ticket: _qt(t), description: t.description, messages: List.of(t.messages));
+  }
+
+  @override
+  Future<void> replyAsStaff({required String id, required String body}) async {
+    final t = _anyTicket(id);
+    final b = body.trim();
+    if (b.isEmpty || b.runes.length > 2000) {
+      throw const ApiError(code: 'VALIDATION_ERROR', message: 'body must be 1 to 2000 characters');
+    }
+    if (t.status == 'CLOSED') throw const ApiError(code: 'CONFLICT', message: 'this ticket is closed', status: 409);
+    t.messages.add(SupportMessage(id: '${t.id}-m${t.messages.length + 1}', authorKind: 'STAFF', body: b, createdAt: '2030-01-10T00:00:00Z'));
+    if (t.status == 'OPEN') t.status = 'IN_PROGRESS';
+    if (t.assignedTo.isEmpty) t.assignedTo = _email;
+  }
+
+  @override
+  Future<void> changeTicketStatus({required String id, required String to, String note = ''}) async {
+    final t = _anyTicket(id);
+    t.status = _nextStatus(_ticketTransitions, t.status, to);
+  }
+
   @override
   Future<void> changeDisputeStatus({required String id, required String to, String note = ''}) async {
     _requirePerm('support.manage');
@@ -833,6 +893,7 @@ class _MockTicket {
   final String category;
   final String description;
   String status = 'OPEN';
+  String assignedTo = '';
   final List<SupportMessage> messages = [];
 
   SupportTicket get summary => SupportTicket(

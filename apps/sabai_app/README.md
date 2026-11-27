@@ -97,3 +97,10 @@ Console → **ฟีเจอร์ที่ปิดเปิดได้** app
 - After every switch the list is reloaded, so it always shows what the server holds, even after a failure.
 - Offline mock: sign in as `admin@…`. Auditors and staff do not see the entry.
 - Not included: hiding the post box or coupon field when a flag is off (`GET /config/flags` exists for that and is not used by the app yet), and system settings (no setting is read by anything yet).
+
+## Update: support requests (customer and staff)
+
+- **Customer** (signed in): Help → **คำขอความช่วยเหลือของฉัน**. Open a request (subject, category, description), follow the conversation, reply and close it. Staff replies show as "เจ้าหน้าที่" with no name, because the server never reveals who wrote them. At most 5 requests may be open at once. A reply to a request staff marked resolved reopens it; a closed request cannot be answered.
+- **Staff** (`support.manage`): Staff queues → **ตั๋วช่วยเหลือ**. Active tickets first (oldest first), closed ones last; open one to read the description, reply, and change the status with the buttons the server allows. The first reply moves an open ticket to in-progress and assigns it to the replier. Closing asks for confirmation because the customer cannot answer afterwards.
+- Offline mock: tickets live in the mock repository, so a request opened as `user@…` appears in the queue for `staff@…` after signing in again.
+- Not included: linking a request to a booking from the app (the API supports it), notifying the customer when staff reply, and assigning a ticket to a specific colleague.

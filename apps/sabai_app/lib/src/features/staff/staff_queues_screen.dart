@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/util/dates.dart';
 import '../../data/models/staff_models.dart';
+import '../../data/models/support_models.dart';
 import '../../state/app_state.dart';
 import '../../state/staff_queues_controller.dart';
 
@@ -17,6 +18,7 @@ class StaffQueuesScreen extends StatelessWidget {
     final tabs = <(String, String, Widget)>[
       if (account.canManageBookings) ('bookings', 'การจอง', const _BookingsTab()),
       if (account.canManageDisputes) ('disputes', 'ข้อพิพาท', const _DisputesTab()),
+      if (account.canManageTickets) ('tickets', 'ตั๋วช่วยเหลือ', const _TicketsTab()),
       if (account.canReviewPartners) ('partners', 'พาร์ตเนอร์', const _PartnersTab()),
     ];
     if (tabs.isEmpty) {
@@ -37,6 +39,7 @@ class StaffQueuesScreen extends StatelessWidget {
 
 const _bookingFilters = [('', 'ทั้งหมด'), ('PENDING', 'รอดำเนินการ'), ('CONFIRMED', 'ยืนยันแล้ว'), ('PAID', 'ชำระแล้ว'), ('CANCELLED', 'ยกเลิก')];
 const _disputeFilters = [('', 'ทั้งหมด'), ('OPEN', 'เปิดอยู่'), ('IN_REVIEW', 'กำลังตรวจสอบ'), ('RESOLVED', 'แก้ไขแล้ว'), ('REJECTED', 'ปฏิเสธ')];
+const _ticketFilters = [('', 'ทั้งหมด'), ('OPEN', 'รอเจ้าหน้าที่'), ('IN_PROGRESS', 'กำลังดำเนินการ'), ('RESOLVED', 'แก้ไขแล้ว'), ('CLOSED', 'ปิดแล้ว')];
 const _partnerFilters = [('', 'ทั้งหมด'), ('PENDING', 'รอดำเนินการ'), ('APPROVED', 'อนุมัติแล้ว'), ('SUSPENDED', 'ถูกระงับ'), ('REJECTED', 'ปฏิเสธ')];
 
 /// Shared frame of a queue: optional header, status chips, then loading / error / empty / list with "load more".
@@ -466,6 +469,199 @@ class _DisputeDialogState extends State<_DisputeDialog> {
         TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('ยกเลิก')),
         FilledButton(key: const Key('confirmDispute'), onPressed: _submit, child: const Text('เปิดข้อพิพาท')),
       ],
+    );
+  }
+}
+
+class _TicketsTab extends StatefulWidget {
+  const _TicketsTab();
+
+  @override
+  State<_TicketsTab> createState() => _TicketsTabState();
+}
+
+class _TicketsTabState extends State<_TicketsTab> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<StaffQueuesController>().loadTickets(status: '');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.watch<StaffQueuesController>();
+    return _QueueView<QueueTicket>(
+      name: 'tickets',
+      state: c.tickets,
+      filters: _ticketFilters,
+      onFilter: (s) => c.loadTickets(status: s),
+      onRefresh: () => c.loadTickets(),
+      onMore: () => c.loadTickets(more: true),
+      itemBuilder: (context, t) => Card(
+        key: Key('tk-${t.id}'),
+        child: InkWell(
+          onTap: () => Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => StaffTicketScreen(ticketId: t.id))),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                Expanded(child: Text(t.subject, maxLines: 2, overflow: TextOverflow.ellipsis, style: Theme.of(context).textTheme.titleMedium)),
+                Chip(key: Key('tk-${t.id}-status'), label: Text(statusLabelTh(t.status))),
+              ]),
+              Text(
+                [
+                  ticketCategoryLabelTh(t.category),
+                  t.customerEmail,
+                  if (t.bookingCode.isNotEmpty) 'การจอง ${t.bookingCode}',
+                  formatDate(t.createdAt),
+                  if (t.messageCount > 0) '${t.messageCount} ข้อความ',
+                ].where((x) => x.isNotEmpty).join(' · '),
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One ticket for staff: the customer's description, the conversation, a reply box and the status changes the server allows.
+/// Customers see staff replies as "เจ้าหน้าที่" without a name.
+class StaffTicketScreen extends StatefulWidget {
+  const StaffTicketScreen({super.key, required this.ticketId});
+
+  final String ticketId;
+
+  @override
+  State<StaffTicketScreen> createState() => _StaffTicketScreenState();
+}
+
+class _StaffTicketScreenState extends State<StaffTicketScreen> {
+  final _reply = TextEditingController();
+  bool _sending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) context.read<StaffQueuesController>().openTicket(widget.ticketId);
+    });
+  }
+
+  @override
+  void dispose() {
+    _reply.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    final text = _reply.text.trim();
+    if (text.isEmpty) return;
+    final c = context.read<StaffQueuesController>();
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _sending = true);
+    final ok = await c.replyToTicket(widget.ticketId, text);
+    if (!mounted) return;
+    setState(() => _sending = false);
+    if (ok) {
+      _reply.clear();
+    } else {
+      messenger.showSnackBar(SnackBar(content: Text(c.actionError ?? 'ส่งไม่สำเร็จ')));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.watch<StaffQueuesController>();
+    final d = c.ticketDetail;
+    Widget body;
+    if (d == null) {
+      body = c.ticketDetailError != null
+          ? Center(child: Padding(padding: const EdgeInsets.all(24), child: Text(c.ticketDetailError!, key: const Key('staffTicketError'))))
+          : const Center(child: CircularProgressIndicator());
+    } else {
+      final t = d.ticket;
+      body = Column(children: [
+        Expanded(
+          child: ListView(padding: const EdgeInsets.all(16), children: [
+            Text(t.subject, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              [ticketCategoryLabelTh(t.category), t.customerEmail, if (t.bookingCode.isNotEmpty) 'การจอง ${t.bookingCode}', formatDate(t.createdAt)].join(' · '),
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 8),
+            Chip(key: const Key('staffTicketStatus'), label: Text(statusLabelTh(t.status))),
+            const SizedBox(height: 8),
+            Text(d.description, key: const Key('staffTicketDescription')),
+            if (t.nextStatuses.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              _Actions(
+                keyPrefix: 'tkd',
+                kind: 'ticket',
+                from: t.status,
+                next: t.nextStatuses,
+                onChange: (to) => _confirmAndRun(
+                  context,
+                  title: '${statusActionTh('ticket', t.status, to)}?',
+                  detail: 'คำขอนี้จะเปลี่ยนเป็น "${statusLabelTh(to)}" และถูกบันทึกในประวัติตรวจสอบ${to == 'CLOSED' ? ' ลูกค้าจะตอบเพิ่มไม่ได้อีก' : ''}',
+                  destructive: isDestructiveStatus(to),
+                  run: (note) => c.changeTicketStatus(widget.ticketId, to, note: note),
+                ),
+              ),
+            ],
+            const Divider(height: 32),
+            if (d.messages.isEmpty) const Text('ยังไม่มีข้อความ', key: Key('staffNoMessages')),
+            for (final m in d.messages)
+              Align(
+                alignment: m.fromStaff ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  key: Key('smsg-${m.id}'),
+                  margin: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.all(12),
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  decoration: BoxDecoration(
+                    color: m.fromStaff ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.secondaryContainer,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(m.fromStaff ? 'เจ้าหน้าที่' : 'ลูกค้า', style: Theme.of(context).textTheme.labelSmall),
+                    const SizedBox(height: 2),
+                    Text(m.body),
+                  ]),
+                ),
+              ),
+          ]),
+        ),
+        if (t.status == 'CLOSED')
+          const Padding(padding: EdgeInsets.all(16), child: Text('คำขอนี้ปิดแล้ว ตอบเพิ่มไม่ได้', key: Key('staffTicketClosedNote')))
+        else
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(children: [
+                Expanded(
+                  child: TextField(
+                    key: const Key('staffReplyField'),
+                    controller: _reply,
+                    maxLength: 2000,
+                    minLines: 1,
+                    maxLines: 4,
+                    decoration: const InputDecoration(labelText: 'ตอบลูกค้า', counterText: ''),
+                  ),
+                ),
+                IconButton(key: const Key('staffSendReply'), onPressed: _sending ? null : _send, icon: const Icon(Icons.send)),
+              ]),
+            ),
+          ),
+      ]);
+    }
+    return Scaffold(
+      appBar: AppBar(title: const Text('คำขอความช่วยเหลือ')),
+      body: Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 900), child: body)),
     );
   }
 }

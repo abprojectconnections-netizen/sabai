@@ -579,6 +579,30 @@ class HttpRepository implements AppRepository {
   }
 
   @override
+  Future<StaffPage<QueueTicket>> staffTickets({String status = '', int offset = 0, int limit = 20}) {
+    final params = <String, String>{'limit': '$limit', 'offset': '$offset'};
+    if (status.isNotEmpty) params['status'] = status;
+    return _staffPage('/portal/tickets', params, QueueTicket.fromJson);
+  }
+
+  @override
+  Future<StaffTicketDetail> staffTicket(String id) async {
+    final r = await _request('/portal/tickets/${Uri.encodeComponent(id)}', auth: true);
+    if (r is! Map<String, dynamic>) throw const ApiError(code: 'BAD_RESPONSE', message: 'ticket payload is invalid');
+    return StaffTicketDetail.fromJson(r);
+  }
+
+  @override
+  Future<void> replyAsStaff({required String id, required String body}) async {
+    await _request('/portal/tickets/${Uri.encodeComponent(id)}/messages', method: 'POST', auth: true, body: {'body': body});
+  }
+
+  @override
+  Future<void> changeTicketStatus({required String id, required String to, String note = ''}) async {
+    await _request('/portal/tickets/${Uri.encodeComponent(id)}/status', method: 'PATCH', auth: true, body: {'status': to, 'note': note});
+  }
+
+  @override
   Future<void> changeBookingStatus({required String id, required String to, String note = ''}) async {
     await _request('/portal/bookings/${Uri.encodeComponent(id)}/status', method: 'PATCH', auth: true, body: {'status': to, 'note': note});
   }
