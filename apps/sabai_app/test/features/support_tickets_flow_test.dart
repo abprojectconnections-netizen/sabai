@@ -28,17 +28,24 @@ void tall(WidgetTester tester) {
   addTearDown(tester.view.reset);
 }
 
-Future<MockRepository> pumpApp(WidgetTester tester, {String? email}) async {
+/// Opens the app and, when [email] is given, signs in through the real sign-in screen so AppState knows about the session.
+Future<void> pumpApp(WidgetTester tester, {String? email}) async {
   SharedPreferences.setMockInitialValues({});
-  final repo = MockRepository();
-  if (email != null) await repo.login(email: email, password: 'password123');
   await tester.pumpWidget(SabaiApp(
     config: AppConfig.parse(const {}),
-    repository: repo,
+    repository: MockRepository(),
     prefs: await SharedPreferences.getInstance(),
   ));
   await tester.pumpAndSettle();
-  return repo;
+  if (email == null) return;
+  await tester.tap(find.text('โปรไฟล์'));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('เข้าสู่ระบบ / สมัครสมาชิก'));
+  await tester.pumpAndSettle();
+  await tester.enterText(find.byKey(const Key('emailField')), email);
+  await tester.enterText(find.byKey(const Key('passwordField')), 'password123');
+  await tester.tap(find.byKey(const Key('submitButton')));
+  await tester.pumpAndSettle();
 }
 
 void main() {
@@ -204,8 +211,6 @@ void main() {
   testWidgets('signed in: open a ticket, see it, reply, close it', (tester) async {
     tall(tester);
     await pumpApp(tester, email: 'user@example.com');
-    await tester.tap(find.text('โปรไฟล์'));
-    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('helpTile')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('myTicketsTile')));
