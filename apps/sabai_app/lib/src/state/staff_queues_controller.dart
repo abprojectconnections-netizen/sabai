@@ -43,6 +43,13 @@ class StaffQueuesController extends ChangeNotifier {
   final bookings = QueueState<QueueBooking>();
   final disputes = QueueState<QueueDispute>();
   final partners = QueueState<QueuePartner>();
+  final tickets = QueueState<QueueTicket>();
+
+  /// The ticket open in the detail screen, with its conversation.
+  StaffTicketDetail? ticketDetail;
+  bool ticketDetailLoading = false;
+  String? ticketDetailError;
+  int _ticketDetailGen = 0;
 
   /// Message of the last failed action; cleared when the next action starts.
   String? actionError;
@@ -59,12 +66,16 @@ class StaffQueuesController extends ChangeNotifier {
   }
 
   void reset() {
-    final all = <QueueState<Object?>>[bookings, disputes, partners];
-    if (all.every((q) => !q.loaded && !q.loading && q.error == null) && actionError == null) return;
+    final all = <QueueState<Object?>>[bookings, disputes, partners, tickets];
+    if (all.every((q) => !q.loaded && !q.loading && q.error == null) && actionError == null && ticketDetail == null && ticketDetailError == null) return;
     for (final q in all) {
       q.clear();
     }
     actionError = null;
+    ticketDetail = null;
+    ticketDetailLoading = false;
+    ticketDetailError = null;
+    _ticketDetailGen++;
     scheduleMicrotask(_notify);
   }
 
@@ -109,15 +120,57 @@ class StaffQueuesController extends ChangeNotifier {
     return _load(partners, (o) => _repo.staffPartners(status: partners.status, offset: o, limit: pageSize), more: more);
   }
 
+  Future<void> loadTickets({String? status, bool more = false}) {
+    tickets.status = status ?? tickets.status;
+    return _load(tickets, (o) => _repo.staffTickets(status: tickets.status, offset: o, limit: pageSize), more: more);
+  }
+
+  Future<void> openTicket(String id) async {
+    final gen = ++_ticketDetailGen;
+    ticketDetail = null;
+    ticketDetailLoading = true;
+    ticketDetailError = null;
+    notifyListeners();
+    await _loadTicketDetail(id, gen);
+  }
+
+  Future<void> _loadTicketDetail(String id, int gen) async {
+    try {
+      final d = await _repo.staffTicket(id);
+      if (gen != _ticketDetailGen) return;
+      ticketDetail = d;
+      ticketDetailError = null;
+    } catch (e) {
+      if (gen != _ticketDetailGen) return;
+      ticketDetailError = describeApiErrorTh(e);
+    }
+    ticketDetailLoading = false;
+    _notify();
+  }
+
+  Future<void> _reloadTicket(String id) async {
+    final gen = ++_ticketDetailGen;
+    await _loadTicketDetail(id, gen);
+    await loadTickets();
+  }
+
+  static const _ticketConflict = 'คำขอนี้ถูกปิดหรือเปลี่ยนสถานะไปแล้ว กรุณาตรวจสอบสถานะล่าสุด';
+
+  Future<bool> replyToTicket(String id, String body) =>
+      _act(() => _repo.replyAsStaff(id: id, body: body.trim()), () => _reloadTicket(id), conflictMessage: _ticketConflict);
+
+  Future<bool> changeTicketStatus(String id, String to, {String note = ''}) =>
+      _act(() => _repo.changeTicketStatus(id: id, to: to, note: note.trim()), () => _reloadTicket(id), conflictMessage: _ticketConflict);
+
   /// Runs a write, then refreshes the affected list. A failed write also refreshes, because the usual cause is a row that
   /// someone else already moved.
-  Future<bool> _act(Future<void> Function() write, Future<void> Function() reload) async {
+  Future<bool> _act(Future<void> Function() write, Future<void> Function() reload, {String? conflictMessage}) async {
     actionError = null;
     var ok = true;
     try {
       await write();
     } catch (e) {
-      actionError = describeApiErrorTh(e);
+      actionError = conflictMessage != null && e is ApiError && e.code == 'CONFLICT' ? conflictMessage : describeApiErrorTh(e);
       ok = false;
     }
     await reload();

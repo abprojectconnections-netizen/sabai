@@ -1,3 +1,5 @@
+import 'support_models.dart';
+
 List<String> _strings(Object? v) => v is List ? v.map((e) => e.toString()).toList() : const [];
 
 /// One page of a staff work queue. [total] is the number of rows matching the filter on the server.
@@ -107,6 +109,8 @@ class QueuePartner {
 }
 
 const _statusTh = {
+  'IN_PROGRESS': 'กำลังดำเนินการ',
+  'CLOSED': 'ปิดแล้ว',
   'PENDING': 'รอดำเนินการ',
   'CONFIRMED': 'ยืนยันแล้ว',
   'CANCELLED': 'ยกเลิก',
@@ -123,9 +127,9 @@ const _statusTh = {
 String statusLabelTh(String status) => _statusTh[status] ?? status;
 
 /// Status changes that cannot easily be undone (or hurt a customer) get a warning colour and an explicit confirmation.
-bool isDestructiveStatus(String to) => to == 'CANCELLED' || to == 'REJECTED' || to == 'SUSPENDED';
+bool isDestructiveStatus(String to) => to == 'CANCELLED' || to == 'REJECTED' || to == 'SUSPENDED' || to == 'CLOSED';
 
-/// Label of the button that moves [kind] ('booking' | 'dispute' | 'partner') from [from] to [to].
+/// Label of the button that moves [kind] ('booking' | 'dispute' | 'partner' | 'ticket') from [from] to [to].
 String statusActionTh(String kind, String from, String to) {
   switch ('$kind:$to') {
     case 'booking:CONFIRMED':
@@ -138,6 +142,12 @@ String statusActionTh(String kind, String from, String to) {
       return 'ปิดเรื่อง (แก้ไขแล้ว)';
     case 'dispute:REJECTED':
       return 'ปฏิเสธข้อพิพาท';
+    case 'ticket:IN_PROGRESS':
+      return from == 'RESOLVED' ? 'เปิดใหม่' : 'เริ่มดำเนินการ';
+    case 'ticket:RESOLVED':
+      return 'ทำเครื่องหมายว่าแก้ไขแล้ว';
+    case 'ticket:CLOSED':
+      return 'ปิดคำขอ';
     case 'partner:APPROVED':
       return from == 'SUSPENDED' ? 'เปิดใช้งานอีกครั้ง' : 'อนุมัติ';
     case 'partner:REJECTED':
@@ -146,4 +156,65 @@ String statusActionTh(String kind, String from, String to) {
       return 'ระงับ';
   }
   return statusLabelTh(to);
+}
+
+/// A support ticket in the staff queue. [nextStatuses] comes from the server's transition rules.
+class QueueTicket {
+  const QueueTicket({
+    required this.id,
+    required this.subject,
+    required this.category,
+    required this.status,
+    required this.customerEmail,
+    this.priority = '',
+    this.bookingCode = '',
+    this.assignedStaffId = '',
+    this.createdAt = '',
+    this.messageCount = 0,
+    this.nextStatuses = const [],
+  });
+
+  final String id;
+  final String subject;
+  final String category;
+  final String status;
+  final String customerEmail;
+  final String priority;
+  final String bookingCode;
+  final String assignedStaffId;
+  final String createdAt;
+  final int messageCount;
+  final List<String> nextStatuses;
+
+  factory QueueTicket.fromJson(Map<String, dynamic> j) => QueueTicket(
+        id: (j['id'] ?? '').toString(),
+        subject: (j['subject'] ?? '').toString(),
+        category: (j['category'] ?? '').toString(),
+        status: (j['status'] ?? '').toString(),
+        customerEmail: (j['customer_email'] ?? '').toString(),
+        priority: (j['priority'] ?? '').toString(),
+        bookingCode: (j['booking_code'] ?? '').toString(),
+        assignedStaffId: (j['assigned_staff_id'] ?? '').toString(),
+        createdAt: (j['created_at'] ?? '').toString(),
+        messageCount: j['message_count'] is num ? (j['message_count'] as num).toInt() : 0,
+        nextStatuses: _strings(j['next_statuses']),
+      );
+}
+
+/// One ticket with its description and the whole conversation (GET /portal/tickets/:id).
+class StaffTicketDetail {
+  const StaffTicketDetail({required this.ticket, this.description = '', this.messages = const []});
+
+  final QueueTicket ticket;
+  final String description;
+  final List<SupportMessage> messages;
+
+  factory StaffTicketDetail.fromJson(Map<String, dynamic> j) {
+    final raw = j['messages'];
+    return StaffTicketDetail(
+      ticket: QueueTicket.fromJson(j),
+      description: (j['description'] ?? '').toString(),
+      messages: raw is List ? raw.whereType<Map<String, dynamic>>().map(SupportMessage.fromJson).toList() : const [],
+    );
+  }
 }

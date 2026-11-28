@@ -131,6 +131,18 @@ abstract class AppRepository {
   /// user.manage. [status] is ACTIVE or SUSPENDED; a reason is required to suspend. You cannot change your own account.
   Future<void> setUserStatus({required String id, required String status, String reason = ''});
 
+  /// support.manage. Ticket queue: active tickets first, oldest first, closed last.
+  Future<StaffPage<QueueTicket>> staffTickets({String status = '', int offset = 0, int limit = 20});
+
+  /// support.manage. One ticket with its description and conversation.
+  Future<StaffTicketDetail> staffTicket(String id);
+
+  /// support.manage. Answers a customer; the first reply moves an OPEN ticket to IN_PROGRESS. A CLOSED ticket is a CONFLICT.
+  Future<void> replyAsStaff({required String id, required String body});
+
+  /// support.manage. Moves a ticket along the server's transition rules (see [QueueTicket.nextStatuses]).
+  Future<void> changeTicketStatus({required String id, required String to, String note = ''});
+
   /// Signed in. Your own support tickets, newest first.
   Future<TicketsPage> myTickets({int offset = 0, int limit = 20});
 
