@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 
 import '../core/errors/api_error.dart';
 import '../data/models/staff_models.dart';
-import '../data/models/support_models.dart';
 import '../data/repositories/app_repository.dart';
 
 /// One work queue: its current page(s), filter and loading state.
